@@ -1353,6 +1353,8 @@ a.slot:hover { background: #B4B4D8; }
 .maquete-girar { position: absolute; right: 8px; bottom: 8px; z-index: 2; padding: 6px 10px; font-family: var(--pixel); font-size: 0.95rem; line-height: 1.2; color: var(--preto); background: var(--papel); border: 2px solid var(--preto); box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--sombra); cursor: pointer; }
 .maquete-girar:hover { background: #B4B4D8; }
 .maquete.viva .maquete-girar, .maquete[data-estado="falhou"] .maquete-girar, html:not(.js) .maquete-girar { display: none; }
+.maquete:not(.viva):not([data-estado="falhou"]) { cursor: pointer; }
+.maquete[data-estado="falhou"] .maquete-dica { display: block; }
 .maquete-dica { display: none; position: absolute; left: 8px; bottom: 8px; padding: 4px 7px; font-family: var(--pixel); font-size: 0.85rem; line-height: 1.2; color: #fff; background: rgb(0 0 0 / 0.55); pointer-events: none; }
 .maquete.viva:not(.girando) .maquete-dica { display: block; }
 .maquete-sem { display: grid; place-items: center; aspect-ratio: 1; padding: var(--e3); font-size: var(--t-pequeno); line-height: 1.4; text-align: center; background: var(--mar); box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #fff; }

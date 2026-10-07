@@ -1,6 +1,6 @@
 /* A maquete que gira. Cada <figure data-maquete="/maquetes/nome.json"> mostra uma imagem parada;
- * quando alguém pede (botão, ponteiro parado em cima ou, nas páginas que marcam data-maquete-auto,
- * ao entrar na tela), os blocos são baixados e desenhados em WebGL no lugar da imagem.
+ * quando alguém pede (um clique no botão ou na própria imagem; nas páginas que marcam
+ * data-maquete-auto, ao entrar na tela), os blocos são baixados e desenhados em WebGL no lugar da imagem.
  * Arrastar gira; as setas do teclado também. Só uma maquete fica viva por vez. */
 import { malhaDaMaquete } from "./maquete-malha.js";
 
@@ -130,14 +130,16 @@ function ligar(figura, modelo) {
 
 const modelos = new Map();
 async function acordar(figura, focar = false) {
-  if (viva?.figura === figura || figura.dataset.estado === "falhou") return;
+  if (viva?.figura === figura || figura.dataset.estado === "falhou" || figura.dataset.estado === "carregando") return;
+  const botao = figura.querySelector(".maquete-girar"), dica = figura.querySelector(".maquete-dica");
   figura.dataset.estado = "carregando";
+  if (botao) { botao.dataset.texto ??= botao.textContent; botao.textContent = "Carregando…"; }
   try {
     const endereco = figura.dataset.maquete;
     if (!modelos.has(endereco)) modelos.set(endereco, fetch(endereco).then((r) => (r.ok ? r.json() : Promise.reject(new Error(r.status)))));
     const modelo = await modelos.get(endereco);
     if (viva?.figura === figura) return;
-    viva?.desligar();
+    if (viva) { viva.desligar(); viva.figura.dataset.estado = "parada"; }
     viva = null;
     const desligar = ligar(figura, modelo);
     if (!desligar) throw new Error("sem WebGL");
@@ -145,17 +147,17 @@ async function acordar(figura, focar = false) {
     figura.dataset.estado = "viva";
     if (focar) figura.querySelector(".maquete-tela")?.focus({ preventScroll: true });
   } catch {
-    figura.dataset.estado = "falhou";               // sem WebGL ou sem rede, a imagem parada continua valendo
+    figura.dataset.estado = "falhou";               // sem WebGL ou sem rede, a imagem parada continua valendo, e a página diz por quê
+    if (dica) dica.textContent = "Não deu para abrir o 3D neste navegador";
+  } finally {
+    if (botao) botao.textContent = botao.dataset.texto;
   }
 }
 
 const figuras = [...document.querySelectorAll("[data-maquete]")];
-for (const figura of figuras) {
-  figura.querySelector(".maquete-girar")?.addEventListener("click", () => acordar(figura, true));
-  let espera = 0;
-  figura.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") espera = setTimeout(() => acordar(figura), 180); });
-  figura.addEventListener("pointerleave", () => clearTimeout(espera));
-}
+/* O modelo só entra com um clique: no botão ou em qualquer ponto da imagem. (Antes bastava parar o
+ * ponteiro em cima, e o botão sumia debaixo da mão de quem ia clicar.) */
+for (const figura of figuras) figura.addEventListener("click", (e) => { if (!e.target.closest(".maquete-tela")) acordar(figura, true); });
 /* nas páginas de leitura corrida (biomas), a maquete que está no meio da tela acorda sozinha */
 const automaticas = figuras.filter((f) => "maqueteAuto" in f.dataset);
 if (automaticas.length && "IntersectionObserver" in window) {

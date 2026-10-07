@@ -352,7 +352,7 @@ export function paginaCobblemonEstruturas() {
   const corpo = `
 <section class="cabecalho">
   <h1>Estruturas</h1>
-  <p class="prosa">O Cobblemon ${esc(C.versao)} espalha ${NUMEROS.estruturas} estruturas próprias pelo mundo. Cada uma aparece aqui em maquete de blocos, montada a partir das peças do próprio mod: aponte ou toque em Girar em 3D e arraste para ver de todos os lados. Junto, o bioma em que ela é gerada e os Pokémon que têm regra de spawn ligada a ela.</p>
+  <p class="prosa">O Cobblemon ${esc(C.versao)} espalha ${NUMEROS.estruturas} estruturas próprias pelo mundo. Cada uma aparece aqui em maquete de blocos, montada a partir das peças do próprio mod: clique em Girar em 3D e arraste para ver de todos os lados. Junto, o bioma em que ela é gerada e os Pokémon que têm regra de spawn ligada a ela.</p>
   <p class="nota-editorial">As maquetes usam a cor média de cada bloco, sem textura, e não trazem o terreno em volta. Estruturas com peças sorteadas mudam de um mundo para outro; a maquete mostra uma das combinações.</p>
   <p class="nota-editorial">${semNomeOficial} delas não têm nome na tradução do mod: aparecem com o nome interno, em inglês.</p>
 </section>
