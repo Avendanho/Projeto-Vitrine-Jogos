@@ -8,6 +8,9 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/build.mjs && node scripts/servir.mjs",
     "arte": "node scripts/arte.mjs",
+    "arte:mini": "node scripts/arte.mjs --mini",
+    "pokedex": "node scripts/pokedex.mjs",
+    "cartas": "node scripts/cartas.mjs",
     "verificar": "node scripts/verificar-paginas.mjs"
   },
   "devDependencies": {

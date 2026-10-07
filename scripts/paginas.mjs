@@ -1,7 +1,8 @@
 /* Modelos das páginas do PokéAtlas. Cada função devolve o HTML de uma página. */
+import { readFileSync } from "node:fs";
 import { JOGOS } from "../dados/jogos.mjs";
 import { ESPECIES } from "../dados/especies.mjs";
-import { REGIOES, OUTRAS_REGIOES, CONSOLES, ESTILOS, TIPOS, PERFIS, PEDIDOS, MARCOS, HORIZONTE, ROMANOS } from "../dados/atlas.mjs";
+import { REGIOES, OUTRAS_REGIOES, CONSOLES, ESTILOS, TIPOS, PERFIS, PEDIDOS, MARCOS, HORIZONTE, ROMANOS, MAPAS } from "../dados/atlas.mjs";
 import { PERGUNTAS } from "../dados/quiz.mjs";
 import { EIXOS, valoresDe, encaixe } from "../src/js/relevo.js";
 import { perfilRegiao, rosaDosVentos, posicoesDosEixos, reguaDeAnos } from "./cenario.mjs";
@@ -9,6 +10,13 @@ import { perfilRegiao, rosaDosVentos, posicoesDosEixos, reguaDeAnos } from "./ce
 /* ---------- utilidades ---------- */
 
 export const MAR = "#D2E1DF", TINTA = "#0F2A3A", NOITE = "#0C2733", PAPEL = "#F1E8CF";
+
+const lerDados = (nome) => JSON.parse(readFileSync(new URL(`../dados/${nome}`, import.meta.url), "utf8"));
+export const POKEDEX = lerDados("pokedex.json");     // gerado por scripts/pokedex.mjs
+export const CARTAS = lerDados("cartas.json");       // gerado por scripts/cartas.mjs
+const semAcento = (t) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+const ORDEM_TIPOS = ["Normal", "Fogo", "Água", "Planta", "Elétrico", "Gelo", "Lutador", "Venenoso", "Terrestre",
+  "Voador", "Psíquico", "Inseto", "Pedra", "Fantasma", "Dragão", "Sombrio", "Aço", "Fada"];
 const DIA = `data-fx-fundo="${MAR}" data-fx-tinta="${TINTA}"`;
 
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -64,11 +72,12 @@ function itemIlha(j, opc = {}) {
 
 const NAV = [
   { href: "/biblioteca/", texto: "Biblioteca" },
+  { href: "/regioes/", texto: "Regiões" },
   { href: "/linha-do-tempo/", texto: "Linha do tempo" },
   { href: "/comparar/", texto: "Comparar" }
 ];
 
-function moldura({ titulo, descricao, caminho, classe, corpo, modulo, motor = false }) {
+function moldura({ titulo, descricao, caminho, classe, corpo, modulo, extra = null, motor = false }) {
   const tituloCompleto = caminho === "/" ? titulo : `${titulo} — PokéAtlas`;
   const link = (n) => `<a href="${n.href}"${n.href === caminho ? ' aria-current="page"' : ""}>${n.texto}</a>`;
   return `<!doctype html>
@@ -113,12 +122,12 @@ ${corpo}
     </nav>
     <div class="rodape-avisos">
       <p>Projeto de fã, sem fins lucrativos e sem vínculo com Nintendo, Game Freak, Creatures ou The Pokémon Company. Pokémon e os nomes dos jogos pertencem aos seus donos.</p>
-      <p>As notas de cada jogo são leitura editorial do atlas, não dado oficial. A arte dos Pokémon é a oficial, obtida do repositório público PokeAPI/sprites e reimpressa em gravura. Fontes: Archivo e Alegreya.</p>
+      <p>As notas de cada jogo são leitura editorial do atlas, não dado oficial. A arte dos Pokémon é a oficial, obtida do repositório público PokeAPI/sprites e reimpressa em gravura; as listas de Pokédex vêm da PokéAPI. As cartas das regiões são redesenhos do atlas sobre os mapas dos jogos. Fontes: Archivo e Alegreya.</p>
     </div>
   </div>
 </footer>
 ${motor ? '<script src="/motor/sites-incriveis.js" defer></script>\n' : ""}<script type="module" src="/js/base.js"></script>
-${modulo ? `<script type="module" src="/js/${modulo}.js"></script>` : ""}
+${[modulo, extra].filter(Boolean).map((m) => `<script type="module" src="/js/${m}.js"></script>`).join("\n")}
 </body>
 </html>
 `;
@@ -135,11 +144,11 @@ function folhaRegiao(r) {
   return `<article class="folha">
   <header class="folha-topo">
     <p class="folha-geracao">Geração ${ROMANOS[r.geracao]}</p>
-    <h3 class="folha-nome">${r.nome}</h3>
+    <h3 class="folha-nome"><a href="/regioes/${r.id}/">${r.nome}</a></h3>
     <p class="folha-inspiracao">${esc(r.inspiracao)}</p>
   </header>
   <p class="folha-texto">${esc(r.texto)}</p>
-  ${perfilRegiao(r.cenario)}
+  <a class="folha-carta" href="/regioes/${r.id}/"><img src="/cartas/${r.id}.svg" alt="Abrir a carta de ${r.nome}" width="1000" height="${CARTAS[r.id].altura}" loading="lazy" decoding="async"></a>
   <div class="folha-base">
     <div class="folha-iniciais">${r.iniciais.map(prancha).join("")}</div>
     <ul class="folha-jogos">
@@ -191,7 +200,7 @@ export function paginaInicio() {
     <div class="trilho" data-fx="trilho">
       <header class="folha-intro">
         <h2 id="t-travessia">${maiuscula(extenso(REGIOES.length))} cartas, de Kanto a Paldea</h2>
-        <p class="prosa">Cada região guarda três primeiros companheiros e os jogos que se passam nela. Passe o cursor pelas gravuras para ver as cores.</p>
+        <p class="prosa">Cada região tem a sua carta, três primeiros companheiros e os jogos que se passam nela. Toque numa carta para abri-la inteira.</p>
       </header>
       ${REGIOES.map(folhaRegiao).join("\n      ")}
     </div>
@@ -298,7 +307,7 @@ export function paginaBiblioteca() {
   const corpo = `
 <section class="cabecalho">
   <h1>Biblioteca</h1>
-  <p class="prosa">Todas as ilhas do atlas, da mais antiga à mais nova. Combine os filtros para reduzir o arquipélago ao que interessa a você.</p>
+  <p class="prosa">Todas as ilhas do atlas, da mais antiga à mais nova. Combine os filtros, ou procure um Pokémon, para reduzir o arquipélago ao que interessa a você.</p>
 </section>
 <section class="biblioteca">
   <form class="filtros" aria-label="Filtros da biblioteca">
@@ -307,10 +316,18 @@ export function paginaBiblioteca() {
     ${grupo("Console", "console", consoles)}
     ${grupo("Estilo de jogo", "estilo", estilos)}
     ${grupo("Perfil de jogador", "perfil", PERFIS)}
+    <div class="filtro filtro-busca">
+      <label for="busca-pokemon">Pokémon</label>
+      <div class="busca">
+        <input id="busca-pokemon" type="search" list="lista-pokemon" placeholder="Um nome, como Lucario" autocomplete="off" spellcheck="false">
+        <datalist id="lista-pokemon"></datalist>
+        <p class="busca-resultado" data-busca-resultado aria-live="polite"></p>
+      </div>
+    </div>
     <p class="filtros-resumo"><span aria-live="polite"><strong data-contagem>${JOGOS.length}</strong> <span data-contagem-rotulo>ilhas no mapa</span></span> <button type="button" class="ligacao" data-limpar hidden>Limpar filtros</button></p>
   </form>
   <ul class="arquipelago">
-    ${ORDENADOS.map((j) => `<li data-geracao="${j.geracao ?? ""}" data-regiao="${j.regiao}" data-console="${j.plataformas.join(" ")}" data-estilo="${j.estilo}" data-perfil="${perfisDe(j).map((p) => p.id).join(" ")}">${itemIlha(j, { transicao: true })}</li>`).join("\n    ")}
+    ${ORDENADOS.map((j) => `<li data-slug="${j.slug}" data-geracao="${j.geracao ?? ""}" data-regiao="${j.regiao}" data-console="${j.plataformas.join(" ")}" data-estilo="${j.estilo}" data-perfil="${perfisDe(j).map((p) => p.id).join(" ")}">${itemIlha(j, { transicao: true })}</li>`).join("\n    ")}
   </ul>
   <p class="vazio" hidden>Nenhuma ilha com essa combinação. Tire um dos filtros para ver mais.</p>
 </section>`;
@@ -337,7 +354,7 @@ export function paginaJogo(j) {
   const ficha = [
     ["Lançamento", String(j.ano)],
     ["Console", j.plataformas.map((p) => `<a href="/biblioteca/?console=${p}">${esc(nome(CONSOLES, p))}</a>`).join(" e ")],
-    lugar ? [j.regiao === "outras" ? "Cenário" : "Região", j.regiao === "outras" ? esc(lugar) : `<a href="/biblioteca/?regiao=${j.regiao}">${esc(lugar)}</a>`] : null,
+    lugar ? [j.regiao === "outras" ? "Cenário" : "Região", j.regiao === "outras" ? esc(lugar) : `<a href="/regioes/${j.regiao}/">${esc(lugar)}</a>`] : null,
     j.geracao ? ["Geração", `<a href="/biblioteca/?geracao=${j.geracao}">${ROMANOS[j.geracao]}</a>`] : null,
     ["Estilo", `<a href="/biblioteca/?estilo=${j.estilo}">${esc(nome(ESTILOS, j.estilo))}</a>`],
     ["Categoria", esc(nome(TIPOS, j.tipo))]
@@ -397,6 +414,8 @@ export function paginaJogo(j) {
     <div class="pranchas">${j.mascotes.map(prancha).join("")}</div>
   </section>
 
+  ${secaoPokedex(j)}
+
   <section class="jogo-vizinhas" aria-labelledby="t-vizinhas">
     <h2 id="t-vizinhas">Ilhas de formato parecido</h2>
     <ul class="arquipelago arquipelago-curto">
@@ -411,7 +430,7 @@ export function paginaJogo(j) {
 </article>`;
 
   return moldura({
-    titulo: j.titulo, caminho: `/jogos/${j.slug}/`, classe: "pagina-jogo", corpo, modulo: "jogo",
+    titulo: j.titulo, caminho: `/jogos/${j.slug}/`, classe: "pagina-jogo", corpo, modulo: "jogo", extra: j.pokedex ? "pokedex" : null,
     descricao: `${j.chamada} Veja para quem é ${j.curto}, o relevo do jogo e títulos parecidos.`
   });
 }
@@ -568,6 +587,153 @@ export function pagina404() {
   <p><a class="botao" href="/biblioteca/">Abrir a biblioteca</a></p>
 </section>`;
   return moldura({ titulo: "Página não encontrada", caminho: "/404", classe: "pagina-404", corpo, descricao: "Página não encontrada no PokéAtlas." });
+}
+
+/* ---------- Pokédex de um jogo ---------- */
+
+function secaoPokedex(j) {
+  if (!j.pokedex) {
+    return `<section class="jogo-pokedex" aria-labelledby="t-pokedex">
+    <h2 id="t-pokedex">Pokédex</h2>
+    <p class="prosa">${esc(j.semPokedex)}</p>
+  </section>`;
+  }
+  const listas = j.pokedex.map(([id, rotulo]) => ({ id, rotulo, entradas: POKEDEX.dex[id] }));
+  const presentes = new Set(listas.flatMap((l) => l.entradas.flatMap(([, e]) => POKEDEX.especies[e][1])));
+  const tipos = ORDEM_TIPOS.filter((t) => presentes.has(t));
+  const unica = listas.length === 1;
+  const titulo = !unica ? "Pokédex" : listas[0].rotulo === "Elenco" ? "Elenco de Pokémon" : `Pokédex de ${listas[0].rotulo}`;
+  const gaveta = (l, i) => `<ol class="gaveta" data-lista="${l.id}"${i ? " hidden" : ""}>
+      ${l.entradas.map(([n, e]) => {
+        const [nome, ts] = POKEDEX.especies[e];
+        return `<li data-nome="${esc(semAcento(nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="/biblioteca/?pokemon=${e}"><span class="dex-arte"><img src="/arte/mini/${e}.webp" data-cor="/arte/mini/${e}-cor.webp" alt="" width="92" height="92" loading="lazy" decoding="async"></span><span class="dex-numero">${String(n).padStart(3, "0")}</span><span class="dex-nome">${esc(nome)}</span><span class="dex-tipos">${ts.join(", ")}</span></a></li>`;
+      }).join("")}
+    </ol>`;
+  return `<section class="jogo-pokedex" aria-labelledby="t-pokedex" data-pokedex>
+    <h2 id="t-pokedex">${titulo}</h2>
+    <p class="nota-editorial">${j.pokedexNota ? `${esc(j.pokedexNota)} ` : ""}A arte e os tipos são os da forma padrão de cada espécie; formas regionais não aparecem. Escolha uma espécie para ver em quais jogos do atlas ela está.</p>
+    <div class="dex-controles">
+      ${unica ? "" : `<div class="filtro-opcoes" role="group" aria-label="Lista">${listas.map((l, i) => `<button type="button" class="ficha" data-aba="${l.id}" aria-pressed="${i === 0}">${esc(l.rotulo)} <span class="dex-conta">${l.entradas.length}</span></button>`).join("")}</div>`}
+      <div class="dex-busca">
+        <label for="dex-procurar">Procurar nesta lista</label>
+        <input id="dex-procurar" type="search" placeholder="Nome ou número" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="filtro-opcoes" role="group" aria-label="Tipo">${tipos.map((t) => `<button type="button" class="ficha ficha-tipo" data-tipo="${semAcento(t)}" aria-pressed="false">${t}</button>`).join("")}</div>
+      <p class="dex-resumo" aria-live="polite"><strong data-dex-contagem>${listas[0].entradas.length}</strong> <span data-dex-rotulo>espécies</span></p>
+    </div>
+    ${listas.map(gaveta).join("\n    ")}
+    <p class="dex-mais" hidden><button type="button" class="botao botao-contorno" data-dex-mais>Mostrar todas</button></p>
+    <p class="vazio" data-dex-vazio hidden>Nenhuma espécie com esse nome ou tipo nesta lista.</p>
+  </section>`;
+}
+
+/* ---------- regiões ---------- */
+
+function numerados(mapa) {
+  return [
+    ...mapa.cidades.map((l, i) => ({ nome: l[0], x: l[1], y: l[2], lado: l[3], n: i + 1, tipo: "cidade" })),
+    ...mapa.marcos.map((l, i) => ({ nome: l[0], x: l[1], y: l[2], lado: l[3], n: mapa.cidades.length + i + 1, tipo: "marco" }))
+  ];
+}
+
+export function paginaRegiao(r) {
+  const i = REGIOES.indexOf(r);
+  const anterior = REGIOES[i - 1], proxima = REGIOES[i + 1];
+  const mapa = MAPAS[r.id], carta = CARTAS[r.id];
+  const pontos = numerados(mapa);
+  const jogos = ORDENADOS.filter((j) => j.regiao === r.id);
+  const alta = carta.proporcao < 0.7;
+  const descricao = `Carta de ${r.nome}, com ${mapa.cidades.length} ${mapa.cidades.length === 1 ? "povoado marcado" : "cidades marcadas"}${mapa.marcos.length ? ` e ${mapa.marcos.length} ${mapa.marcos.length === 1 ? "marco" : "marcos"}` : ""}. A lista completa vem logo abaixo.`;
+
+  const corpo = `
+<article class="regiao${alta ? " regiao-alta" : ""}">
+  <header class="cabecalho">
+    <p class="migalha"><a href="/regioes/">Regiões</a></p>
+    <h1>${r.nome}</h1>
+    <p class="regiao-meta">Geração ${ROMANOS[r.geracao]}. ${esc(r.inspiracao)}.</p>
+    <p class="prosa">${esc(r.texto)}</p>
+  </header>
+
+  <section class="regiao-carta" aria-labelledby="t-carta">
+    <h2 id="t-carta" class="so-leitor">Carta de ${r.nome}</h2>
+    <figure class="carta">
+      <div class="carta-quadro" style="--proporcao:${carta.proporcao}">
+        <img src="/cartas/${r.id}.svg" alt="${esc(descricao)}" width="1000" height="${carta.altura}">
+        <ol class="carta-pontos" aria-hidden="true">
+          ${pontos.map((p) => `<li class="ponto ponto-${p.tipo} lado-${p.lado}" style="left:${p.x}%;top:${p.y}%"><span class="ponto-marca">${p.n}</span><span class="ponto-nome">${esc(p.nome)}</span></li>`).join("\n          ")}
+          ${(mapa.areas || []).map(([nome, x, y]) => `<li class="ponto-area" style="left:${x}%;top:${y}%">${esc(nome)}</li>`).join("\n          ")}
+        </ol>
+      </div>
+      <figcaption>Carta redesenhada pelo atlas a partir do mapa da região nos jogos: a costa segue o original, o relevo é interpretação. As linhas vermelhas são rotas, sem numeração.${mapa.nota ? ` ${esc(mapa.nota)}` : ""}</figcaption>
+    </figure>
+    <div class="carta-legenda">
+      <h2>Lugares na carta</h2>
+      <ol class="legenda-lista">
+        ${pontos.map((p) => `<li class="legenda-${p.tipo}"><span class="ponto-marca" aria-hidden="true">${p.n}</span>${esc(p.nome)}</li>`).join("\n        ")}
+      </ol>
+      ${(mapa.areas || []).length ? `<p class="nota-editorial">Também na carta, sem número: ${mapa.areas.map(([n]) => esc(n)).join(", ")}.</p>` : ""}
+    </div>
+  </section>
+
+  <section class="regiao-iniciais" aria-labelledby="t-iniciais">
+    <h2 id="t-iniciais">Primeiros companheiros</h2>
+    <div class="pranchas">${r.iniciais.map(prancha).join("")}</div>
+  </section>
+
+  <section class="regiao-jogos" aria-labelledby="t-jogos">
+    <h2 id="t-jogos">${jogos.length === 1 ? "O jogo que se passa aqui" : "Jogos que se passam aqui"}</h2>
+    <ul class="arquipelago arquipelago-curto">
+      ${jogos.map((j) => `<li>${itemIlha(j)}</li>`).join("\n      ")}
+    </ul>
+  </section>
+
+  <div class="regiao-perfil" aria-hidden="true">${perfilRegiao(r.cenario)}</div>
+
+  <nav class="jogo-passos" aria-label="Outras regiões">
+    ${anterior ? `<a href="/regioes/${anterior.id}/"><span>Carta anterior</span>${anterior.nome}</a>` : "<span></span>"}
+    ${proxima ? `<a href="/regioes/${proxima.id}/"><span>Próxima carta</span>${proxima.nome}</a>` : "<span></span>"}
+  </nav>
+</article>`;
+
+  return moldura({
+    titulo: `${r.nome}, a carta da região`, caminho: `/regioes/${r.id}/`, classe: "pagina-regiao", corpo,
+    descricao: `${r.texto} Veja a carta de ${r.nome}, as cidades, os iniciais e os jogos que se passam nela.`
+  });
+}
+
+export function paginaRegioes() {
+  const corpo = `
+<section class="cabecalho">
+  <h1>Regiões</h1>
+  <p class="prosa">${maiuscula(extenso(REGIOES.length))} cartas, redesenhadas a partir dos mapas dos jogos. Cada uma traz as cidades, as rotas e os jogos que se passam ali.</p>
+</section>
+<section class="regioes">
+  <ul class="regioes-lista">
+    ${REGIOES.map((r) => `<li><a href="/regioes/${r.id}/">
+      <span class="regioes-carta"><img src="/cartas/${r.id}.svg" alt="" width="1000" height="${CARTAS[r.id].altura}" loading="lazy" decoding="async"></span>
+      <span class="regioes-nome">${r.nome}</span>
+      <span class="ilha-meta">Geração ${ROMANOS[r.geracao]}. ${esc(r.inspiracao)}</span>
+    </a></li>`).join("\n    ")}
+  </ul>
+</section>`;
+  return moldura({
+    titulo: "Regiões", caminho: "/regioes/", classe: "pagina-regioes", corpo,
+    descricao: `As ${REGIOES.length} regiões de Pokémon em cartas redesenhadas, de Kanto a Paldea, com cidades, rotas e os jogos de cada uma.`
+  });
+}
+
+/* Para a busca "onde este Pokémon está": nomes e, por jogo, as espécies de todas as suas listas. */
+export function indiceDeEspecies() {
+  const nomes = Object.entries(POKEDEX.especies).map(([id, [nome]]) => [Number(id), nome]);
+  const porJogo = {};
+  for (const j of JOGOS) {
+    if (!j.pokedex) continue;
+    porJogo[j.slug] = [...new Set(j.pokedex.flatMap(([id]) => POKEDEX.dex[id].map(([, e]) => e)))].sort((a, b) => a - b);
+  }
+  return `/* Gerado por scripts/build.mjs a partir de dados/pokedex.json. Não edite à mão. */
+export const NOMES = ${JSON.stringify(nomes)};
+export const POR_JOGO = ${JSON.stringify(porJogo)};
+`;
 }
 
 /* ---------- dados enviados ao navegador ---------- */

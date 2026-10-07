@@ -12,7 +12,7 @@ function a(exploracao, liberdade, competitivo, dificuldade, historia, nostalgia)
 
 export const JOGOS = [
   {
-    slug: "red-blue-yellow", titulo: "Pokémon Red, Blue e Yellow", curto: "Red, Blue e Yellow",
+    slug: "red-blue-yellow", pokedex: [["kanto", "Kanto"]], titulo: "Pokémon Red, Blue e Yellow", curto: "Red, Blue e Yellow",
     ano: 1996, plataformas: ["gb"], regiao: "kanto", geracao: 1, tipo: "principal", estilo: "rpg-classico",
     atributos: a(3, 2, 2, 3, 1, 5),
     chamada: "O começo de tudo: 151 espécies, oito ginásios e um rival sempre um passo à frente.",
@@ -26,7 +26,7 @@ export const JOGOS = [
     mascotes: [6, 9, 25]
   },
   {
-    slug: "gold-silver-crystal", titulo: "Pokémon Gold, Silver e Crystal", curto: "Gold, Silver e Crystal",
+    slug: "gold-silver-crystal", pokedex: [["original-johto", "Johto"]], titulo: "Pokémon Gold, Silver e Crystal", curto: "Gold, Silver e Crystal",
     ano: 1999, plataformas: ["gbc"], regiao: "johto", geracao: 2, tipo: "principal", estilo: "rpg-classico",
     atributos: a(4, 3, 2, 3, 2, 5),
     chamada: "Duas regiões num cartucho só, com um relógio de verdade marcando dia e noite.",
@@ -43,7 +43,7 @@ export const JOGOS = [
     mascotes: [250, 249, 245]
   },
   {
-    slug: "ruby-sapphire-emerald", titulo: "Pokémon Ruby, Sapphire e Emerald", curto: "Ruby, Sapphire e Emerald",
+    slug: "ruby-sapphire-emerald", pokedex: [["hoenn", "Hoenn"]], titulo: "Pokémon Ruby, Sapphire e Emerald", curto: "Ruby, Sapphire e Emerald",
     ano: 2002, plataformas: ["gba"], regiao: "hoenn", geracao: 3, tipo: "principal", estilo: "rpg-classico",
     atributos: a(4, 2, 3, 3, 2, 4),
     chamada: "Um arquipélago tropical, batalhas em dupla e um mapa que continua debaixo d'água.",
@@ -60,7 +60,7 @@ export const JOGOS = [
     mascotes: [383, 382, 384]
   },
   {
-    slug: "firered-leafgreen", titulo: "Pokémon FireRed e LeafGreen", curto: "FireRed e LeafGreen",
+    slug: "firered-leafgreen", pokedex: [["kanto", "Kanto"]], titulo: "Pokémon FireRed e LeafGreen", curto: "FireRed e LeafGreen",
     ano: 2004, plataformas: ["gba"], regiao: "kanto", geracao: 3, tipo: "remake", estilo: "rpg-classico",
     atributos: a(3, 2, 2, 2, 1, 4),
     chamada: "A primeira viagem por Kanto, refeita com o conforto do Game Boy Advance.",
@@ -74,7 +74,7 @@ export const JOGOS = [
     mascotes: [6, 3]
   },
   {
-    slug: "diamond-pearl-platinum", titulo: "Pokémon Diamond, Pearl e Platinum", curto: "Diamond, Pearl e Platinum",
+    slug: "diamond-pearl-platinum", pokedex: [["extended-sinnoh", "Sinnoh"]], pokedexNota: "Lista de Platinum. Diamond e Pearl têm as 151 primeiras.", titulo: "Pokémon Diamond, Pearl e Platinum", curto: "Diamond, Pearl e Platinum",
     ano: 2006, plataformas: ["ds"], regiao: "sinnoh", geracao: 4, tipo: "principal", estilo: "rpg-classico",
     atributos: a(4, 2, 3, 4, 3, 4),
     chamada: "Mitos sobre a criação do mundo e uma campeã que não perdoa time mal montado.",
@@ -92,7 +92,7 @@ export const JOGOS = [
     mascotes: [483, 484, 487]
   },
   {
-    slug: "heartgold-soulsilver", titulo: "Pokémon HeartGold e SoulSilver", curto: "HeartGold e SoulSilver",
+    slug: "heartgold-soulsilver", pokedex: [["updated-johto", "Johto"]], titulo: "Pokémon HeartGold e SoulSilver", curto: "HeartGold e SoulSilver",
     ano: 2009, plataformas: ["ds"], regiao: "johto", geracao: 4, tipo: "remake", estilo: "rpg-classico",
     atributos: a(5, 3, 3, 3, 2, 5),
     chamada: "Johto e Kanto refeitas com capricho, e o seu Pokémon caminhando logo atrás.",
@@ -109,7 +109,7 @@ export const JOGOS = [
     mascotes: [250, 249]
   },
   {
-    slug: "black-white", titulo: "Pokémon Black e White", curto: "Black e White",
+    slug: "black-white", pokedex: [["original-unova", "Unova"]], titulo: "Pokémon Black e White", curto: "Black e White",
     ano: 2010, plataformas: ["ds"], regiao: "unova", geracao: 5, tipo: "principal", estilo: "rpg-classico",
     atributos: a(2, 1, 3, 3, 5, 3),
     chamada: "A geração que perguntou se é certo capturar Pokémon, e levou a pergunta a sério.",
@@ -123,7 +123,7 @@ export const JOGOS = [
     mascotes: [643, 644]
   },
   {
-    slug: "black-2-white-2", titulo: "Pokémon Black 2 e White 2", curto: "Black 2 e White 2",
+    slug: "black-2-white-2", pokedex: [["updated-unova", "Unova"]], titulo: "Pokémon Black 2 e White 2", curto: "Black 2 e White 2",
     ano: 2012, plataformas: ["ds"], regiao: "unova", geracao: 5, tipo: "principal", estilo: "rpg-classico",
     atributos: a(3, 2, 4, 5, 4, 3),
     chamada: "A continuação direta de Black e White: Unova dois anos depois, com modo difícil.",
@@ -141,7 +141,7 @@ export const JOGOS = [
     mascotes: [646]
   },
   {
-    slug: "x-y", titulo: "Pokémon X e Y", curto: "X e Y",
+    slug: "x-y", pokedex: [["kalos-central", "Kalos Central"], ["kalos-coastal", "Kalos Costeira"], ["kalos-mountain", "Kalos Montanhosa"]], titulo: "Pokémon X e Y", curto: "X e Y",
     ano: 2013, plataformas: ["3ds"], regiao: "kalos", geracao: 6, tipo: "principal", estilo: "rpg-classico",
     atributos: a(3, 2, 3, 1, 2, 2),
     chamada: "O salto para o 3D, com Megaevolução e uma região inspirada na França.",
@@ -155,7 +155,7 @@ export const JOGOS = [
     mascotes: [716, 717]
   },
   {
-    slug: "omega-ruby-alpha-sapphire", titulo: "Pokémon Omega Ruby e Alpha Sapphire", curto: "Omega Ruby e Alpha Sapphire",
+    slug: "omega-ruby-alpha-sapphire", pokedex: [["updated-hoenn", "Hoenn"]], titulo: "Pokémon Omega Ruby e Alpha Sapphire", curto: "Omega Ruby e Alpha Sapphire",
     ano: 2014, plataformas: ["3ds"], regiao: "hoenn", geracao: 6, tipo: "remake", estilo: "rpg-classico",
     atributos: a(4, 2, 3, 2, 3, 4),
     chamada: "Hoenn em 3D, com voo livre sobre o mapa e um epílogo no espaço.",
@@ -172,7 +172,7 @@ export const JOGOS = [
     mascotes: [383, 382]
   },
   {
-    slug: "sun-moon", titulo: "Pokémon Sun e Moon", curto: "Sun e Moon",
+    slug: "sun-moon", pokedex: [["original-alola", "Alola"]], titulo: "Pokémon Sun e Moon", curto: "Sun e Moon",
     ano: 2016, plataformas: ["3ds"], regiao: "alola", geracao: 7, tipo: "principal", estilo: "rpg-classico",
     atributos: a(2, 1, 3, 3, 4, 2),
     chamada: "Quatro ilhas tropicais onde os ginásios deram lugar a provas e rituais.",
@@ -186,7 +186,7 @@ export const JOGOS = [
     mascotes: [791, 792]
   },
   {
-    slug: "ultra-sun-ultra-moon", titulo: "Pokémon Ultra Sun e Ultra Moon", curto: "Ultra Sun e Ultra Moon",
+    slug: "ultra-sun-ultra-moon", pokedex: [["updated-alola", "Alola"]], titulo: "Pokémon Ultra Sun e Ultra Moon", curto: "Ultra Sun e Ultra Moon",
     ano: 2017, plataformas: ["3ds"], regiao: "alola", geracao: 7, tipo: "principal", estilo: "rpg-classico",
     atributos: a(3, 1, 4, 4, 4, 2),
     chamada: "Alola revista, com mais espécies, mais desafio e um chefe temido.",
@@ -204,7 +204,7 @@ export const JOGOS = [
     mascotes: [800]
   },
   {
-    slug: "lets-go-pikachu-eevee", titulo: "Pokémon: Let's Go, Pikachu! e Let's Go, Eevee!", curto: "Let's Go, Pikachu! e Eevee!",
+    slug: "lets-go-pikachu-eevee", pokedex: [["letsgo-kanto", "Kanto"]], titulo: "Pokémon: Let's Go, Pikachu! e Let's Go, Eevee!", curto: "Let's Go, Pikachu! e Eevee!",
     ano: 2018, plataformas: ["switch"], regiao: "kanto", geracao: 7, tipo: "remake", estilo: "rpg-classico",
     atributos: a(2, 2, 1, 1, 1, 5),
     chamada: "Kanto para jogar no sofá, capturando com o movimento do controle.",
@@ -221,7 +221,7 @@ export const JOGOS = [
     mascotes: [25, 133]
   },
   {
-    slug: "sword-shield", titulo: "Pokémon Sword e Shield", curto: "Sword e Shield",
+    slug: "sword-shield", pokedex: [["galar", "Galar"], ["isle-of-armor", "Isle of Armor"], ["crown-tundra", "Crown Tundra"]], pokedexNota: "Isle of Armor e Crown Tundra são as duas expansões pagas.", titulo: "Pokémon Sword e Shield", curto: "Sword e Shield",
     ano: 2019, plataformas: ["switch"], regiao: "galar", geracao: 8, tipo: "principal", estilo: "rpg-classico",
     atributos: a(3, 2, 5, 2, 2, 1),
     chamada: "Ginásios em estádios lotados e a porta de entrada mais prática para o competitivo.",
@@ -235,7 +235,7 @@ export const JOGOS = [
     mascotes: [888, 889]
   },
   {
-    slug: "brilliant-diamond-shining-pearl", titulo: "Pokémon Brilliant Diamond e Shining Pearl", curto: "Brilliant Diamond e Shining Pearl",
+    slug: "brilliant-diamond-shining-pearl", pokedex: [["original-sinnoh", "Sinnoh"]], titulo: "Pokémon Brilliant Diamond e Shining Pearl", curto: "Brilliant Diamond e Shining Pearl",
     ano: 2021, plataformas: ["switch"], regiao: "sinnoh", geracao: 8, tipo: "remake", estilo: "rpg-classico",
     atributos: a(3, 2, 3, 3, 3, 4),
     chamada: "A Sinnoh de 2006 reconstruída no Switch, fiel até nos detalhes.",
@@ -249,7 +249,7 @@ export const JOGOS = [
     mascotes: [483, 484]
   },
   {
-    slug: "legends-arceus", titulo: "Pokémon Legends: Arceus", curto: "Legends: Arceus",
+    slug: "legends-arceus", pokedex: [["hisui", "Hisui"]], titulo: "Pokémon Legends: Arceus", curto: "Legends: Arceus",
     ano: 2022, plataformas: ["switch"], regiao: "hisui", geracao: 8, tipo: "legends", estilo: "acao",
     atributos: a(5, 4, 1, 3, 3, 2),
     chamada: "Sinnoh séculos atrás: você, um punhado de Poké Bolas e a primeira Pokédex por escrever.",
@@ -266,7 +266,7 @@ export const JOGOS = [
     mascotes: [493]
   },
   {
-    slug: "scarlet-violet", titulo: "Pokémon Scarlet e Violet", curto: "Scarlet e Violet",
+    slug: "scarlet-violet", pokedex: [["paldea", "Paldea"], ["kitakami", "Kitakami"], ["blueberry", "Blueberry"]], pokedexNota: "Kitakami e Blueberry são as duas partes da expansão paga.", titulo: "Pokémon Scarlet e Violet", curto: "Scarlet e Violet",
     ano: 2022, plataformas: ["switch"], regiao: "paldea", geracao: 9, tipo: "principal", estilo: "mundo-aberto",
     atributos: a(5, 5, 5, 2, 4, 1),
     chamada: "O primeiro mundo aberto de verdade: três histórias, na ordem que você quiser.",
@@ -285,7 +285,7 @@ export const JOGOS = [
     mascotes: [1007, 1008]
   },
   {
-    slug: "legends-z-a", titulo: "Pokémon Legends: Z-A", curto: "Legends: Z-A",
+    slug: "legends-z-a", pokedex: [["lumiose-city", "Lumiose"], ["hyperspace", "Mega Dimension"]], pokedexNota: "Mega Dimension é a expansão paga.", titulo: "Pokémon Legends: Z-A", curto: "Legends: Z-A",
     ano: 2025, plataformas: ["switch", "switch2"], regiao: "kalos", geracao: 9, tipo: "legends", estilo: "acao",
     atributos: a(3, 3, 3, 3, 4, 3),
     chamada: "Uma cidade inteira como mapa e, pela primeira vez, batalhas em tempo real.",
@@ -301,7 +301,7 @@ export const JOGOS = [
 
   /* ---------- derivados ---------- */
   {
-    slug: "colosseum-xd", titulo: "Pokémon Colosseum e XD: Gale of Darkness", curto: "Colosseum e XD",
+    slug: "colosseum-xd", semPokedex: "Orre não tem Pokédex regional: o elenco são os Shadow Pokémon tomados dos adversários, e essa lista não está na base pública que o atlas usa.", titulo: "Pokémon Colosseum e XD: Gale of Darkness", curto: "Colosseum e XD",
     ano: 2003, plataformas: ["gc"], regiao: "outras", lugar: "Orre", geracao: null, tipo: "derivado", estilo: "rpg-classico",
     atributos: a(2, 1, 3, 4, 4, 4),
     chamada: "Um deserto sem Pokémon selvagens, onde você toma de volta os que foram corrompidos.",
@@ -319,7 +319,7 @@ export const JOGOS = [
     mascotes: [197, 196]
   },
   {
-    slug: "mystery-dungeon-explorers-of-sky", titulo: "Pokémon Mystery Dungeon: Explorers of Sky", curto: "Mystery Dungeon: Explorers of Sky",
+    slug: "mystery-dungeon-explorers-of-sky", semPokedex: "Aqui não se preenche Pokédex: os Pokémon são recrutados para a equipe, e a lista de recrutáveis não está na base pública que o atlas usa.", titulo: "Pokémon Mystery Dungeon: Explorers of Sky", curto: "Mystery Dungeon: Explorers of Sky",
     ano: 2009, plataformas: ["ds"], regiao: "outras", lugar: "um mundo só de Pokémon", geracao: null, tipo: "derivado", estilo: "roguelike",
     atributos: a(3, 2, 1, 4, 5, 4),
     chamada: "Você acorda transformado em Pokémon, e a história que vem depois faz muita gente chorar.",
@@ -337,7 +337,7 @@ export const JOGOS = [
     mascotes: [492, 253]
   },
   {
-    slug: "conquest", titulo: "Pokémon Conquest", curto: "Conquest",
+    slug: "conquest", pokedex: [["conquest-gallery", "Ransei"]], titulo: "Pokémon Conquest", curto: "Conquest",
     ano: 2012, plataformas: ["ds"], regiao: "outras", lugar: "Ransei", geracao: null, tipo: "derivado", estilo: "estrategia",
     atributos: a(3, 3, 2, 3, 3, 2),
     chamada: "Pokémon num tabuleiro de guerra do Japão feudal.",
@@ -351,7 +351,7 @@ export const JOGOS = [
     mascotes: [133]
   },
   {
-    slug: "pokemon-go", titulo: "Pokémon GO", curto: "Pokémon GO",
+    slug: "pokemon-go", semPokedex: "O elenco cresce a cada evento. Qualquer lista publicada aqui estaria desatualizada em semanas.", titulo: "Pokémon GO", curto: "Pokémon GO",
     ano: 2016, plataformas: ["celular"], regiao: "outras", lugar: "o mundo real", geracao: null, tipo: "derivado", estilo: "mundo-real",
     atributos: a(5, 4, 3, 1, 1, 4),
     chamada: "O mapa é a sua cidade: para capturar, é preciso sair de casa.",
@@ -369,7 +369,7 @@ export const JOGOS = [
     mascotes: [808]
   },
   {
-    slug: "pokken-tournament-dx", titulo: "Pokkén Tournament DX", curto: "Pokkén Tournament DX",
+    slug: "pokken-tournament-dx", semPokedex: "São lutadores e Pokémon de apoio, não uma Pokédex, e a lista não está na base pública que o atlas usa.", titulo: "Pokkén Tournament DX", curto: "Pokkén Tournament DX",
     ano: 2017, plataformas: ["switch"], regiao: "outras", lugar: "Ferrum", geracao: null, tipo: "derivado", estilo: "luta",
     atributos: a(1, 2, 5, 4, 1, 2),
     chamada: "Um jogo de luta de verdade, feito pelo estúdio de Tekken.",
@@ -386,7 +386,7 @@ export const JOGOS = [
     mascotes: [448]
   },
   {
-    slug: "mystery-dungeon-rescue-team-dx", titulo: "Pokémon Mystery Dungeon: Rescue Team DX", curto: "Mystery Dungeon: Rescue Team DX",
+    slug: "mystery-dungeon-rescue-team-dx", semPokedex: "Aqui não se preenche Pokédex: os Pokémon são recrutados para a equipe, e a lista de recrutáveis não está na base pública que o atlas usa.", titulo: "Pokémon Mystery Dungeon: Rescue Team DX", curto: "Mystery Dungeon: Rescue Team DX",
     ano: 2020, plataformas: ["switch"], regiao: "outras", lugar: "um mundo só de Pokémon", geracao: null, tipo: "derivado", estilo: "roguelike",
     atributos: a(2, 2, 1, 3, 4, 4),
     chamada: "O primeiro Mystery Dungeon, refeito como um livro ilustrado em aquarela.",
@@ -403,7 +403,7 @@ export const JOGOS = [
     mascotes: [94, 359]
   },
   {
-    slug: "new-pokemon-snap", titulo: "New Pokémon Snap", curto: "New Pokémon Snap",
+    slug: "new-pokemon-snap", semPokedex: "O jogo tem uma Fotodex própria, que não está na base pública que o atlas usa.", titulo: "New Pokémon Snap", curto: "New Pokémon Snap",
     ano: 2021, plataformas: ["switch"], regiao: "outras", lugar: "Lental", geracao: null, tipo: "derivado", estilo: "fotografia",
     atributos: a(4, 1, 1, 1, 2, 3),
     chamada: "Um safári fotográfico: nenhuma batalha, só paciência e bom enquadramento.",
@@ -417,7 +417,7 @@ export const JOGOS = [
     mascotes: [154]
   },
   {
-    slug: "pokemon-unite", titulo: "Pokémon UNITE", curto: "Pokémon UNITE",
+    slug: "pokemon-unite", semPokedex: "O elenco de jogáveis muda a cada temporada. Qualquer lista publicada aqui estaria desatualizada em semanas.", titulo: "Pokémon UNITE", curto: "Pokémon UNITE",
     ano: 2021, plataformas: ["switch", "celular"], regiao: "outras", lugar: "Ilha Aeos", geracao: null, tipo: "derivado", estilo: "moba",
     atributos: a(1, 2, 5, 3, 1, 1),
     chamada: "Cinco contra cinco, dez minutos por partida, e quem pontua mais leva.",
@@ -431,7 +431,7 @@ export const JOGOS = [
     mascotes: [807]
   },
   {
-    slug: "detective-pikachu-returns", titulo: "Detective Pikachu Returns", curto: "Detective Pikachu Returns",
+    slug: "detective-pikachu-returns", semPokedex: "Não há Pokédex: os Pokémon aparecem como personagens da história.", titulo: "Detective Pikachu Returns", curto: "Detective Pikachu Returns",
     ano: 2023, plataformas: ["switch"], regiao: "outras", lugar: "Ryme City", geracao: null, tipo: "derivado", estilo: "aventura",
     atributos: a(2, 1, 1, 1, 5, 2),
     chamada: "Um Pikachu de boné, viciado em café, resolvendo crimes com você.",
@@ -445,7 +445,7 @@ export const JOGOS = [
     mascotes: [25, 58]
   },
   {
-    slug: "tcg-pocket", titulo: "Pokémon TCG Pocket", curto: "TCG Pocket",
+    slug: "tcg-pocket", semPokedex: "Aqui se colecionam cartas, não espécies, e saem coleções novas com frequência.", titulo: "Pokémon TCG Pocket", curto: "TCG Pocket",
     ano: 2024, plataformas: ["celular"], regiao: "outras", lugar: null, geracao: null, tipo: "derivado", estilo: "cartas",
     atributos: a(1, 3, 3, 1, 1, 4),
     chamada: "Abrir pacotinhos de cartas todo dia, na tela do celular.",
@@ -459,7 +459,7 @@ export const JOGOS = [
     mascotes: [150, 151]
   },
   {
-    slug: "pokopia", titulo: "Pokémon Pokopia", curto: "Pokopia",
+    slug: "pokopia", semPokedex: "A lista de Pokémon do jogo ainda não está na base pública que o atlas usa.", titulo: "Pokémon Pokopia", curto: "Pokopia",
     ano: 2026, plataformas: ["switch2"], regiao: "outras", lugar: "as ruínas de Kanto", geracao: null, tipo: "derivado", estilo: "simulacao",
     atributos: a(4, 5, 1, 1, 2, 2),
     chamada: "Você é um Ditto disfarçado de gente, reconstruindo um mundo para os Pokémon voltarem.",
@@ -476,7 +476,7 @@ export const JOGOS = [
     mascotes: [132]
   },
   {
-    slug: "champions", titulo: "Pokémon Champions", curto: "Champions",
+    slug: "champions", pokedex: [["champions", "Elenco"]], pokedexNota: "Elenco registrado na base pública em outubro de 2026, com o número nacional de cada espécie. O jogo recebe espécies novas por atualização.", titulo: "Pokémon Champions", curto: "Champions",
     ano: 2026, plataformas: ["switch", "celular"], regiao: "outras", lugar: null, geracao: null, tipo: "derivado", estilo: "batalha",
     atributos: a(1, 2, 5, 4, 1, 2),
     chamada: "Só batalhas: o novo endereço do Pokémon competitivo.",

@@ -118,3 +118,21 @@ geração. Nada de números de vendas ou notas de crítica.
 - Repositório Git pronto para o GitHub e `vercel.json` pronto para a Vercel.
 - Rodapé: projeto de fã, não oficial, sem vínculo com Nintendo, Game Freak ou
   The Pokémon Company.
+
+## Segunda rodada (pedido depois da primeira entrega)
+
+Pedido: a Pokédex completa em todos os jogos e, nas cartas das regiões, uma
+representação minimamente fiel dos mapas reais.
+
+Escolhas feitas na entrevista:
+
+- **Mapas** — carta redesenhada a partir do mapa real: a costa de cada região é
+  traçada sobre o mapa dos jogos e redesenhada no estilo do atlas, com relevo
+  nas cores de altitude, rotas em vermelhão, cidades e marcos numerados.
+- **Pokédex** — gaveta de espécimes em gravura: cada espécie é uma prancha
+  pequena em tinta, com número regional, nome e tipos; a cor volta ao apontar.
+- **Alcance** — série principal completa (com as expansões em abas) e, dos
+  derivados, só os que têm lista na base pública: Conquest e Champions. Os
+  outros dez dizem por que não têm Pokédex, em vez de exibir lista inventada.
+- **Melhorias aceitas** — busca por Pokémon na biblioteca ("onde ele está"),
+  página própria por região, e tipos com filtro na Pokédex.

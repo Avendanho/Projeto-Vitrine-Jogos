@@ -5,11 +5,13 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JOGOS } from "../dados/jogos.mjs";
 import { ESPECIES } from "../dados/especies.mjs";
-import { REGIOES, CONSOLES, ESTILOS, PEDIDOS } from "../dados/atlas.mjs";
+import { REGIOES, CONSOLES, ESTILOS, PEDIDOS, MAPAS } from "../dados/atlas.mjs";
+import { cartaSVG } from "./cenario.mjs";
 import { svgIlha, valoresDe, sementeDe, malhaQuadrada, EIXOS } from "../src/js/relevo.js";
 import {
   paginaInicio, paginaBiblioteca, paginaJogo, paginaLinha, paginaComparar, paginaBussola,
-  pagina404, dadosDoNavegador, DEMO_COMPARAR, MAR, TINTA
+  paginaRegiao, paginaRegioes, indiceDeEspecies,
+  pagina404, dadosDoNavegador, DEMO_COMPARAR, MAR, TINTA, POKEDEX, CARTAS
 } from "./paginas.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -32,6 +34,16 @@ function conferir() {
     if (!ESTILOS.some((e) => e.id === j.estilo)) erros.push(`${j.slug}: estilo desconhecido ${j.estilo}`);
     if (j.regiao !== "outras" && !REGIOES.some((r) => r.id === j.regiao)) erros.push(`${j.slug}: região desconhecida ${j.regiao}`);
     for (const m of j.mascotes) if (!ESPECIES[m]) erros.push(`${j.slug}: espécie ${m} sem nome em especies.mjs`);
+    if (!j.pokedex && !j.semPokedex) erros.push(`${j.slug}: falta "pokedex" ou "semPokedex"`);
+    for (const [id] of j.pokedex || []) if (!POKEDEX.dex[id]) erros.push(`${j.slug}: Pokédex ${id} não existe em pokedex.json`);
+  }
+  for (const r of REGIOES) {
+    if (!CARTAS[r.id]) erros.push(`${r.id}: sem traçado em cartas.json (rode scripts/cartas.mjs)`);
+    const m = MAPAS[r.id];
+    if (!m) { erros.push(`${r.id}: sem lugares em MAPAS`); continue; }
+    for (const [nome, x, y] of [...m.cidades, ...m.marcos, ...(m.areas || [])]) {
+      if (!(x >= 0 && x <= 100 && y >= 0 && y <= 100)) erros.push(`${r.id}: ${nome} fora do quadro`);
+    }
   }
   for (const r of REGIOES) for (const m of r.iniciais) if (!ESPECIES[m]) erros.push(`${r.id}: inicial ${m} sem nome`);
   for (const [eixo, p] of Object.entries(PEDIDOS)) {
@@ -79,7 +91,12 @@ const [demoA, demoB] = DEMO_COMPARAR.map((slug) => JOGOS.find((j) => j.slug === 
 await escrever("ilhas/demo-a.svg", svgIlha(valoresDe(demoA.atributos), sementeDe(demoA.slug), "#1F7BA6", malha));
 await escrever("ilhas/demo-b.svg", svgIlha(valoresDe(demoB.atributos), sementeDe(demoB.slug), "#C4391F", malha));
 
+for (const r of REGIOES) await escrever(`cartas/${r.id}.svg`, cartaSVG(CARTAS[r.id], MAPAS[r.id]));
+
 await escrever("js/dados.js", dadosDoNavegador());
+await escrever("js/onde.js", indiceDeEspecies());
+await escrever("regioes/index.html", paginaRegioes());
+for (const r of REGIOES) await escrever(`regioes/${r.id}/index.html`, paginaRegiao(r));
 await escrever("favicon.svg", FAVICON);
 await escrever("index.html", paginaInicio());
 await escrever("biblioteca/index.html", paginaBiblioteca());
@@ -89,4 +106,4 @@ await escrever("bussola/index.html", paginaBussola());
 await escrever("404.html", pagina404());
 for (const j of JOGOS) await escrever(`jogos/${j.slug}/index.html`, paginaJogo(j));
 
-console.log(`PokéAtlas: ${JOGOS.length} jogos, ${JOGOS.length + 6} páginas em dist/ (${Date.now() - inicio} ms)`);
+console.log(`PokéAtlas: ${JOGOS.length} jogos, ${REGIOES.length} regiões, ${JOGOS.length + REGIOES.length + 7} páginas em dist/ (${Date.now() - inicio} ms)`);

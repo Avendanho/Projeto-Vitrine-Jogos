@@ -141,3 +141,27 @@ export function reguaDeAnos(jogos, anoFinal) {
   }
   return `<svg class="regua" viewBox="-8 0 ${L + 16} 140" aria-hidden="true" focusable="false">${svg}</svg>`;
 }
+
+/* A carta de uma região: o traçado de dados/cartas.json nas cores do atlas,
+ * com as rotas em vermelhão e um ponto em cada lugar de dados/atlas.mjs. */
+export function cartaSVG(carta, mapa) {
+  const A = carta.altura, T = TINTAS.dia;
+  const px = (x) => (x * 10).toFixed(1), py = (y) => ((y * A) / 100).toFixed(1);
+  // cada caminho é escrito uma vez e reaproveitado para preencher e para contornar
+  const defs = carta.niveis.map((d, i) => `<path id="n${i}" d="${d}"/>`).join("");
+  let svg = `<use href="#n0" fill="none" stroke="${T.raso}" stroke-width="30" stroke-linejoin="round"/>`;
+  carta.niveis.forEach((d, i) => { if (d) svg += `<use href="#n${i}" fill="${T.terra[i]}" fill-rule="evenodd"/>`; });
+  svg += `<g fill="none" stroke="${T.curva}" stroke-width="1.6">${carta.niveis.slice(1).map((d, i) => (d ? `<use href="#n${i + 1}"/>` : "")).join("")}</g>`;
+  svg += `<use href="#n0" fill="none" stroke="${T.costa}" stroke-width="3" stroke-linejoin="round"/>`;
+  const aMao = (mapa.rotas || []).map((l) => l.map(([x, y], k) => `${k ? "L" : "M"}${px(x)} ${py(y)}`).join("")).join("");
+  if (carta.rotas || aMao) {
+    svg += `<path d="${carta.rotas}${aMao}" fill="none" stroke="#C4391F" stroke-width="4.5" stroke-dasharray="13 8" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }
+  for (const [, x, y] of mapa.marcos) {
+    svg += `<rect x="-5" y="-5" width="10" height="10" transform="translate(${px(x)} ${py(y)}) rotate(45)" fill="${TINTA}"/>`;
+  }
+  for (const [, x, y] of mapa.cidades) {
+    svg += `<circle cx="${px(x)}" cy="${py(y)}" r="5.5" fill="#F8F2E2" stroke="${TINTA}" stroke-width="3"/>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 ${A}"><defs>${defs}</defs>${svg}</svg>`;
+}

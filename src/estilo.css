@@ -745,10 +745,153 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
   .resultado-lista .mapa-vivo { max-width: 300px; margin-inline: auto; }
 }
 
+/* ---------- carta na folha da região (início) ---------- */
+
+.folha-nome a { text-decoration: none; }
+.folha-nome a:hover { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 4px; text-underline-offset: 0.12em; }
+.folha-carta {
+  display: block; min-height: 70px; height: 100%; overflow: hidden;
+  background: var(--mar); border: 1.5px solid var(--tinta);
+}
+.folha-carta img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--suave); }
+.folha-carta:hover img { transform: scale(1.04); }
+
+/* ---------- Pokédex na página de jogo ---------- */
+
+.jogo-pokedex h2 { margin-bottom: 6px; }
+.jogo-pokedex .nota-editorial { max-width: 78ch; }
+.dex-controles { display: grid; gap: 12px; margin-top: var(--e3); padding-bottom: var(--e2); border-bottom: 1.5px solid currentColor; }
+.dex-busca { display: grid; gap: 6px; max-width: 22rem; }
+.dex-busca label, .filtro-busca label { font-size: var(--t-pequeno); font-weight: 660; }
+.dex-busca input, .busca input {
+  width: 100%; padding: 11px 12px;
+  font: 540 1rem var(--mapa); color: var(--tinta);
+  background: var(--papel-claro); border: 1.5px solid var(--tinta); border-radius: 2px;
+}
+.dex-busca input::placeholder, .busca input::placeholder { color: var(--tinta-suave); opacity: 1; }
+.dex-conta { font-weight: 440; opacity: 0.75; font-variant-numeric: tabular-nums; }
+.ficha-tipo { padding: 6px 10px; font-size: var(--t-menor); }
+.dex-resumo strong { font-weight: 800; font-stretch: 118%; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+
+.gaveta {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: var(--e3) 6px; margin-top: var(--e4);
+}
+.gaveta[hidden], .gaveta li[hidden] { display: none; }
+.gaveta a { display: grid; justify-items: center; text-align: center; text-decoration: none; line-height: 1.2; }
+.dex-arte { position: relative; width: 92px; height: 92px; }
+.dex-arte img { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity 0.35s ease, transform 0.5s var(--suave); }
+.dex-arte .cor { opacity: 0; }
+.gaveta a:hover .cor, .gaveta a:focus-visible .cor { opacity: 1; transform: scale(1.1); }
+.gaveta a:hover img:not(.cor), .gaveta a:focus-visible img:not(.cor) { opacity: 0; }
+.dex-numero { margin-top: 4px; font-size: 0.78rem; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
+.dex-nome { font-size: var(--t-menor); font-weight: 660; overflow-wrap: anywhere; }
+.gaveta a:hover .dex-nome { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 2px; }
+.dex-tipos { font-size: 0.78rem; color: var(--tinta-suave); }
+.jogo-pokedex .vazio { padding: var(--e4) 0 0; }
+/* a lista abre recolhida: três fileiras no computador, seis no celular */
+.recolhida .gaveta li:nth-child(n + 34) { display: none; }
+.dex-mais { margin-top: var(--e4); }
+
+@media (max-width: 720px) {
+  .gaveta { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: var(--e2) 2px; }
+  .dex-arte { width: 80px; height: 80px; }
+  .recolhida .gaveta li:nth-child(n + 19) { display: none; }
+  .dex-controles .filtro-opcoes { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--margem) * -1); padding: 2px var(--margem) 6px; scrollbar-width: none; }
+}
+
+/* ---------- busca por Pokémon na biblioteca ---------- */
+
+.filtro-busca { align-items: start; }
+.filtro-busca label { padding-top: 12px; }
+.busca { display: grid; gap: 6px; max-width: 24rem; }
+.busca-resultado { font-size: var(--t-pequeno); color: var(--tinta-suave); min-height: 1.4em; }
+.busca-resultado strong { color: var(--tinta); }
+
+/* ---------- regiões ---------- */
+
+.regioes { padding: var(--e3) var(--margem) var(--e7); }
+.regioes-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: var(--e5) var(--e4); }
+.regioes-lista a { display: grid; gap: 4px; text-decoration: none; }
+.regioes-carta { display: block; aspect-ratio: 4 / 3; margin-bottom: var(--e1); border: 1.5px solid var(--tinta); overflow: hidden; }
+.regioes-carta img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--suave); }
+/* Galar é uma carta em pé: na miniatura aparece a faixa do meio, entre Motostoke e Hammerlocke */
+.folha-carta img[src$="galar.svg"], .regioes-carta img[src$="galar.svg"] { object-position: 50% 56%; }
+.regioes-lista a:hover .regioes-carta img { transform: scale(1.05); }
+.regioes-nome { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 820; font-stretch: 125%; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
+.regioes-lista a:hover .regioes-nome { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 4px; text-underline-offset: 0.12em; }
+
+.regiao { padding-bottom: var(--e6); }
+.regiao > section, .regiao > .jogo-passos { margin: var(--e6) var(--margem) 0; }
+.regiao .cabecalho { gap: var(--e2); }
+.regiao .cabecalho h1 { text-transform: uppercase; letter-spacing: 0; }
+.regiao .migalha { margin-bottom: 0; }
+.regiao-meta { font-family: var(--caderno); font-style: italic; font-size: 1.4rem; }
+.regiao > .regiao-carta { margin-top: var(--e3); }
+
+.carta-quadro { position: relative; width: 100%; max-width: calc(88svh * var(--proporcao)); margin-inline: auto; border: 1.5px solid var(--tinta); }
+.carta-quadro img { width: 100%; }
+.carta figcaption { margin: var(--e2) auto 0; max-width: 78ch; font-size: var(--t-menor); color: var(--tinta-suave); text-align: center; }
+.carta-pontos { position: absolute; inset: 0; }
+.ponto { position: absolute; width: 0; height: 0; }
+.ponto-marca {
+  position: absolute; left: -11px; top: -11px; width: 22px; height: 22px;
+  display: grid; place-items: center;
+  font-size: 0.7rem; font-weight: 760; line-height: 1; font-variant-numeric: tabular-nums;
+  background: var(--papel-claro); color: var(--tinta); border: 2px solid var(--tinta); border-radius: 50%;
+}
+.ponto-marco .ponto-marca, .legenda-marco .ponto-marca { background: var(--tinta); color: var(--papel-claro); border-radius: 3px; }
+.ponto-nome {
+  position: absolute; white-space: nowrap;
+  font-size: 0.86rem; font-weight: 660; line-height: 1;
+  text-shadow: 0 0 3px var(--papel-claro), 0 0 3px var(--papel-claro), 0 0 6px var(--papel-claro), 0 0 1px var(--papel-claro);
+}
+.ponto-marco .ponto-nome { font-family: var(--caderno); font-style: italic; font-weight: 500; font-size: 0.98rem; }
+.lado-d .ponto-nome { left: 16px; top: -0.5em; }
+.lado-e .ponto-nome { right: 16px; top: -0.5em; }
+.lado-c .ponto-nome { left: 0; bottom: 15px; transform: translateX(-50%); }
+.lado-b .ponto-nome { left: 0; top: 15px; transform: translateX(-50%); }
+.ponto-area {
+  position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+  font-family: var(--caderno); font-style: italic; font-size: 1.12rem; letter-spacing: 0.08em; color: var(--tinta);
+  text-shadow: 0 0 4px var(--papel-claro), 0 0 4px var(--papel-claro);
+}
+
+.carta-legenda { margin-top: var(--e5); }
+.carta-legenda h2 { font-size: var(--t-subtitulo); margin-bottom: var(--e2); }
+.legenda-lista { columns: 4 12rem; column-gap: var(--e4); }
+.legenda-lista li { position: relative; break-inside: avoid; padding: 7px 0 7px 32px; font-weight: 560; border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent); }
+.legenda-lista .ponto-marca { left: 0; top: 7px; }
+.legenda-marco { font-family: var(--caderno); font-style: italic; font-weight: 500; font-size: 1.1rem; }
+.carta-legenda .nota-editorial { margin-top: var(--e2); }
+
+.regiao-iniciais h2, .regiao-jogos h2 { margin-bottom: var(--e3); }
+.regiao-jogos .arquipelago-curto { padding-top: var(--e2); }
+.regiao-perfil { margin-top: var(--e6); height: clamp(110px, 16vw, 220px); }
+.regiao-perfil .perfil { min-height: 0; }
+
+/* carta mais alta que larga (Galar): carta e lista lado a lado */
+@media (min-width: 900px) {
+  .regiao-alta .regiao-carta { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: var(--e5); align-items: start; }
+  .regiao-alta .carta-quadro { max-width: none; }
+  .regiao-alta .carta-legenda { margin-top: 0; position: sticky; top: 100px; }
+  .regiao-alta .legenda-lista { columns: 2 11rem; }
+}
+/* em tela estreita os nomes saem da carta: ficam os números, e a lista logo abaixo */
+@media (max-width: 900px) {
+  .ponto-nome { display: none; }
+  .ponto-marca { left: -9px; top: -9px; width: 18px; height: 18px; font-size: 0.62rem; border-width: 1.5px; }
+  .ponto-area { font-size: 0.86rem; letter-spacing: 0.04em; }
+  .legenda-lista .ponto-marca { left: 0; top: 8px; width: 22px; height: 22px; font-size: 0.7rem; }
+  .regiao-meta { font-size: 1.2rem; }
+}
+
 /* ---------- transições entre páginas ---------- */
 
 @view-transition { navigation: auto; }
 ::view-transition-group(*) { animation-duration: 0.55s; animation-timing-function: var(--suave); }
+/* durante a animação a página continua clicável: um segundo filtro não se perde */
+::view-transition { pointer-events: none; }
 
 /* ---------- movimento reduzido ---------- */
 

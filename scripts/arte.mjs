@@ -1,14 +1,18 @@
 #!/usr/bin/env node
-/* Baixa a arte oficial dos Pokémon (repositório público PokeAPI/sprites) e gera,
- * para cada espécie, duas versões em src/arte/pokemon/:
- *   <id>.webp        a arte em cor
- *   <id>-tinta.webp  uma gravura em hachura, só no canal alfa, que o CSS tinge
+/* Baixa a arte oficial dos Pokémon (repositório público PokeAPI/sprites) e a
+ * reimprime em gravura.
  *
- * Uso: node scripts/arte.mjs            (todas as espécies citadas nos dados)
- *      node scripts/arte.mjs 6 25 384   (só essas)
+ *   node scripts/arte.mjs            pranchas grandes das espécies de dados/especies.mjs,
+ *                                    em src/arte/pokemon/: <id>.webp (cor) e
+ *                                    <id>-tinta.webp (hachura só no canal alfa, que o CSS tinge)
+ *   node scripts/arte.mjs 6 25 384   só essas, refeitas
+ *   node scripts/arte.mjs --mini     miniaturas de todas as espécies de dados/pokedex.json,
+ *                                    em src/arte/mini/: <id>.webp (gravura já em tinta)
+ *                                    e <id>-cor.webp
+ *
  * Os arquivos gerados ficam no repositório; o build não depende deste script.
  */
-import { mkdir, writeFile, access } from "node:fs/promises";
+import { mkdir, writeFile, readFile, access } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -17,8 +21,11 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SAIDA = join(RAIZ, "src", "arte", "pokemon");
 const ORIGEM = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/";
 
+const SAIDA_MINI = join(RAIZ, "src", "arte", "mini");
 const LADO_COR = 440;
 const LADO_TINTA = 640;
+const LADO_MINI = 184;
+const LADO_MINI_COR = 144;
 
 async function idsDosDados() {
   const { ESPECIES } = await import("../dados/especies.mjs");
@@ -72,31 +79,95 @@ async function gravar(png) {
     .toBuffer();
 }
 
+/* Miniatura: hachura sobre uma aguada leve, para o rosto não sumir em 90 pixels. */
+async function gravarMini(png) {
+  const L = LADO_MINI;
+  const { data } = await sharp(png)
+    .resize(L, L, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const saida = Buffer.alloc(L * L * 4);
+  const passo = 4.1, ang = (38 * Math.PI) / 180;
+  const cx = Math.cos(ang), sx = Math.sin(ang);
+  for (let y = 0; y < L; y++) {
+    for (let x = 0; x < L; x++) {
+      const i = (y * L + x) * 4;
+      const alfa = data[i + 3] / 255;
+      if (alfa === 0) continue;
+      const lum = (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255;
+      const escuro = Math.min(1, Math.max(0, (1 - lum - 0.1) * 1.3));
+      const t = ((x * cx + y * sx) / passo) % 1;
+      const onda = Math.abs(2 * (t < 0 ? t + 1 : t) - 1);
+      let tinta = Math.max(0.07 + 0.36 * escuro, degrau(-0.22, 0.22, escuro * 0.9 - onda));
+      tinta = Math.max(tinta, degrau(0.68, 0.9, escuro));
+      saida[i] = 15; saida[i + 1] = 42; saida[i + 2] = 58;
+      saida[i + 3] = Math.round(tinta * alfa * 255);
+    }
+  }
+  return sharp(saida, { raw: { width: L, height: L, channels: 4 } })
+    .webp({ quality: 60, alphaQuality: 80, effort: 6 }).toBuffer();
+}
+
 async function existe(caminho) {
   try { await access(caminho); return true; } catch { return false; }
 }
 
-const pedidos = process.argv.slice(2).map(Number).filter(Boolean);
-const ids = pedidos.length ? pedidos : await idsDosDados();
+async function baixar(id) {
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      const resposta = await fetch(`${ORIGEM}${id}.png`);
+      if (resposta.status === 404) return null;
+      if (!resposta.ok) throw new Error(String(resposta.status));
+      return Buffer.from(await resposta.arrayBuffer());
+    } catch (erro) {
+      if (tentativa === 4) throw erro;
+      await new Promise((ok) => setTimeout(ok, 800 * tentativa));
+    }
+  }
+}
+
+const args = process.argv.slice(2);
+const mini = args.includes("--mini");
+const pedidos = args.map(Number).filter(Boolean);
 const refazer = pedidos.length > 0;
-await mkdir(SAIDA, { recursive: true });
+const pasta = mini ? SAIDA_MINI : SAIDA;
+await mkdir(pasta, { recursive: true });
+
+let ids = pedidos;
+if (!ids.length) {
+  if (mini) {
+    const { dex } = JSON.parse(await readFile(join(RAIZ, "dados", "pokedex.json"), "utf8"));
+    ids = [...new Set(Object.values(dex).flat().map(([, especie]) => especie))].sort((a, b) => a - b);
+  } else {
+    ids = await idsDosDados();
+  }
+}
 
 let feitos = 0, pulados = 0;
-for (const id of ids) {
-  const cor = join(SAIDA, `${id}.webp`);
-  const tinta = join(SAIDA, `${id}-tinta.webp`);
-  if (!refazer && (await existe(cor)) && (await existe(tinta))) { pulados++; continue; }
-
-  const resposta = await fetch(`${ORIGEM}${id}.png`);
-  if (!resposta.ok) {
-    console.error(`  ${id}: falhou (${resposta.status})`);
-    process.exitCode = 1;
-    continue;
-  }
-  const png = Buffer.from(await resposta.arrayBuffer());
-  await writeFile(cor, await sharp(png).resize(LADO_COR, LADO_COR, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).webp({ quality: 80, alphaQuality: 90, effort: 6 }).toBuffer());
-  await writeFile(tinta, await gravar(png));
+const faltando = [];
+async function processar(id) {
+  const [gravura, cor] = mini
+    ? [join(pasta, `${id}.webp`), join(pasta, `${id}-cor.webp`)]
+    : [join(pasta, `${id}-tinta.webp`), join(pasta, `${id}.webp`)];
+  if (!refazer && (await existe(gravura)) && (await existe(cor))) { pulados++; return; }
+  const png = await baixar(id);
+  if (!png) { faltando.push(id); return; }
+  const lado = mini ? LADO_MINI_COR : LADO_COR;
+  await writeFile(cor, await sharp(png)
+    .resize(lado, lado, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .webp({ quality: mini ? 72 : 80, alphaQuality: 90, effort: 6 }).toBuffer());
+  await writeFile(gravura, await (mini ? gravarMini(png) : gravar(png)));
   feitos++;
-  process.stdout.write(`  ${id} `);
+  if (feitos % 50 === 0) console.log(`  ${feitos} de ${ids.length - pulados}`);
 }
-console.log(`\nArte: ${feitos} gerada(s), ${pulados} já existente(s), em src/arte/pokemon/`);
+
+// alguns downloads ao mesmo tempo, sem sobrecarregar a origem
+const fila = [...ids];
+await Promise.all(Array.from({ length: 10 }, async () => {
+  while (fila.length) await processar(fila.shift());
+}));
+
+console.log(`Arte${mini ? " em miniatura" : ""}: ${feitos} gerada(s), ${pulados} já existente(s), em ${pasta.replace(RAIZ + "/", "")}/`);
+if (faltando.length) {
+  console.error(`Sem arte na origem: ${faltando.join(", ")}`);
+  process.exitCode = 1;
+}
