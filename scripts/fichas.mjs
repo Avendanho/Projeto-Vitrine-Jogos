@@ -40,7 +40,8 @@ async function tabela(nome) {
 
 const NOMES = ["pokemon_species", "pokemon_species_names", "pokemon", "pokemon_stats", "pokemon_abilities", "ability_names",
   "pokemon_evolution", "evolution_triggers", "item_names", "pokemon_egg_groups", "egg_groups", "growth_rates",
-  "pokemon_habitats", "pokemon_colors", "pokemon_species_flavor_text", "version_names"];
+  "pokemon_habitats", "pokemon_colors", "pokemon_species_flavor_text", "version_names",
+  "pokemon_forms", "pokemon_form_names", "pokemon_types", "types", "pokemon_dex_numbers", "pokedexes"];
 const T = Object.fromEntries(await Promise.all(NOMES.map(async (n) => [n, await tabela(n)])));
 const EN = "9", KANA = "1", ROMAJI = "2";
 
@@ -120,6 +121,50 @@ for (const f of T.pokemon_species_flavor_text) {
   }
 }
 
+/* ---------- formas especiais ----------
+ * Megaevoluções, Gigantamax, formas regionais e outras formas que mudam tipos,
+ * atributos ou habilidades. Variações só de aparência (cores de Minior, bonés
+ * de Pikachu, totens) ficam de fora. */
+const TIPOS_PT = { normal: "Normal", fighting: "Lutador", flying: "Voador", poison: "Venenoso", ground: "Terrestre",
+  rock: "Pedra", bug: "Inseto", ghost: "Fantasma", steel: "Aço", fire: "Fogo", water: "Água", grass: "Planta",
+  electric: "Elétrico", psychic: "Psíquico", ice: "Gelo", dragon: "Dragão", dark: "Sombrio", fairy: "Fada", stellar: "Estelar" };
+const idTipo = Object.fromEntries(T.types.map((t) => [t.id, t.identifier]));
+const tiposDe = {};
+for (const t of T.pokemon_types.sort((a, b) => a.slot - b.slot)) (tiposDe[t.pokemon_id] ??= []).push(TIPOS_PT[idTipo[t.type_id]]);
+const formaPadrao = {};          // pokemon_id -> a linha de pokemon_forms que o representa
+for (const f of T.pokemon_forms) if (f.is_default === "1" || !formaPadrao[f.pokemon_id]) formaPadrao[f.pokemon_id] = f;
+const nomeDaForma = {};
+for (const n of T.pokemon_form_names) if (n.local_language_id === EN && n.pokemon_name) nomeDaForma[n.pokemon_form_id] = n.pokemon_name;
+const REGIOES_DE_FORMA = ["alola", "galar", "hisui", "paldea"];
+const SO_APARENCIA = /totem|-cap$|starter|cosplay|rock-star|belle|pop-star|phd|libre/;
+
+const formasDe = {};
+for (const p of T.pokemon.sort((a, b) => a.id - b.id)) {
+  if (p.is_default === "1" || SO_APARENCIA.test(p.identifier)) continue;
+  const base = padrao[p.species_id];
+  if (!base || !atributos[p.id] || !tiposDe[p.id]) continue;
+  const regiao = REGIOES_DE_FORMA.find((r) => p.identifier.endsWith(`-${r}`) || p.identifier.includes(`-${r}-`));
+  const classe = /-mega(-|$)/.test(p.identifier) || /-primal$/.test(p.identifier) ? "mega" : p.identifier.endsWith("-gmax") ? "gmax" : regiao ? "regional" : "outra";
+  const assinatura = [tiposDe[p.id].join("/"), atributos[p.id].join("/"), (habilidades[p.id] || []).map((h) => h[0]).join("/")].join("|");
+  const daBase = [tiposDe[base.id].join("/"), atributos[base.id].join("/"), (habilidades[base.id] || []).map((h) => h[0]).join("/")].join("|");
+  const lista = (formasDe[p.species_id] ??= []);
+  // outra forma só entra se mudar alguma coisa no jogo, e uma vez só
+  if (classe === "outra" && (assinatura === daBase || lista.some((f) => f.assinatura === assinatura))) continue;
+  lista.push({
+    id: Number(p.id), slug: p.identifier, classe, regiao: regiao || null, assinatura,
+    nome: nomeDaForma[formaPadrao[p.id]?.id] || p.identifier,
+    tipos: tiposDe[p.id], atributos: atributos[p.id],
+    altura: Number(p.height) / 10, peso: Number(p.weight) / 10,
+    habilidades: habilidades[p.id] || []
+  });
+}
+for (const lista of Object.values(formasDe)) for (const f of lista) delete f.assinatura;
+
+/* Dynamax: toda espécie de Sword e Shield pode, menos estas três. */
+const dexDeGalar = new Set(T.pokedexes.filter((d) => ["galar", "isle-of-armor", "crown-tundra"].includes(d.identifier)).map((d) => d.id));
+const emGalar = new Set(T.pokemon_dex_numbers.filter((n) => dexDeGalar.has(n.pokedex_id)).map((n) => n.species_id));
+const SEM_DYNAMAX = new Set(["888", "889", "890"]);
+
 const fichas = {};
 for (const e of especies) {
   const id = e.id, p = padrao[id];
@@ -143,6 +188,8 @@ for (const e of especies) {
     megas: f.filter((x) => /-mega(-|$)/.test(x)).length,
     gmax: f.some((x) => x.endsWith("-gmax")),
     regionais,
+    formas: formasDe[id] || [],
+    dynamax: emGalar.has(id) && !SEM_DYNAMAX.has(id),
     entrada: entrada[id] ? [entrada[id][0], VERSAO[entrada[id][1]]] : null
   };
 }
@@ -153,5 +200,7 @@ for (const [id, f] of Object.entries(fichas)) {
 }
 await writeFile(join(RAIZ, "dados", "fichas.json"), JSON.stringify(fichas), "utf8");
 const lista = Object.values(fichas);
+const todas = lista.flatMap((f) => f.formas);
 console.log(`fichas.json: ${lista.length} espécies; ${lista.filter((f) => f.entrada).length} com entrada da Pokédex; ` +
-  `${lista.filter((f) => f.megas).length} com megaevolução; ${lista.filter((f) => f.gmax).length} com Gigantamax`);
+  `${todas.length} formas especiais (${["mega", "gmax", "regional", "outra"].map((c) => `${todas.filter((f) => f.classe === c).length} ${c}`).join(", ")}); ` +
+  `${lista.filter((f) => f.dynamax).length} com Dynamax`);

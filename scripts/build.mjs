@@ -7,8 +7,13 @@ import { JOGOS } from "../dados/jogos.mjs";
 import { ESPECIES } from "../dados/especies.mjs";
 import { REGIOES, CONSOLES, ESTILOS, PEDIDOS, MAPAS, ROTAS } from "../dados/atlas.mjs";
 import { terrenoSVG } from "./cenario.mjs";
-import { MAR, TINTA, POKEDEX, FICHAS, CARTAS } from "./base.mjs";
+import { MAR, TINTA, POKEDEX, FICHAS, CARTAS, COBBLEMON } from "./base.mjs";
 import { paginaPokedex, paginaEspecie, TODAS_AS_ESPECIES } from "./paginas-pokedex.mjs";
+import {
+  paginaCobblemonInicio, paginaCobblemonPokemon, paginaCobblemonEspecie, paginaCobblemonItens,
+  paginaCobblemonEstruturas, paginaCobblemonGuia, ESPECIES_DO_COBBLEMON
+} from "./paginas-cobblemon.mjs";
+import { paginaDesafios, paginaDesafio, dadosDaRoleta, TODOS_OS_DESAFIOS, enderecoDoDesafio } from "./paginas-desafios.mjs";
 import { svgIlha, valoresDe, sementeDe, malhaQuadrada, EIXOS } from "../src/js/relevo.js";
 import {
   paginaInicio, paginaJogo, paginaLinha, paginaComparar, paginaBussola,
@@ -39,6 +44,18 @@ function conferir() {
     for (const [id] of j.pokedex || []) if (!POKEDEX.dex[id]) erros.push(`${j.slug}: Pokédex ${id} não existe em pokedex.json`);
   }
   for (const id of Object.keys(POKEDEX.especies)) if (!FICHAS[id]) erros.push(`espécie ${id} sem ficha em fichas.json (rode scripts/fichas.mjs)`);
+  const slugsDeDesafio = new Set();
+  for (const d of TODOS_OS_DESAFIOS) {
+    if (slugsDeDesafio.has(d.slug)) erros.push(`desafio repetido: ${d.slug}`);
+    slugsDeDesafio.add(d.slug);
+    for (const campo of ["dificuldade", "caos"]) if (!(d[campo] >= 1 && d[campo] <= 5)) erros.push(`desafio ${d.slug}: ${campo} fora de 1 a 5`);
+    for (const j of d.jogos || []) if (!JOGOS.some((x) => x.slug === j)) erros.push(`desafio ${d.slug}: jogo ${j} não existe`);
+    if (d.regiao && !REGIOES.some((r) => r.id === d.regiao)) erros.push(`desafio ${d.slug}: região ${d.regiao} não existe`);
+    for (const n of d.especies) {
+      if (!FICHAS[n]) erros.push(`desafio ${d.slug}: espécie ${n} não existe`);
+      else if (d.edicao === "cobblemon" && !COBBLEMON.especies[n]?.impl) erros.push(`desafio ${d.slug}: ${FICHAS[n].nome} não está no Cobblemon`);
+    }
+  }
   for (const r of REGIOES) {
     if (!CARTAS[r.id]) erros.push(`${r.id}: sem traçado em cartas.json (rode scripts/cartas.mjs)`);
     const m = MAPAS[r.id];
@@ -85,8 +102,7 @@ await Promise.all([
   cp(join(SRC, "estilo.css"), join(DIST, "estilo.css")),
   cp(join(SRC, "js"), join(DIST, "js"), { recursive: true }),
   cp(join(SRC, "fontes"), join(DIST, "fontes"), { recursive: true }),
-  cp(join(SRC, "arte"), join(DIST, "arte"), { recursive: true }),
-  cp(join(SRC, "motor"), join(DIST, "motor"), { recursive: true })
+  cp(join(SRC, "arte"), join(DIST, "arte"), { recursive: true })
 ]);
 
 const malha = malhaQuadrada();
@@ -114,5 +130,21 @@ await escrever("bussola/index.html", paginaBussola());
 await escrever("404.html", pagina404());
 for (const j of JOGOS) await escrever(`jogos/${j.slug}/index.html`, paginaJogo(j));
 
+// edição Cobblemon
+await escrever("cobblemon/index.html", paginaCobblemonInicio());
+await escrever("cobblemon/pokemon/index.html", paginaCobblemonPokemon());
+for (const n of ESPECIES_DO_COBBLEMON) await escrever(`cobblemon/pokemon/${FICHAS[n].slug}/index.html`, paginaCobblemonEspecie(n));
+await escrever("cobblemon/itens/index.html", paginaCobblemonItens());
+await escrever("cobblemon/estruturas/index.html", paginaCobblemonEstruturas());
+await escrever("cobblemon/guia/index.html", paginaCobblemonGuia());
+
+// desafios, nas duas edições
+for (const edicao of ["pokemon", "cobblemon"]) {
+  await escrever(`${edicao === "cobblemon" ? "cobblemon/" : ""}desafios/index.html`, paginaDesafios(edicao));
+  await escrever(`js/roleta-${edicao}.js`, dadosDaRoleta(edicao));
+}
+for (const d of TODOS_OS_DESAFIOS) await escrever(`${enderecoDoDesafio(d).slice(1)}index.html`, paginaDesafio(d));
+
+const paginas = JOGOS.length + REGIOES.length + TODAS_AS_ESPECIES.length + ESPECIES_DO_COBBLEMON.length + TODOS_OS_DESAFIOS.length + 14;
 console.log(`PokéAtlas: ${JOGOS.length} jogos, ${REGIOES.length} regiões, ${TODAS_AS_ESPECIES.length} espécies, ` +
-  `${JOGOS.length + REGIOES.length + TODAS_AS_ESPECIES.length + 7} páginas em dist/ (${Date.now() - inicio} ms)`);
+  `${ESPECIES_DO_COBBLEMON.length} do Cobblemon, ${TODOS_OS_DESAFIOS.length} desafios; ${paginas} páginas em dist/ (${Date.now() - inicio} ms)`);

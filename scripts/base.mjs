@@ -7,6 +7,8 @@ const lerDados = (nome) => JSON.parse(readFileSync(new URL(`../dados/${nome}`, i
 export const POKEDEX = lerDados("pokedex.json");     // gerado por scripts/pokedex.mjs
 export const FICHAS = lerDados("fichas.json");       // gerado por scripts/fichas.mjs
 export const CARTAS = lerDados("cartas.json");       // gerado por scripts/cartas.mjs
+export const COBBLEMON = lerDados("cobblemon.json"); // gerado por scripts/cobblemon.mjs
+export const FORMAS_COM_ARTE = new Set(lerDados("formas-com-arte.json"));   // gerado por scripts/arte.mjs --formas
 
 export const ORDEM_TIPOS = ["Normal", "Fogo", "Água", "Planta", "Elétrico", "Gelo", "Lutador", "Venenoso", "Terrestre",
   "Voador", "Psíquico", "Inseto", "Pedra", "Fantasma", "Dragão", "Sombrio", "Aço", "Fada"];
@@ -29,5 +31,6 @@ export const enumerar = (itens) => (itens.length <= 1 ? itens.join("") : `${iten
 /* 1025 -> "1.025"; 0.5 -> "0,5" */
 export const numero = (n, casas = 0) => n.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
 
-/* Endereço da página de uma espécie. */
+/* Endereço da página de uma espécie, em cada edição. */
 export const enderecoEspecie = (id) => `/pokedex/${FICHAS[id].slug}/`;
+export const enderecoCobblemon = (id) => `/cobblemon/pokemon/${FICHAS[id].slug}/`;

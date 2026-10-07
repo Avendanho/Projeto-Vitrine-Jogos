@@ -11,7 +11,7 @@ import { rotasDaCarta, lugaresDaCarta, tracosDaCarta, caixaCarta } from "./carta
 
 /* ---------- utilidades ---------- */
 
-const DIA = `data-fx-fundo="${MAR}" data-fx-tinta="${TINTA}"`;
+const DIA = `data-fundo="${MAR}" data-tinta="${TINTA}"`;
 const nome = (lista, id) => lista.find((x) => x.id === id)?.nome ?? id;
 
 export const ORDENADOS = [...JOGOS].sort((a, b) => a.ano - b.ano || (a.tipo === "derivado") - (b.tipo === "derivado"));
@@ -60,17 +60,52 @@ function itemIlha(j, opc = {}) {
  *   registra uma promessa rejeitada. Esse aviso, e só ele, é silenciado. */
 const ANTES_DE_APARECER = `document.documentElement.classList.add("js");addEventListener("unhandledrejection",(e)=>{if(e.reason&&e.reason.name==="AbortError"&&/Transition was skipped/.test(e.reason.message))e.preventDefault()})`;
 
-const NAV = [
-  { href: "/pokedex/", texto: "Pokédex" },
-  { href: "/regioes/", texto: "Regiões" },
-  { href: "/linha-do-tempo/", texto: "Linha do tempo" },
-  { href: "/comparar/", texto: "Comparar" }
-];
+/* O atlas tem duas edições, cada uma com as suas abas, o seu tema e a sua chamada principal. */
+export const EDICOES = {
+  pokemon: {
+    nome: "Pokémon", inicio: "/", cor: MAR, sufixo: "PokéAtlas",
+    lema: "Um guia para descobrir qual jogo de Pokémon combina com você.",
+    acao: { href: "/bussola/", texto: "Abrir a bússola" },
+    nav: [
+      { href: "/pokedex/", texto: "Pokédex" },
+      { href: "/regioes/", texto: "Regiões" },
+      { href: "/linha-do-tempo/", texto: "Linha do tempo" },
+      { href: "/comparar/", texto: "Comparar" },
+      { href: "/desafios/", texto: "Desafios" }
+    ],
+    avisos: [
+      "Projeto de fã, sem fins lucrativos e sem vínculo com Nintendo, Game Freak, Creatures ou The Pokémon Company. Pokémon e os nomes dos jogos pertencem aos seus donos.",
+      "As notas de cada jogo são leitura editorial do atlas, não dado oficial. A arte dos Pokémon é a oficial, obtida do repositório público PokeAPI/sprites e reimpressa em gravura; as listas de Pokédex vêm da PokéAPI. As cartas das regiões são redesenhos do atlas sobre os mapas dos jogos. Fontes: Archivo e Alegreya."
+    ]
+  },
+  cobblemon: {
+    nome: "Cobblemon", inicio: "/cobblemon/", cor: "#DCCB9F", sufixo: "PokéAtlas, edição Cobblemon",
+    lema: "O atlas do Cobblemon: o que nasce onde, o que se fabrica e jeitos diferentes de jogar.",
+    acao: { href: "/cobblemon/desafios/#roleta", texto: "Sortear um desafio" },
+    nav: [
+      { href: "/cobblemon/pokemon/", texto: "Pokémon" },
+      { href: "/cobblemon/itens/", texto: "Itens" },
+      { href: "/cobblemon/estruturas/", texto: "Estruturas" },
+      { href: "/cobblemon/guia/", texto: "Guia" },
+      { href: "/cobblemon/desafios/", texto: "Desafios" }
+    ],
+    avisos: [
+      "Projeto de fã, sem fins lucrativos. Cobblemon é um mod de código aberto feito pela equipe Cobblemon; este site não tem vínculo com ela, nem com a Mojang, a Microsoft, a Nintendo ou a The Pokémon Company.",
+      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. A arte dos Pokémon é a oficial, do repositório público PokeAPI/sprites, redesenhada em pixel. Fontes: Pixelify Sans, Archivo e Alegreya."
+    ]
+  }
+};
 
-export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, extra = null, motor = false }) {
-  const tituloCompleto = caminho === "/" ? titulo : `${titulo} — PokéAtlas`;
+/* edicao   "pokemon" ou "cobblemon"
+ * espelho  endereço da página equivalente na outra edição (sem ele, o seletor leva ao início dela) */
+export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, extra = null, rolagem = false, edicao = "pokemon", espelho = null }) {
+  const ed = EDICOES[edicao];
+  const tituloCompleto = caminho === ed.inicio ? titulo : `${titulo} — ${ed.sufixo}`;
   // dentro de uma seção (a página de uma espécie, de uma região), a aba da seção continua marcada
   const link = (n) => `<a href="${n.href}"${caminho.startsWith(n.href) ? ' aria-current="page"' : ""}>${n.texto}</a>`;
+  const seletor = Object.entries(EDICOES).map(([id, e]) => (id === edicao
+    ? `<a href="${e.inicio}" aria-current="true">${e.nome}</a>`
+    : `<a href="${espelho ?? e.inicio}">${e.nome}</a>`)).join("");
   return `<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -78,7 +113,7 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(tituloCompleto)}</title>
 <meta name="description" content="${esc(descricao)}">
-<meta name="theme-color" content="${MAR}">
+<meta name="theme-color" content="${ed.cor}">
 <meta property="og:title" content="${esc(tituloCompleto)}">
 <meta property="og:description" content="${esc(descricao)}">
 <meta property="og:type" content="website">
@@ -86,17 +121,18 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
 <script>${ANTES_DE_APARECER}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fontes/archivo.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fontes/alegreya.woff2" as="font" type="font/woff2" crossorigin>
-${motor ? '<link rel="stylesheet" href="/motor/sites-incriveis.css">\n' : ""}<link rel="stylesheet" href="/estilo.css">
+<link rel="preload" href="/fontes/${edicao === "cobblemon" ? "pixelify" : "alegreya"}.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/estilo.css">
 </head>
-<body class="${classe}">
+<body class="edicao-${edicao} ${classe}">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 <header class="topo">
-  <a class="marca" href="/"${caminho === "/" ? ' aria-current="page"' : ""}>PokéAtlas</a>
+  <a class="marca" href="${ed.inicio}"${caminho === ed.inicio ? ' aria-current="page"' : ""}>PokéAtlas</a>
+  <div class="edicoes" role="group" aria-label="Edição do atlas">${seletor}</div>
   <button type="button" class="topo-menu" aria-expanded="false" aria-controls="menu">Menu</button>
   <nav class="topo-nav" id="menu" aria-label="Seções">
-    ${NAV.map(link).join("\n    ")}
-    <a class="botao botao-pequeno" href="/bussola/"${caminho === "/bussola/" ? ' aria-current="page"' : ""}>Abrir a bússola</a>
+    ${ed.nav.map(link).join("\n    ")}
+    <a class="botao botao-pequeno" href="${ed.acao.href}"${caminho === ed.acao.href ? ' aria-current="page"' : ""}>${ed.acao.texto}</a>
   </nav>
 </header>
 <main id="conteudo">
@@ -106,19 +142,17 @@ ${corpo}
   <div class="rodape-grade">
     <div>
       <p class="marca">PokéAtlas</p>
-      <p>Um guia para descobrir qual jogo de Pokémon combina com você.</p>
+      <p>${ed.lema}</p>
     </div>
     <nav aria-label="Rodapé">
-      <a href="/bussola/">Bússola</a>
-      ${NAV.map((n) => `<a href="${n.href}">${n.texto}</a>`).join("\n      ")}
+      ${[ed.acao, ...ed.nav].map((n) => `<a href="${n.href.split("#")[0]}">${n.texto}</a>`).join("\n      ")}
     </nav>
     <div class="rodape-avisos">
-      <p>Projeto de fã, sem fins lucrativos e sem vínculo com Nintendo, Game Freak, Creatures ou The Pokémon Company. Pokémon e os nomes dos jogos pertencem aos seus donos.</p>
-      <p>As notas de cada jogo são leitura editorial do atlas, não dado oficial. A arte dos Pokémon é a oficial, obtida do repositório público PokeAPI/sprites e reimpressa em gravura; as listas de Pokédex vêm da PokéAPI. As cartas das regiões são redesenhos do atlas sobre os mapas dos jogos. Fontes: Archivo e Alegreya.</p>
+      ${ed.avisos.map((t) => `<p>${t}</p>`).join("\n      ")}
     </div>
   </div>
 </footer>
-${motor ? '<script src="/motor/sites-incriveis.js" defer></script>\n' : ""}<script type="module" src="/js/base.js"></script>
+<script type="module" src="/js/base.js"></script>${rolagem ? '\n<script type="module" src="/js/rolagem.js"></script>' : ""}
 ${[modulo, extra].filter(Boolean).map((m) => `<script type="module" src="/js/${m}.js"></script>`).join("\n")}
 </body>
 </html>
@@ -180,7 +214,7 @@ export function paginaInicio() {
   <div class="abertura-eixos" aria-hidden="true">${EIXOS.map((e) => `<span data-eixo="${e.id}">${e.nome}</span>`).join("")}</div>
   <div class="abertura-texto">
     <h1 class="marca-gigante" id="t-abertura">PokéAtlas</h1>
-    <p class="abertura-lema" data-fx="palavras" data-fx-duracao="1200">Todo jogo de Pokémon é uma ilha. Uma delas tem o seu formato.</p>
+    <p class="abertura-lema" data-entra="palavras" data-ritmo="1200">Todo jogo de Pokémon é uma ilha. Uma delas tem o seu formato.</p>
   </div>
   <div class="abertura-legenda">
     <p>No mapa agora, <a href="/jogos/${primeiro.slug}/" data-ilha-atual>${esc(primeiro.curto)}</a>.</p>
@@ -188,9 +222,9 @@ export function paginaInicio() {
   </div>
 </section>
 
-<section class="travessia" data-fx-fixa data-fx-altura="6.5" ${DIA} aria-labelledby="t-travessia">
-  <div class="fx-palco">
-    <div class="trilho" data-fx="trilho">
+<section class="travessia" data-cena data-telas="6.5" ${DIA} aria-labelledby="t-travessia">
+  <div class="palco">
+    <div class="trilho" data-trilho>
       <header class="folha-intro">
         <h2 id="t-travessia">${maiuscula(extenso(REGIOES.length))} cartas, de Kanto a Paldea</h2>
         <p class="prosa">Cada região tem a sua carta, três primeiros companheiros e os jogos que se passam nela. Toque numa carta para abri-la com os nomes e as rotas.</p>
@@ -208,20 +242,20 @@ export function paginaInicio() {
       <a class="botao botao-contorno" href="/linha-do-tempo/">Ver a linha do tempo</a>
     </div>
     <dl class="numeros">
-      <div><dd data-fx="contar" data-fx-fim="${ANO_ATUAL - ORDENADOS[0].ano}">${ANO_ATUAL - ORDENADOS[0].ano}</dd><dt>anos desde Red e Green</dt></div>
-      <div><dd data-fx="contar" data-fx-fim="${Math.max(...REGIOES.map((r) => r.geracao))}">${Math.max(...REGIOES.map((r) => r.geracao))}</dd><dt>gerações lançadas</dt></div>
-      <div><dd data-fx="contar" data-fx-fim="${REGIOES.length}">${REGIOES.length}</dd><dt>regiões mapeadas</dt></div>
-      <div><dd data-fx="contar" data-fx-fim="${JOGOS.length}">${JOGOS.length}</dd><dt>ilhas neste atlas</dt></div>
+      <div><dd data-entra="contar" data-ate="${ANO_ATUAL - ORDENADOS[0].ano}">${ANO_ATUAL - ORDENADOS[0].ano}</dd><dt>anos desde Red e Green</dt></div>
+      <div><dd data-entra="contar" data-ate="${Math.max(...REGIOES.map((r) => r.geracao))}">${Math.max(...REGIOES.map((r) => r.geracao))}</dd><dt>gerações lançadas</dt></div>
+      <div><dd data-entra="contar" data-ate="${REGIOES.length}">${REGIOES.length}</dd><dt>regiões mapeadas</dt></div>
+      <div><dd data-entra="contar" data-ate="${JOGOS.length}">${JOGOS.length}</dd><dt>ilhas neste atlas</dt></div>
     </dl>
   </div>
-  <div class="tempo-regua" data-fx="surgir">
+  <div class="tempo-regua" data-entra="surgir">
     ${reguaDeAnos(ORDENADOS, HORIZONTE.ano)}
     <p class="regua-chave"><span class="chave chave-cheia"></span>Série principal, remakes e Legends <span class="chave chave-vazada"></span>Derivados</p>
   </div>
 </section>
 
-<section class="pico" data-fx-fixa data-fx-altura="7.5" data-fx-fundo="${NOITE}" data-fx-tinta="${PAPEL}" aria-labelledby="t-pico">
-  <div class="fx-palco">
+<section class="pico" data-cena data-telas="7.5" data-fundo="${NOITE}" data-tinta="${PAPEL}" aria-labelledby="t-pico">
+  <div class="palco">
     <div class="pico-mapa" aria-hidden="true">
       <div class="pico-arquipelago">${arquipelago()}</div>
       <div class="pico-bussola">
@@ -248,7 +282,7 @@ export function paginaInicio() {
 <section class="ferramentas" ${DIA}>
   <div class="ferramenta ferramenta-pokedex">
     <ul class="mosaico mosaico-especies" aria-label="Algumas espécies da Pokédex">
-      ${FAVORITOS.map(([e, forca]) => `<li class="mosaico-ilha" data-fx-paralaxe="${forca}"><a href="${enderecoEspecie(e)}" aria-label="${esc(FICHAS[e].nome)}"><img src="/arte/mini/${e}.webp" alt="" width="184" height="184" loading="lazy" decoding="async"></a></li>`).join("\n      ")}
+      ${FAVORITOS.map(([e, forca]) => `<li class="mosaico-ilha" data-deriva="${forca}"><a href="${enderecoEspecie(e)}" aria-label="${esc(FICHAS[e].nome)}"><img src="/arte/mini/${e}.webp" alt="" width="184" height="184" loading="lazy" decoding="async"></a></li>`).join("\n      ")}
     </ul>
     <div class="ferramenta-texto">
       <h2>A Pokédex inteira, em gravura</h2>
@@ -270,8 +304,8 @@ export function paginaInicio() {
     </div>
     <figure class="sobreposicao">
       <div class="sobreposicao-ilhas" aria-hidden="true">
-        <img src="/ilhas/demo-a.svg" alt="" width="480" height="480" loading="lazy" data-fx-mouse="14">
-        <img src="/ilhas/demo-b.svg" alt="" width="480" height="480" loading="lazy" data-fx-mouse="-14">
+        <img src="/ilhas/demo-a.svg" alt="" width="480" height="480" loading="lazy" data-segue="14">
+        <img src="/ilhas/demo-b.svg" alt="" width="480" height="480" loading="lazy" data-segue="-14">
       </div>
       <figcaption><span class="serie serie-a"></span>${esc(da.curto)} <span class="serie serie-b"></span>${esc(db.curto)}</figcaption>
     </figure>
@@ -279,7 +313,7 @@ export function paginaInicio() {
 </section>
 
 <section class="fechamento" ${DIA} aria-labelledby="t-fechamento">
-  <h2 id="t-fechamento" data-fx="palavras" data-fx-duracao="1400">Em algum ponto deste mar existe uma ilha com o seu formato.</h2>
+  <h2 id="t-fechamento" data-entra="palavras" data-ritmo="1400">Em algum ponto deste mar existe uma ilha com o seu formato.</h2>
   <p class="prosa">${maiuscula(extenso(PERGUNTAS.length))} perguntas. O mapa se desenha enquanto você responde.</p>
   <a class="botao botao-grande" href="/bussola/">Abrir a bússola</a>
 </section>`;
@@ -287,7 +321,7 @@ export function paginaInicio() {
   return moldura({
     titulo: "PokéAtlas — descubra qual jogo de Pokémon combina com você",
     descricao: "Um atlas visual dos jogos de Pokémon. Explore as regiões e a Pokédex, compare títulos e use a bússola para encontrar o jogo que tem o seu formato.",
-    caminho: "/", classe: "pagina-inicio", corpo, modulo: "inicio", motor: true
+    caminho: "/", classe: "pagina-inicio", corpo, modulo: "inicio", rolagem: true
   });
 }
 

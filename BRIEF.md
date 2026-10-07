@@ -114,7 +114,7 @@ geração. Nada de números de vendas ou notas de crítica.
 
 - Site estático, sem framework. Um script de build gera as páginas a partir de
   um único arquivo de dados dos jogos.
-- Motor da skill copiado sem alterações; o relevo vivo é código próprio.
+- A rolagem das páginas de abertura é código próprio (`src/js/rolagem.js`).
 - Repositório Git pronto para o GitHub e `vercel.json` pronto para a Vercel.
 - Rodapé: projeto de fã, não oficial, sem vínculo com Nintendo, Game Freak ou
   The Pokémon Company.
@@ -173,3 +173,49 @@ caixas dos mapas das regiões, que cortavam algumas cartas.
   um a um quando a carta entra na tela.
 - **Na página inicial**, a cena das ferramentas mostra a Pokédex no lugar da
   biblioteca.
+
+## Quinta rodada: edição Cobblemon, desafios e formas especiais
+
+Pedido: uma segunda versão do site sobre o mod Cobblemon (estruturas, itens,
+Pokémon, informações gerais, curiosidades), com tema próprio e um seletor para
+escolher entre as duas; uma aba de desafios para dar motivo de continuar
+jogando, com desafios randomizados; e as formas especiais na página de cada
+Pokémon.
+
+Respostas da entrevista:
+
+- **Visual da edição Cobblemon:** mapa do Minecraft. Pergaminho no fundo,
+  painéis de inventário com borda chanfrada, títulos em letra de pixel, grama
+  como cor de ação. O texto corrido continua na letra do atlas.
+- **Repositório:** público. Por isso as animações de rolagem foram reescritas
+  com código próprio e os arquivos da skill saíram do projeto.
+- **Sugestões aceitas:** roleta de desafios, desafios de Cobblemon e "onde
+  nasce cada Pokémon". O diário do desafio ficou de fora.
+
+Jornada da abertura da edição Cobblemon (5 cenas):
+
+| # | Cena | Vê | Sente | Energia | Efeito |
+|---|---|---|---|---|---|
+| 1 | O mapa em branco | Um mapa de blocos que se revela em volta de um marcador | Vontade de explorar | Média | Movimento-assinatura |
+| 2 | O inventário do mod | Quatro números reais do mod | Confiança | Baixa | Números que sobem |
+| 3 | **O que nasce em cada lugar (pico)** | O mapa escurece e só o ambiente da vez fica aceso; caverna, Nether e Fim trocam o mapa de dimensão | Descoberta | **Máxima** | Cena fixa por etapas, fundo que viaja |
+| 4 | O resto do inventário | Quatro painéis: Pokémon, itens, estruturas, guia | Controle | Baixa | Nenhum |
+| 5 | Mundo novo, regra nova | Uma chamada: sortear um desafio | Decisão | Resolvida | Texto que se monta |
+
+**Movimento-assinatura desta edição:** o mapa que se preenche por onde o
+marcador anda, como o item "mapa" do jogo. Difere da edição Pokémon na
+abertura, no pico, na assinatura, na paleta e na tipografia.
+
+Decisões de conteúdo:
+
+- Os dados do Cobblemon vêm dos arquivos da versão 1.8.1 do mod; nada é
+  escrito de memória. Estruturas sem nome na tradução aparecem com o nome
+  interno, em inglês.
+- Os Pokémon da edição Cobblemon são a arte oficial redesenhada em pixel. Os
+  modelos do mod não são usados.
+- Dez desafios de Pokémon, um por região (o primeiro é o do dono do projeto,
+  "Os Super Woopers"), e cinco de Cobblemon. A roleta combina jogo ou ambiente,
+  regra, complicações, vitória e derrota, com semente no endereço.
+- Formas especiais: megaevoluções, Gigantamax, formas regionais e outras
+  formas que mudam tipos, atributos ou habilidades. Dynamax aparece como nota
+  para as espécies da Pokédex de Sword e Shield.

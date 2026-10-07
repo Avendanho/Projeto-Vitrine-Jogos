@@ -10,6 +10,10 @@
  *                                    <id>.webp (miniatura em gravura, já em tinta) e
  *                                    <id>-cor.webp (a arte em cor, maior, usada ao apontar
  *                                    e na página de cada espécie)
+ *   node scripts/arte.mjs --formas   arte em cor de cada forma especial de dados/fichas.json
+ *                                    (megas, Gigantamax, regionais), em src/arte/formas/<id>.webp
+ *   node scripts/arte.mjs --pixel    sprites em pixel de todas as espécies, para a edição Cobblemon,
+ *                                    em src/arte/pixel/<id>.png. Não usa a rede: parte de src/arte/mini/
  *
  * Os arquivos gerados ficam no repositório; o build não depende deste script.
  */
@@ -126,7 +130,70 @@ async function baixar(id) {
   }
 }
 
+/* Sprite em pixel: a arte reduzida a 48 pixels, com poucas cores e contorno escuro. */
+async function pixelar(origem) {
+  const L = 48, NIVEIS = 6;
+  const { data } = await sharp(origem).trim()
+    .resize(L, L, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 }, kernel: "lanczos3" })
+    .ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const cor = Buffer.alloc(L * L * 4);
+  const q = (v) => Math.round(Math.round((v / 255) * (NIVEIS - 1)) * (255 / (NIVEIS - 1)));
+  for (let i = 0; i < L * L; i++) {
+    if (data[i * 4 + 3] < 120) continue;
+    cor[i * 4] = q(data[i * 4]); cor[i * 4 + 1] = q(data[i * 4 + 1]); cor[i * 4 + 2] = q(data[i * 4 + 2]); cor[i * 4 + 3] = 255;
+  }
+  const saida = Buffer.from(cor);
+  for (let y = 0; y < L; y++) {
+    for (let x = 0; x < L; x++) {
+      const i = (y * L + x) * 4;
+      if (cor[i + 3]) continue;
+      const vizinho = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => {
+        const xx = x + dx, yy = y + dy;
+        return xx >= 0 && yy >= 0 && xx < L && yy < L && cor[(yy * L + xx) * 4 + 3];
+      });
+      if (vizinho) { saida[i] = 35; saida[i + 1] = 32; saida[i + 2] = 28; saida[i + 3] = 255; }
+    }
+  }
+  return sharp(saida, { raw: { width: L, height: L, channels: 4 } }).png({ palette: true, colours: 48, compressionLevel: 9 }).toBuffer();
+}
+
 const args = process.argv.slice(2);
+
+if (args.includes("--pixel")) {
+  const destino = join(RAIZ, "src", "arte", "pixel");
+  await mkdir(destino, { recursive: true });
+  const { readdir } = await import("node:fs/promises");
+  const cores = (await readdir(SAIDA_MINI)).filter((n) => n.endsWith("-cor.webp"));
+  for (const nome of cores) await writeFile(join(destino, nome.replace("-cor.webp", ".png")), await pixelar(join(SAIDA_MINI, nome)));
+  console.log(`Arte em pixel: ${cores.length} sprites em src/arte/pixel/`);
+  process.exit(0);
+}
+
+if (args.includes("--formas")) {
+  const destino = join(RAIZ, "src", "arte", "formas");
+  await mkdir(destino, { recursive: true });
+  const fichas = JSON.parse(await readFile(join(RAIZ, "dados", "fichas.json"), "utf8"));
+  const fila = Object.values(fichas).flatMap((f) => f.formas.map((x) => x.id));
+  let feitas = 0, existentes = 0;
+  const semArte = [];
+  await Promise.all(Array.from({ length: 10 }, async () => {
+    while (fila.length) {
+      const id = fila.shift(), arquivo = join(destino, `${id}.webp`);
+      if (await existe(arquivo)) { existentes++; continue; }
+      const png = await baixar(id);
+      if (!png) { semArte.push(id); continue; }
+      await writeFile(arquivo, await sharp(png).resize(240, 240, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).webp({ quality: 72, alphaQuality: 88, effort: 6 }).toBuffer());
+      feitas++;
+    }
+  }));
+  // a página só mostra a figura das formas que têm arte; a lista fica em dados/ para o build saber
+  const { readdir } = await import("node:fs/promises");
+  const comArte = (await readdir(destino)).map((n) => Number(n.replace(".webp", ""))).sort((a, b) => a - b);
+  await writeFile(join(RAIZ, "dados", "formas-com-arte.json"), JSON.stringify(comArte), "utf8");
+  console.log(`Arte das formas: ${feitas} gerada(s), ${existentes} já existente(s), ${semArte.length} sem arte na origem${semArte.length ? ` (${semArte.join(", ")})` : ""}`);
+  process.exit(0);
+}
+
 const mini = args.includes("--mini");
 const pedidos = args.map(Number).filter(Boolean);
 const refazer = pedidos.length > 0;

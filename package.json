@@ -9,6 +9,9 @@
     "dev": "node scripts/build.mjs && node scripts/servir.mjs",
     "arte": "node scripts/arte.mjs",
     "arte:mini": "node scripts/arte.mjs --mini",
+    "arte:formas": "node scripts/arte.mjs --formas",
+    "arte:pixel": "node scripts/arte.mjs --pixel",
+    "cobblemon": "node scripts/cobblemon.mjs",
     "pokedex": "node scripts/pokedex.mjs && node scripts/fichas.mjs",
     "cartas": "node scripts/cartas.mjs",
     "verificar": "node scripts/verificar-paginas.mjs"

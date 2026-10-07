@@ -81,6 +81,7 @@ Um sistema de recomendação dinâmico com 8 perguntas de perfil. À medida que 
 - Apresentação visual em **gravura botânica monocromática (tinta sobre papel)** que recupera suas cores oficiais em hover/foco.
 - Busca instantânea e filtros por geração e tipo elemental.
 - Páginas individuais com atributos base, dimensões, linha evolutiva completa, formas regionais e lista de jogos em que a espécie pode ser encontrada.
+- **Formas especiais:** megaevoluções, Gigantamax, formas regionais e outras formas que mudam tipos ou atributos, cada uma com arte, tipos e atributos próprios; e a indicação de quais espécies podem usar Dynamax.
 - **Curiosidades computadas proceduralmente:** fatos gerados por análise cruzada em tempo de compilação (exclusividade de tipos, outliers estatísticos de peso/tamanho, etc.), sem redação artificial.
 
 ### 3. 🗺️ Cartas das Regiões (`/regioes/` e `/regioes/<regiao>/`)
@@ -95,7 +96,20 @@ Permite selecionar até 3 jogos simultâneos e sobrepor suas ilhas em tintas duo
 ### 5. ⏳ Linha do Tempo da Franquia (`/linha-do-tempo/`)
 Uma régua cronológica abrangendo de **1996 a 2027**, separada por plataformas/consoles (do Game Boy original ao Nintendo Switch), servindo também como índice canônico completo dos jogos analisados.
 
-### 6. 🎬 Prólogo Cinematográfico da Home (`/`)
+### 6. 🎲 Desafios (`/desafios/` e `/desafios/<desafio>/`)
+- **Dez maneiras alternativas de jogar**, uma para cada região, cada uma com sinopse, regras, condição de vitória e de derrota (a primeira é "Os Super Woopers").
+- **Roleta de desafios:** sorteia um jogo, uma regra para o time, complicações e uma condição de vitória. As espécies e os tipos sorteados existem na Pokédex do jogo sorteado, e cada sorteio tem link próprio (`?roleta=...`), que reproduz o mesmo desafio.
+
+### 7. ⛏️ Edição Cobblemon (`/cobblemon/`)
+Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) para Minecraft, escolhida no seletor do topo. Tem tema próprio (pergaminho de mapa, painéis de inventário, letra de pixel) e os Pokémon redesenhados em pixel.
+- **Pokémon** (`/cobblemon/pokemon/`): as 888 espécies já implementadas, com os biomas em que nascem, raridade, condições, o que deixam cair, montaria e como evoluem dentro do mod.
+- **Itens** (`/cobblemon/itens/`): 492 itens e blocos em português, com as receitas de bancada.
+- **Estruturas** (`/cobblemon/estruturas/`): as 67 estruturas do mod, com o bioma de cada uma e os Pokémon que nascem ali.
+- **Guia** (`/cobblemon/guia/`): como o mod decide o que nasce, fósseis, glossário de biomas, versões e curiosidades calculadas dos dados.
+- **Desafios** (`/cobblemon/desafios/`): cinco desafios para começar um mundo novo, e a roleta.
+- Todos os dados são extraídos dos arquivos da versão **1.8.1** do mod por `scripts/cobblemon.mjs`.
+
+### 8. 🎬 Prólogo Cinematográfico da Home (`/`)
 Jornada contínua dividida em 6 cenas orientadas pelo scroll:
 1. *O atlas se abre:* introdução tátil e o relevo procedural ao vivo.
 2. *A travessia:* carrossel panorâmico das 10 regiões com pranchas dos iniciais.
@@ -121,7 +135,7 @@ Jornada contínua dividida em 6 cenas orientadas pelo scroll:
 ## ⚡ Arquitetura e Engenharia
 
 - **Zero Dependências em Produção:** Sem frameworks pesados (sem React, Vue, Next.js ou Tailwind). Toda a aplicação roda sobre HTML5 semântico, CSS moderno (com variáveis e Grid/Flexbox) e Vanilla JavaScript (ES Modules).
-- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.072 páginas HTML estáticas prontas em ~1,2 segundos**.
+- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.982 páginas HTML estáticas prontas em ~1,2 segundos**.
 - **Performance Extrema:** Carregamento instantâneo, First Contentful Paint (FCP) quase imediato e consumo mínimo de recursos no cliente.
 - **Validação Rigorosa em Build:** O processo de compilação valida previamente cada rota, nota de 1 a 5, compatibilidade de Pokédex e coerência cartográfica antes de emitir a pasta de distribuição.
 
@@ -136,13 +150,18 @@ Projeto-Vitrine-Jogos/
 │   ├── jogos.mjs                # Títulos, atributos (1 a 5), mascotes e plataformas
 │   ├── especies.mjs             # Metadados e mapeamento de Pokémon
 │   ├── pokedex.json             # Dados de espécies e dex regionais (via PokéAPI)
-│   ├── fichas.json              # Estatísticas, medidas, curiosidades e evoluções
-│   └── cartas.json              # Coordenadas vetoriais das costas e altitudes
+│   ├── fichas.json              # Estatísticas, medidas, formas especiais e evoluções
+│   ├── cartas.json              # Coordenadas vetoriais das costas e altitudes
+│   ├── cobblemon.json           # Espécies, spawns, itens e estruturas do Cobblemon (extraído do mod)
+│   └── desafios.mjs             # Desafios escritos e peças da roleta
 │
 ├── scripts/                     # Motor do SSG e automação de dados
 │   ├── build.mjs                # Compilador principal (gera dist/ sem dependências)
 │   ├── paginas.mjs              # Templates das páginas principais e jogos
 │   ├── paginas-pokedex.mjs      # Gerador da Pokédex e cálculo das curiosidades
+│   ├── paginas-cobblemon.mjs    # Templates da edição Cobblemon
+│   ├── paginas-desafios.mjs     # Desafios e dados da roleta, nas duas edições
+│   ├── cobblemon.mjs            # Extrator dos dados do mod Cobblemon
 │   ├── carta.mjs                # Renderizador vetorial dos mapas regionais
 │   ├── cenario.mjs              # Desenhos SVG auxiliares e bússola
 │   ├── servir.mjs               # Servidor HTTP local para desenvolvimento
@@ -150,9 +169,12 @@ Projeto-Vitrine-Jogos/
 │
 ├── src/                         # Código-fonte da interface
 │   ├── estilo.css               # Design system e folhas de estilo globais
-│   ├── fontes/                  # Tipografias Archivo e Alegreya (SIL OFL)
+│   ├── fontes/                  # Tipografias Archivo, Alegreya e Pixelify Sans (SIL OFL)
 │   ├── js/                      # Lógica client-side modularizada
 │   │   ├── relevo.js            # Algoritmo de geração da ilha procedural
+│   │   ├── rolagem.js           # Animações de rolagem das páginas de abertura
+│   │   ├── roleta.js            # Sorteio de desafios com semente no endereço
+│   │   ├── cobblemon-inicio.js  # Mapa em blocos da edição Cobblemon
 │   │   ├── bussola.js           # Lógica interativa do quiz e recomendações
 │   │   ├── pokedex.js           # Mecanismo de busca e filtragem instantânea
 │   │   └── cartas.js            # Interatividade hover/touch dos mapas
@@ -198,10 +220,13 @@ Projeto-Vitrine-Jogos/
 | Comando | Descrição |
 | :--- | :--- |
 | `npm run dev` | Compila o site em `dist/` e inicia o servidor local em `http://localhost:4600`. |
-| `npm run build` | Valida as regras de negócio e compila todas as 1.072 páginas HTML. |
+| `npm run build` | Valida as regras de negócio e compila todas as 1.982 páginas HTML. |
 | `npm run pokedex` | *(Opcional)* Reconstrói `pokedex.json` e `fichas.json` a partir da PokéAPI. |
 | `npm run arte` | *(Opcional)* Baixa e rasteriza as pranchas em alta resolução dos mascotes. |
 | `npm run arte:mini` | *(Opcional)* Gera o acervo de gravuras e miniaturas de todas as espécies. |
+| `npm run arte:formas` | *(Opcional)* Baixa a arte das formas especiais (megas, Gigantamax, regionais). |
+| `npm run arte:pixel` | *(Opcional)* Gera os sprites em pixel da edição Cobblemon. |
+| `npm run cobblemon -- --fonte <pasta>` | *(Opcional)* Reconstrói `cobblemon.json` a partir de um clone do repositório do mod. |
 | `npm run cartas` | *(Opcional)* Recalcula os nós vetoriais de altitude e caminhos das cartas. |
 | `npm run verificar` | *(Opcional)* Executa a auditoria visual automática com Playwright. |
 
@@ -222,7 +247,8 @@ O projeto é configurado nativamente para publicação contínua na **Vercel** a
 - **Pokémon:** Pokémon, nomes dos jogos, criaturas e insígnias são marcas registradas e propriedades intelectuais da **Nintendo**, **Game Freak**, **Creatures Inc.** e **The Pokémon Company**. Este é um projeto de fã, não oficial, de caráter artístico e informativo, sem fins lucrativos e sem qualquer vínculo comercial.
 - **Dados e Sprites:** Nomes, estatísticas e ilustrações oficiais foram obtidos por meio da [PokéAPI](https://pokeapi.co/) e tratados artisticamente em formato de gravura.
 - **Cartografia:** Todas as cartas das regiões são redesenhos originais e interpretações artísticas desenvolvidas especificamente para o atlas.
-- **Tipografia:** Fontes [Archivo](https://fonts.google.com/specimen/Archivo) e [Alegreya](https://fonts.google.com/specimen/Alegreya), licenciadas sob a *SIL Open Font License*.
+- **Tipografia:** Fontes [Archivo](https://fonts.google.com/specimen/Archivo), [Alegreya](https://fonts.google.com/specimen/Alegreya) e [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans), licenciadas sob a *SIL Open Font License*.
+- **Cobblemon:** mod de código aberto da equipe Cobblemon, sob a licença *MPL 2.0*. `dados/cobblemon.json` é derivado dos arquivos de dados e da tradução em português do mod; nenhuma textura ou modelo do mod é usado. Os nomes de itens e biomas do jogo base vêm da tradução oficial do Minecraft, marca da Mojang e da Microsoft. Este projeto não tem vínculo com nenhuma delas.
 
 ---
 

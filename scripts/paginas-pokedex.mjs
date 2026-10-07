@@ -2,7 +2,7 @@
  * Tudo sai de dados/fichas.json e dados/pokedex.json; as curiosidades são
  * calculadas aqui, comparando cada espécie com as outras. */
 import { ROMANOS } from "../dados/atlas.mjs";
-import { POKEDEX, FICHAS, ORDEM_TIPOS, esc, semAcento, extenso, maiuscula, enumerar, numero, enderecoEspecie } from "./base.mjs";
+import { POKEDEX, FICHAS, COBBLEMON, FORMAS_COM_ARTE, ORDEM_TIPOS, esc, semAcento, extenso, maiuscula, enumerar, numero, enderecoEspecie, enderecoCobblemon } from "./base.mjs";
 import { moldura, ilha, ORDENADOS } from "./paginas.mjs";
 
 const IDS = Object.keys(FICHAS).map(Number).sort((a, b) => a - b);
@@ -170,6 +170,49 @@ function linhaEvolutiva(id) {
     </ol>`;
 }
 
+/* ---------- formas especiais ---------- */
+
+const ABREVIADOS = ["PS", "Atq", "Def", "AtE", "DfE", "Vel"];
+function classeDaForma(f) {
+  if (f.classe === "mega") return f.slug.endsWith("-primal") ? "Reversão Primitiva" : "Megaevolução";
+  if (f.classe === "gmax") return "Gigantamax";
+  if (f.classe === "regional") return `Forma de ${maiuscula(f.regiao)}`;
+  return "Outra forma";
+}
+
+function secaoDeFormas(id) {
+  const f = FICHAS[id], padrao = f.atributos.reduce((a, b) => a + b, 0);
+  const item = (x) => {
+    const total = x.atributos.reduce((a, b) => a + b, 0), diferenca = total - padrao;
+    const mudaram = x.atributos.some((v, k) => v !== f.atributos[k]);
+    return `<li class="forma">
+        ${FORMAS_COM_ARTE.has(x.id) ? `<figure class="prancha forma-prancha" tabindex="0"><span class="prancha-arte">
+          <canvas class="prancha-gravura" width="400" height="400" aria-hidden="true"></canvas>
+          <img class="prancha-cor" src="/arte/formas/${x.id}.webp" alt="Arte oficial de ${esc(x.nome)}" width="240" height="240" loading="lazy" decoding="async">
+        </span></figure>` : ""}
+        <div class="forma-texto">
+          <p class="forma-classe">${classeDaForma(x)}</p>
+          <h3 lang="en">${esc(x.nome)}</h3>
+          <p class="forma-tipos">${x.tipos.join(", ")}</p>
+          ${mudaram ? `<dl class="forma-atributos">${x.atributos.map((v, k) => `<div${v !== f.atributos[k] ? ' class="mudou"' : ""}><dt>${ABREVIADOS[k]}</dt><dd>${v}</dd></div>`).join("")}<div class="forma-total"><dt>Total</dt><dd>${total}</dd></div></dl>
+          <p class="forma-nota">${diferenca === 0 ? "Mesmo total da forma padrão, distribuído de outro jeito." : `${Math.abs(diferenca)} ${diferenca > 0 ? "a mais" : "a menos"} que a forma padrão.`}</p>`
+            : x.classe === "gmax" ? `<p class="forma-nota">Mesmos atributos base. Em campo, os PS aumentam e os golpes viram Golpes G-Max. Mede ${numero(x.altura, Number.isInteger(x.altura) ? 0 : 1)} m.</p>`
+            : `<p class="forma-nota">Mesmos atributos da forma padrão.</p>`}
+          ${x.habilidades.length ? `<p class="forma-nota"><span lang="en">${x.habilidades.map(([nome, oculta]) => `${esc(nome)}${oculta ? " (oculta)" : ""}`).join(", ")}</span></p>` : ""}
+        </div>
+      </li>`;
+  };
+  const dynamax = f.dynamax ? `Está na Pokédex de Sword e Shield, onde pode usar Dynamax${f.gmax ? " e tem forma Gigantamax própria" : ""}.` : null;
+  return `<section class="especie-formas" aria-labelledby="t-formas">
+    <h2 id="t-formas">Formas especiais</h2>
+    ${f.formas.length ? `<p class="nota-editorial">Megaevoluções, Gigantamax, formas regionais e outras formas que mudam tipos, atributos ou habilidades. Variações só de aparência ficam de fora. Os nomes são os dos jogos, em inglês.</p>
+    <ul class="formas-lista">
+      ${f.formas.map(item).join("\n      ")}
+    </ul>` : `<p class="prosa">${esc(f.nome)} não tem megaevolução, forma Gigantamax, forma regional nem outra forma que mude tipos ou atributos.</p>`}
+    ${dynamax ? `<p class="forma-dynamax">${dynamax}</p>` : ""}
+  </section>`;
+}
+
 /* ---------- a página de uma espécie ---------- */
 
 export function paginaEspecie(id) {
@@ -178,6 +221,7 @@ export function paginaEspecie(id) {
   const anterior = IDS[i - 1], proxima = IDS[i + 1];
   const total = totalDe(id);
   const onde = presenca[id] || [];
+  const noCobblemon = Boolean(COBBLEMON.especies[id]?.impl);
   const ficha = [
     ["Altura", `${medida(f.altura)} m`],
     ["Peso", `${medida(f.peso)} kg`],
@@ -227,6 +271,8 @@ export function paginaEspecie(id) {
     <p class="nota-editorial">Categoria, habilidades e itens aparecem em inglês, como nos jogos.</p>
   </section>
 
+  ${secaoDeFormas(id)}
+
   <section class="especie-evolucao" aria-labelledby="t-evolucao">
     <h2 id="t-evolucao">Linha evolutiva</h2>
     ${linhaEvolutiva(id)}
@@ -250,6 +296,7 @@ export function paginaEspecie(id) {
     <ul class="jogos-da-especie">
       ${onde.map(({ jogo, n, rotulo }) => `<li><a href="/jogos/${jogo.slug}/">${ilha(jogo)}<span><span class="ilha-nome">${esc(jogo.curto)}</span><span class="ilha-meta">${jogo.ano}. ${rotulo === "Elenco" ? "No elenco" : `Nº ${String(n).padStart(3, "0")} em ${esc(rotulo)}`}</span></span></a></li>`).join("\n      ")}
     </ul>
+    ${noCobblemon ? `<p class="especie-cobblemon">Também está no mod Cobblemon. <a href="${enderecoCobblemon(id)}">Ver onde ${esc(f.nome)} nasce por lá</a>.</p>` : ""}
   </section>
 
   <nav class="jogo-passos" aria-label="Espécies vizinhas">
@@ -260,6 +307,7 @@ export function paginaEspecie(id) {
 
   return moldura({
     titulo: `${f.nome}, Nº ${n4(id)}`, caminho: enderecoEspecie(id), classe: "pagina-especie", corpo, modulo: "especie",
+    espelho: noCobblemon ? enderecoCobblemon(id) : "/cobblemon/pokemon/",
     descricao: `${f.nome}, ${f.categoria}, tipo ${ts.join(" e ")}. Atributos, linha evolutiva, curiosidades e os jogos em que aparece.`
   });
 }
@@ -296,7 +344,7 @@ export function paginaPokedex() {
 </section>`;
 
   return moldura({
-    titulo: "Pokédex", caminho: "/pokedex/", classe: "pagina-pokedex", corpo, modulo: "pokedex-geral",
+    titulo: "Pokédex", caminho: "/pokedex/", classe: "pagina-pokedex", corpo, modulo: "pokedex-geral", espelho: "/cobblemon/pokemon/",
     descricao: `As ${numero(TOTAL)} espécies de Pokémon em gravura, com atributos, linha evolutiva, curiosidades e os jogos em que cada uma aparece.`
   });
 }

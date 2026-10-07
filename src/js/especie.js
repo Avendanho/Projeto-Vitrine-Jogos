@@ -17,7 +17,7 @@ function gravar(canvas, imagem) {
   ctx.clearRect(0, 0, L, L);
   ctx.drawImage(imagem, 0, 0, L, L);
   const quadro = ctx.getImageData(0, 0, L, L), d = quadro.data;
-  const passo = 6.5, angulo = (38 * Math.PI) / 180;
+  const passo = L / 98, angulo = (38 * Math.PI) / 180;      // a trama acompanha o tamanho da prancha
   const cx = Math.cos(angulo), sx = Math.sin(angulo);
   for (let y = 0; y < L; y++) {
     for (let x = 0; x < L; x++) {
@@ -42,15 +42,14 @@ function gravar(canvas, imagem) {
   ctx.putImageData(quadro, 0, 0);
 }
 
-const arte = document.querySelector(".especie-prancha .prancha-arte");
-const canvas = arte.querySelector("canvas");
-const cor = arte.querySelector(".prancha-cor");
-function pronto() {
-  gravar(canvas, cor);
-  arte.classList.add("gravada");
+/* A prancha principal e a de cada forma especial: cada uma é gravada quando a arte em cor termina de carregar. */
+for (const arte of document.querySelectorAll(".especie .prancha-arte")) {
+  const canvas = arte.querySelector("canvas"), cor = arte.querySelector(".prancha-cor");
+  if (!canvas || !cor) continue;
+  const pronto = () => { gravar(canvas, cor); arte.classList.add("gravada"); };
+  if (cor.complete && cor.naturalWidth) pronto();
+  else cor.addEventListener("load", pronto, { once: true });
 }
-if (cor.complete && cor.naturalWidth) pronto();
-else cor.addEventListener("load", pronto, { once: true });
 
 const evolucao = document.querySelector(".evolucao");
 if (evolucao) colorirAoApontar(evolucao);
