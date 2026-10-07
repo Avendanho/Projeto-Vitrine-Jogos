@@ -211,11 +211,39 @@ Decisões de conteúdo:
 - Os dados do Cobblemon vêm dos arquivos da versão 1.8.1 do mod; nada é
   escrito de memória. Estruturas sem nome na tradução aparecem com o nome
   interno, em inglês.
-- Os Pokémon da edição Cobblemon são a arte oficial redesenhada em pixel. Os
-  modelos do mod não são usados.
+- Os Pokémon da edição Cobblemon eram a arte oficial redesenhada em pixel.
+  Mudou na rodada 6, abaixo.
 - Dez desafios de Pokémon, um por região (o primeiro é o do dono do projeto,
   "Os Super Woopers"), e cinco de Cobblemon. A roleta combina jogo ou ambiente,
   regra, complicações, vitória e derrota, com semente no endereço.
 - Formas especiais: megaevoluções, Gigantamax, formas regionais e outras
   formas que mudam tipos, atributos ou habilidades. Dynamax aparece como nota
   para as espécies da Pokédex de Sword e Shield.
+
+
+## Rodada 6: os Pokémon como no jogo, e em movimento
+
+Pedido: usar a imagem real dos Pokémon dentro do Cobblemon, mas sem a grade de
+cartões do cobbledex.info ("não achei criativa"); apresentar no jeito do
+PokéAtlas; e animar os Pokémon nos dois temas.
+
+- **De onde vem a imagem.** `scripts/modelos.mjs` desenha as 888 espécies a
+  partir da geometria, das texturas e das poses do próprio mod (1.8.1): um
+  desenhista de software, sem GPU, que monta os ossos, aplica o primeiro
+  instante da animação parada de cada espécie e pinta com z-buffer, camadas
+  translúcidas e camadas que brilham. Nada é copiado do cobbledex.
+- **Tratamento.** O mesmo gesto do PokéAtlas, com outro material: lá a arte
+  oficial fica em gravura e a cor volta ao apontar; aqui o modelo fica em
+  tinta de mapa (quatro tons, do nanquim ao pergaminho) dentro do slot de
+  inventário, e ao apontar o modelo em cor salta para fora do slot.
+- **A assinatura continua.** O mapa que se preenche por onde se anda agora
+  vale para a Pokédex: a espécie cuja página foi aberta fica revelada em cor
+  nas listas, e a lista conta quantas já foram.
+- **Movimento, tema Cobblemon.** Em dois quadros, como sprite: o modelo quica
+  no slot; no retrato a cor entra bloco a bloco, do centro para fora, como
+  chunks carregando; depois ele respira, acompanha o ponteiro e pula com um
+  clique.
+- **Movimento, tema Pokémon.** Suave, como papel: a gravura da prancha é
+  impressa na chegada seguindo o ângulo da trama, o espécime flutua devagar e
+  se inclina para o ponteiro; nas gavetas, quem recebe o ponteiro dá um pulinho.
+- Com movimento reduzido, tudo aparece pronto e parado.

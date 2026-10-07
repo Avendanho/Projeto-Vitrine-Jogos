@@ -67,3 +67,22 @@ secao.querySelector("form").addEventListener("submit", (e) => {
   if (sobraram.length === 1) sobraram[0].querySelector("a").click();
 });
 aplicar(false);
+
+/* o quanto do mapa já foi revelado: as espécies cuja página este navegador já abriu */
+const linhaVistos = document.querySelector("[data-vistos]");
+if (linhaVistos) {
+  const CHAVE = "pokeatlas.cobblemon.vistos";
+  let vistos = [];
+  try { vistos = JSON.parse(localStorage.getItem(CHAVE) || "[]"); } catch { /* sem armazenamento */ }
+  const naLista = new Set(itens.filter((li) => !("falta" in li.dataset)).map((li) => Number(li.dataset.n)));
+  const quantos = vistos.filter((n) => naLista.has(Number(n))).length;
+  if (quantos) {
+    linhaVistos.querySelector("[data-vistos-contagem]").textContent = quantos;
+    linhaVistos.hidden = false;
+    linhaVistos.querySelector("[data-vistos-apagar]").addEventListener("click", () => {
+      try { localStorage.removeItem(CHAVE); } catch { /* nada a apagar */ }
+      for (const slot of secao.querySelectorAll(".slot.visto")) slot.classList.remove("visto");
+      linhaVistos.hidden = true;
+    });
+  }
+}

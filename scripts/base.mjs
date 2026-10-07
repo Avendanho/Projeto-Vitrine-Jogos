@@ -9,6 +9,7 @@ export const FICHAS = lerDados("fichas.json");       // gerado por scripts/ficha
 export const CARTAS = lerDados("cartas.json");       // gerado por scripts/cartas.mjs
 export const COBBLEMON = lerDados("cobblemon.json"); // gerado por scripts/cobblemon.mjs
 export const FORMAS_COM_ARTE = new Set(lerDados("formas-com-arte.json"));   // gerado por scripts/arte.mjs --formas
+export const MODELOS = new Set(lerDados("modelos.json"));                   // gerado por scripts/modelos.mjs: espécies desenhadas a partir do modelo do mod
 
 export const ORDEM_TIPOS = ["Normal", "Fogo", "Água", "Planta", "Elétrico", "Gelo", "Lutador", "Venenoso", "Terrestre",
   "Voador", "Psíquico", "Inseto", "Pedra", "Fantasma", "Dragão", "Sombrio", "Aço", "Fada"];

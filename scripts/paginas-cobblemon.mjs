@@ -1,7 +1,7 @@
 /* A edição Cobblemon do atlas: início, lista de Pokémon, página de cada espécie,
  * itens, estruturas e guia. Tudo sai de dados/cobblemon.json, que é extraído dos
  * arquivos do próprio mod; as curiosidades e os números são calculados aqui. */
-import { COBBLEMON, FICHAS, ORDEM_TIPOS, esc, semAcento, numero, extenso, maiuscula, enumerar, enderecoEspecie, enderecoCobblemon } from "./base.mjs";
+import { MODELOS, COBBLEMON, FICHAS, ORDEM_TIPOS, esc, semAcento, numero, extenso, maiuscula, enumerar, enderecoEspecie, enderecoCobblemon } from "./base.mjs";
 import { moldura } from "./paginas.mjs";
 
 const C = COBBLEMON;
@@ -18,13 +18,19 @@ const DIA = `data-fundo="${FUNDO_COBBLEMON}" data-tinta="${TINTA_COBBLEMON}"`;
 
 /* ---------- peças ---------- */
 
-/* O Pokémon em pixel, dentro de um "slot" de inventário. */
+/* O Pokémon dentro de um "slot" de inventário. Quem já tem modelo no mod aparece em tinta de mapa,
+ * e o navegador troca pela cor do modelo quando alguém aponta (src/js/base.js). Quem ainda não
+ * está no mod fica com o desenho em pixel da arte oficial. */
 export function slot(n, { ligacao = true, lado = 96, preguica = true } = {}) {
-  const e = C.especies[n];
-  const figura = `<img class="pixel" src="/arte/pixel/${n}.png" alt="" width="${lado}" height="${lado}"${preguica ? ' loading="lazy" decoding="async"' : ""}>`;
+  const e = C.especies[n], vivo = MODELOS.has(n);
+  const espera = preguica ? ' loading="lazy" decoding="async"' : "";
+  const figura = vivo
+    ? `<img class="tinta" src="/arte/modelo/${n}-tinta.png" data-cor="/arte/modelo/${n}.webp" alt="" width="${lado}" height="${lado}"${espera}>`
+    : `<img class="pixel" src="/arte/pixel/${n}.png" alt="" width="${lado}" height="${lado}"${espera}>`;
+  const marca = vivo ? ` data-n="${n}"` : "";
   return ligacao && e.impl
-    ? `<a class="slot" href="${enderecoCobblemon(n)}" title="${esc(e.nome)}" aria-label="${esc(e.nome)}">${figura}</a>`
-    : `<span class="slot" title="${esc(e.nome)}">${figura}</span>`;
+    ? `<a class="slot"${marca} href="${enderecoCobblemon(n)}" title="${esc(e.nome)}" aria-label="${esc(e.nome)}">${figura}</a>`
+    : `<span class="slot"${marca} title="${esc(e.nome)}">${figura}</span>`;
 }
 const fileira = (ns, limite = 18) => `<span class="fileira">${ns.slice(0, limite).map((n) => slot(n, { lado: 48 })).join("")}${ns.length > limite ? `<span class="fileira-resto">e mais ${ns.length - limite}</span>` : ""}</span>`;
 
@@ -152,7 +158,8 @@ export function paginaCobblemonPokemon() {
   const corpo = `
 <section class="cabecalho">
   <h1>Pokémon</h1>
-  <p class="prosa">As ${NUMEROS.noMod} espécies que já estão no Cobblemon ${esc(C.versao)}. Escolha uma para ver em que bioma ela nasce, com que raridade, o que deixa cair e como evolui dentro do mod.</p>
+  <p class="prosa">As ${NUMEROS.noMod} espécies que já estão no Cobblemon ${esc(C.versao)}, desenhadas a partir dos modelos do próprio mod. Elas começam em tinta de mapa: aponte para uma e ela aparece como no jogo. Abra a página dela e ela fica revelada de vez, com o bioma em que nasce, a raridade, o que deixa cair e como evolui.</p>
+  <p class="cb-vistos" data-vistos hidden>Seu mapa: <strong data-vistos-contagem>0</strong> de ${NUMEROS.noMod} espécies reveladas. <button type="button" class="ligacao" data-vistos-apagar>Apagar o mapa</button></p>
 </section>
 <section class="pokedex-geral" data-cb-lista>
   <form class="dex-controles" role="search" aria-label="Procurar Pokémon do Cobblemon">
@@ -227,7 +234,12 @@ export function paginaCobblemonEspecie(n) {
       <ul class="especie-tipos" aria-label="Tipos e classificação">${e.tipos.map((t) => `<li><a class="ficha" href="/cobblemon/pokemon/?tipo=${semAcento(t)}">${t}</a></li>`).join("")}${e.rotulos.map((r) => `<li><span class="ficha ficha-rotulo">${r}</span></li>`).join("")}</ul>
       ${e.desc ? `<p class="cb-descricao">${esc(e.desc)}</p>` : ""}
     </div>
-    <figure class="cb-retrato painel"><img class="pixel" src="/arte/pixel/${n}.png" alt="${esc(e.nome)}, em pixel" width="288" height="288"></figure>
+    ${MODELOS.has(n)
+      ? `<figure class="cb-retrato painel" data-retrato="${n}">
+      <img class="cb-modelo" src="/arte/modelo/${n}.webp" alt="${esc(e.nome)}, o modelo do Cobblemon" width="400" height="400">
+      <canvas class="cb-revela" width="400" height="400" data-tinta="/arte/modelo/${n}-tinta.png" aria-hidden="true"></canvas>
+    </figure>`
+      : `<figure class="cb-retrato painel"><img class="pixel" src="/arte/pixel/${n}.png" alt="${esc(e.nome)}, em pixel" width="288" height="288"></figure>`}
   </section>
 
   <section aria-labelledby="t-onde">
@@ -262,7 +274,7 @@ export function paginaCobblemonEspecie(n) {
 
   const onde = e.ambientes.filter((a) => a !== "qualquer").map((a) => AMBIENTE[a].toLowerCase());
   return moldura({
-    ...base, titulo: `${e.nome} no Cobblemon`, caminho: enderecoCobblemon(n), classe: "pagina-cb-especie", corpo, espelho: enderecoEspecie(n),
+    ...base, titulo: `${e.nome} no Cobblemon`, caminho: enderecoCobblemon(n), classe: "pagina-cb-especie", corpo, modulo: "cobblemon-especie", espelho: enderecoEspecie(n),
     descricao: `${e.nome} no Cobblemon ${C.versao}: ${nasce(e) ? `nasce em ${onde.length ? enumerar(onde.slice(0, 3)) : "qualquer bioma da Superfície"}` : "não nasce no mundo"}. Veja raridade, condições, o que deixa cair e como evolui no mod.`
   });
 }

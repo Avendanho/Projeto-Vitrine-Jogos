@@ -12,6 +12,7 @@
     "arte:formas": "node scripts/arte.mjs --formas",
     "arte:pixel": "node scripts/arte.mjs --pixel",
     "cobblemon": "node scripts/cobblemon.mjs",
+    "modelos": "node scripts/modelos.mjs",
     "pokedex": "node scripts/pokedex.mjs && node scripts/fichas.mjs",
     "cartas": "node scripts/cartas.mjs",
     "verificar": "node scripts/verificar-paginas.mjs"

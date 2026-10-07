@@ -91,7 +91,7 @@ export const EDICOES = {
     ],
     avisos: [
       "Projeto de fã, sem fins lucrativos. Cobblemon é um mod de código aberto feito pela equipe Cobblemon; este site não tem vínculo com ela, nem com a Mojang, a Microsoft, a Nintendo ou a The Pokémon Company.",
-      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. A arte dos Pokémon é a oficial, do repositório público PokeAPI/sprites, redesenhada em pixel. Fontes: Pixelify Sans, Archivo e Alegreya."
+      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. Os Pokémon são desenhados a partir dos modelos e das texturas do próprio mod, feitos pela equipe do Cobblemon; os que ainda não estão nele aparecem com a arte oficial, do repositório público PokeAPI/sprites, redesenhada em pixel. Fontes: Pixelify Sans, Archivo e Alegreya."
     ]
   }
 };

@@ -64,3 +64,39 @@ document.addEventListener("click", (e) => {
     if (ilha) ilha.style.viewTransitionName = "ilha";
   }
 });
+
+/* Edição Cobblemon: cada Pokémon fica em tinta de mapa até alguém apontar para ele; aí entra o
+ * modelo do jogo, em cor. As espécies cuja página já foi aberta ficam reveladas de vez, como o
+ * trecho do mapa por onde se andou (quem guarda a visita é src/js/cobblemon-especie.js). */
+if (document.body.classList.contains("edicao-cobblemon")) {
+  const colorir = (slot, preguica = false) => {
+    const tinta = slot.querySelector("img[data-cor]");
+    if (!tinta || slot.querySelector(".cor")) return;
+    const cor = new Image();
+    cor.className = "cor";
+    cor.alt = "";
+    cor.decoding = "async";
+    if (preguica) cor.loading = "lazy";
+    cor.addEventListener("load", () => slot.classList.add("tem-cor"), { once: true });
+    slot.append(cor);
+    cor.src = tinta.dataset.cor;
+  };
+  const apontar = (e) => {
+    const raiz = e.target.closest?.("a, .slot");
+    if (!raiz) return;
+    for (const slot of raiz.matches(".slot") ? [raiz] : raiz.querySelectorAll(".slot")) colorir(slot);
+  };
+  document.addEventListener("pointerover", apontar);
+  document.addEventListener("focusin", apontar);
+
+  let vistos = [];
+  try { vistos = JSON.parse(localStorage.getItem("pokeatlas.cobblemon.vistos") || "[]").map(Number); } catch { /* sem armazenamento, nada fica revelado */ }
+  if (vistos.length) {
+    const conjunto = new Set(vistos);
+    for (const slot of document.querySelectorAll(".slot[data-n]")) {
+      if (!conjunto.has(Number(slot.dataset.n))) continue;
+      slot.classList.add("visto");
+      colorir(slot, true);
+    }
+  }
+}

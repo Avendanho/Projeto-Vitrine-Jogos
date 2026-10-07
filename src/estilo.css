@@ -851,6 +851,9 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
 .dex-arte img { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity 0.35s ease, transform 0.5s var(--suave); }
 .dex-arte .cor { opacity: 0; }
 .gaveta a:hover .cor, .gaveta a:focus-visible .cor { opacity: 1; transform: scale(1.1); }
+/* quem recebe o ponteiro dá um pulinho: a gravura vira bicho */
+.gaveta a:is(:hover, :focus-visible) .dex-arte, .elenco a:is(:hover, :focus-visible) img { animation: pulinho 0.6s var(--suave) 1; }
+@keyframes pulinho { 0%, 100% { translate: 0 0; rotate: 0deg; } 30% { translate: 0 -11%; rotate: -3deg; } 55% { translate: 0 0; rotate: 1.5deg; } 74% { translate: 0 -4%; rotate: 0deg; } }
 .gaveta a:hover img:not(.cor), .gaveta a:focus-visible img:not(.cor) { opacity: 0; }
 .dex-numero { margin-top: 4px; font-size: 0.78rem; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
 .dex-nome { font-size: var(--t-menor); font-weight: 660; overflow-wrap: anywhere; }
@@ -1030,6 +1033,20 @@ a.carta-caixa:hover .carta-terreno, a.carta-caixa:hover .carta-tracos { transfor
 .especie-tipos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--e3); }
 .especie-tipos .ficha { display: inline-block; text-decoration: none; }
 .especie-prancha .prancha-arte { view-transition-name: especie; }
+/* A prancha da espécie: a gravura é impressa na chegada, seguindo o ângulo da trama; depois o
+ * espécime flutua devagar e se inclina para o ponteiro, com a cor um pouco à frente do traço. */
+@property --impressa { syntax: "<percentage>"; inherits: false; initial-value: 130%; }
+.especie-prancha .prancha-gravura { -webkit-mask-image: linear-gradient(128deg, #000 calc(var(--impressa) - 14%), transparent var(--impressa)); mask-image: linear-gradient(128deg, #000 calc(var(--impressa) - 14%), transparent var(--impressa)); }
+.especie-prancha .gravada .prancha-gravura { animation: imprimir 1.25s cubic-bezier(0.3, 0, 0.2, 1) 1 both; }
+/* até a tinta chegar, a miniatura faz as vezes de esboço a lápis */
+.js .especie-prancha .prancha-rascunho { opacity: 0.4; }
+.js .especie-prancha .gravada .prancha-rascunho { opacity: 0; transition: opacity 0.5s ease 0.8s; }
+.js .especie-prancha:is(:hover, :focus-visible, .revelada) .prancha-rascunho { opacity: 0; transition-delay: 0s; }
+@keyframes imprimir { from { --impressa: 0%; } to { --impressa: 130%; } }
+.especie-prancha { perspective: 900px; }
+.especie-prancha .prancha-arte { animation: flutuar 6.5s ease-in-out infinite; transform: rotateY(calc(var(--ix, 0) * 9deg)) rotateX(calc(var(--iy, 0) * -9deg)); transform-style: preserve-3d; transition: transform 0.5s var(--suave); }
+.especie-prancha .prancha-cor { translate: calc(var(--ix, 0) * 10px) calc(var(--iy, 0) * 10px); }
+@keyframes flutuar { 0%, 100% { translate: 0 0; } 50% { translate: 0 -1.8%; } }
 .mapa-do-jogo { view-transition-name: ilha; }
 
 .atributos-lista { margin-top: var(--e3); max-width: 54rem; border-top: 1.5px solid currentColor; }
@@ -1234,6 +1251,21 @@ html:has(.edicao-cobblemon) { background: #DCCB9F; }
 .slot { display: inline-grid; place-items: center; padding: 4px; background: #8B8B8B; box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #fff; line-height: 0; }
 a.slot:hover { background: #B4B4D8; }
 .slot img { display: block; }
+/* Com modelo no mod: a figura fica em tinta de mapa e ganha a cor do modelo quando se aponta.
+ * A cor salta para fora do slot e quica em dois quadros, como um sprite parado. As espécies
+ * já visitadas ficam em cor de vez (.visto), sem saltar. */
+.slot { position: relative; }
+.slot .tinta { image-rendering: pixelated; }
+.slot .cor { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px); object-fit: contain; opacity: 0; pointer-events: none; transform-origin: 50% 90%; }
+:is(.slot.tem-cor:is(:hover, :focus-visible, .visto), a:is(:hover, :focus-visible) .slot.tem-cor) .cor { opacity: 1; }
+:is(.slot.tem-cor:is(:hover, :focus-visible, .visto), a:is(:hover, :focus-visible) .slot.tem-cor) .tinta { opacity: 0; }
+:is(.slot.tem-cor:is(:hover, :focus-visible), a:is(:hover, :focus-visible) .slot.tem-cor) { z-index: 3; }
+:is(.slot.tem-cor:is(:hover, :focus-visible), a:is(:hover, :focus-visible) .slot.tem-cor) .cor {
+  scale: 1.5; filter: drop-shadow(0 3px 0 rgb(0 0 0 / 0.3));
+  animation: cb-quica 0.62s steps(1) infinite;
+}
+@keyframes cb-quica { 0%, 49.9% { translate: 0 0; } 50%, 100% { translate: 0 -7%; } }
+.fileira a:is(:hover, :focus-visible) .slot.tem-cor .cor, .fileira .slot.tem-cor:is(:hover, :focus-visible) .cor { scale: 1.8; }
 .fileira { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .fileira-resto { margin-left: 8px; font-size: var(--t-menor); }
 
@@ -1245,8 +1277,21 @@ a.slot:hover { background: #B4B4D8; }
 
 /* página de uma espécie */
 .cb-especie > section { max-width: 76rem; }
-.cb-retrato { justify-self: center; width: min(100%, 330px); padding: var(--e3); line-height: 0; }
+.cb-retrato { position: relative; justify-self: center; width: min(100%, 380px); padding: var(--e3); line-height: 0; }
 .cb-retrato img { width: 100%; height: auto; }
+.cb-vistos { margin-top: var(--e3); font-family: var(--pixel); font-size: 1.05rem; }
+/* O retrato chega em tinta de mapa e a cor entra bloco a bloco, do centro para fora, como os
+ * chunks carregando em volta do jogador (src/js/cobblemon-especie.js). Depois ele respira em dois
+ * quadros, acompanha o ponteiro e pula quando recebe um clique. */
+.cb-revela { position: absolute; inset: var(--e3); width: calc(100% - 2 * var(--e3)); height: auto; aspect-ratio: 1; image-rendering: pixelated; display: none; }
+.cb-retrato.revelando:not(.revelado) .cb-revela { display: block; }
+.js .cb-retrato[data-retrato]:not(.revelado) .cb-modelo { opacity: 0; animation: cb-garantia 0.01s 4s forwards; }
+@keyframes cb-garantia { to { opacity: 1; } }
+.cb-retrato[data-retrato] { cursor: pointer; }
+.cb-retrato.revelado .cb-modelo { translate: calc(var(--ix, 0) * 12px) calc(var(--iy, 0) * 6px); transition: translate 0.24s steps(3); animation: cb-respira 1.7s steps(1) infinite; }
+@keyframes cb-respira { 0%, 49.9% { transform: none; } 50%, 100% { transform: translateY(-1.4%); } }
+.cb-retrato.revelado.pulando .cb-modelo { animation: cb-pulo 0.52s steps(6) 1; }
+@keyframes cb-pulo { 0%, 100% { transform: none; } 45% { transform: translateY(-13%); } }
 .cb-descricao { max-width: 46ch; margin-top: var(--e3); font-family: var(--caderno); font-size: 1.3rem; line-height: 1.4; }
 .cb-tabela { margin-top: var(--e3); background: var(--papel-claro); border: 3px solid var(--preto); }
 .cb-tabela :is(th, td) { padding: 10px 14px; border-top: 2px solid #A9A9A9; font-weight: 400; }

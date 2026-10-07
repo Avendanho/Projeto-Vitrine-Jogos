@@ -53,3 +53,15 @@ for (const arte of document.querySelectorAll(".especie .prancha-arte")) {
 
 const evolucao = document.querySelector(".evolucao");
 if (evolucao) colorirAoApontar(evolucao);
+
+/* a prancha grande se inclina para o ponteiro, e a cor vai um pouco à frente do traço */
+const prancha = document.querySelector(".especie-prancha");
+if (prancha && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  prancha.addEventListener("pointermove", (e) => {
+    if (e.pointerType === "touch") return;
+    const r = prancha.getBoundingClientRect();
+    prancha.style.setProperty("--ix", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+    prancha.style.setProperty("--iy", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+  });
+  prancha.addEventListener("pointerleave", () => { prancha.style.removeProperty("--ix"); prancha.style.removeProperty("--iy"); });
+}
