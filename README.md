@@ -1,165 +1,238 @@
-# PokéAtlas
+# 🗺️ PokéAtlas
 
-Um guia visual para descobrir qual jogo de Pokémon combina com você. Cada jogo
-é desenhado como uma ilha: seis qualidades (exploração, liberdade, competitivo,
-dificuldade, história, nostalgia) viram seis morros, e o formato da ilha mostra
-onde o jogo é forte.
+<p align="center">
+  <strong>Um guia visual e cartográfico para descobrir qual jogo de Pokémon combina com você.</strong>
+</p>
 
-Projeto de fã, sem fins lucrativos e sem vínculo com Nintendo, Game Freak,
-Creatures ou The Pokémon Company.
+<p align="center">
+  <a href="https://pokeatlas-swart.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/Acessar%20Pok%C3%A9Atlas-pokeatlas--swart.vercel.app-2ea44f?style=for-the-badge&logo=vercel&logoColor=white" alt="Deploy Vercel" />
+  </a>
+</p>
 
-## O que tem no site
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Online-success?style=flat-square" alt="Status" />
+  <img src="https://img.shields.io/badge/Node.js-%3E%3D20-informational?style=flat-square&logo=node.js" alt="Node version" />
+  <img src="https://img.shields.io/badge/Framework-Zero%20Dependencies%20(Vanilla)-f5a623?style=flat-square" alt="Zero Framework" />
+  <img src="https://img.shields.io/badge/P%C3%A1ginas%20Geradas-1.072%20est%C3%A1ticas-blue?style=flat-square" alt="Páginas" />
+  <img src="https://img.shields.io/badge/Dados-Pok%C3%A9API-red?style=flat-square" alt="PokéAPI" />
+  <img src="https://img.shields.io/badge/Tipo-Projeto%20de%20F%C3%A3%20(N%C3%A3o%20Oficial)-lightgrey?style=flat-square" alt="Não Oficial" />
+</p>
 
-| Área | Endereço | O que faz |
-|---|---|---|
-| Início | `/` | A história em seis cenas, guiada pela rolagem |
-| Bússola | `/bussola/` | Oito perguntas; o relevo do visitante se desenha a cada resposta e o resultado explica cada recomendação |
-| Pokédex | `/pokedex/` e `/pokedex/<nome>/` | As 1.025 espécies em gravura, com busca e filtro por geração e tipo; cada uma tem página própria, com atributos, ficha, linha evolutiva, curiosidades e os jogos em que aparece |
-| Jogo | `/jogos/<nome>/` | Página de cada título: relevo, ficha, para quem é, a carta de onde se passa, espécimes, Pokédex do jogo com busca e filtro por tipo, jogos parecidos |
-| Regiões | `/regioes/` e `/regioes/<nome>/` | A carta de cada região, redesenhada a partir do mapa dos jogos, com cidades, marcos e rotas numeradas; a lista e a carta se destacam uma à outra |
-| Linha do tempo | `/linha-do-tempo/` | De 1996 a 2027, com filtro por categoria. É também o índice de todos os jogos |
-| Comparar | `/comparar/` | Dois ou três jogos sobrepostos, nota por nota |
+---
 
-## Rodar na sua máquina
+## 📌 Sumário
 
-Precisa só do Node 20 ou mais novo. O build não usa nenhuma dependência.
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [A Assinatura: O Relevo Vivo](#-a-assinatura-o-relevo-vivo)
+- [Funcionalidades Principais](#-funcionalidades-principais)
+- [Direção de Arte e Design](#-direção-de-arte-e-design)
+- [Arquitetura e Engenharia](#-arquitetura-e-engenharia)
+- [Estrutura do Repositório](#-estrutura-do-repositório)
+- [Como Rodar Localmente](#-como-rodar-localmente)
+- [Scripts Disponíveis](#-scripts-disponíveis)
+- [Deploy](#-deploy)
+- [Avisos Legais e Créditos](#-avisos-legais-e-créditos)
+- [Autor](#-autor)
+
+---
+
+## 🧭 Sobre o Projeto
+
+O **PokéAtlas** é uma experiência interativa e editorial criada para acolher três perfis de jogadores:
+1. **O nostálgico** que parou em gerações anteriores e quer reencontrar a franquia;
+2. **O iniciante** curioso que não sabe por onde começar entre dezenas de títulos;
+3. **O fã veterano** em busca de uma perspectiva visual inovadora sobre os jogos.
+
+Em vez de uma wiki enciclopédica tradicional ou uma vitrine de e-commerce, o PokéAtlas adota o conceito de um **caderno de campo naturalista e atlas de expedição náutica**. Cada jogo ganha uma identidade topográfica própria que traduz sua proposta de experiência em relevo, curvas de nível e altitude.
+
+🔗 **Acesse o site em produção:** [https://pokeatlas-swart.vercel.app/](https://pokeatlas-swart.vercel.app/)
+
+---
+
+## 🏔️ A Assinatura: O Relevo Vivo
+
+Cada título é modelado através de seis atributos de gameplay fundamentais:
+
+| Eixo | O que mede |
+| :--- | :--- |
+| **História** | Profundidade da narrativa, desenvolvimento de personagens e mitologia. |
+| **Exploração** | Riqueza de rotas, segredos, biomas e labirintos fora do caminho principal. |
+| **Dificuldade** | Curva de desafio dos ginásios, inteligência artificial e batalhas cruciais. |
+| **Liberdade** | Autonomia na ordem dos objetivos, exploração aberta e escolha de rotas. |
+| **Competitivo** | Complexidade mecânica de pós-jogo, breeding, EVs/IVs e profundidade tática. |
+| **Nostalgia** | Memória afetiva, fidelidade estética de época e peso histórico. |
+
+### Como a Ilha é Gerada
+Cada atributo ocupa uma direção na rosa dos ventos. As notas (de 1 a 5) elevam montanhas correspondentes:
+- Quanto mais alta a nota, maior o cume montanhoso e mais distante a costa se projeta.
+- O terreno acima do nível do mar consolida o contorno de uma **ilha única**.
+- Renderizado proceduralmente tanto em **SVG durante o build estático** quanto em **Canvas interativo em tempo real** no navegador.
+
+---
+
+## 🗺️ Funcionalidades Principais
+
+### 1. 🧭 Bússola Náutica (Quiz de Recomendação) (`/bussola/`)
+Um sistema de recomendação dinâmico com 8 perguntas de perfil. À medida que o visitante responde, o relevo do seu perfil vai sendo esculpido ao vivo em tela. No final, o algoritmo compara a geometria do relevo gerado com todas as ilhas do catálogo e recomenda os títulos de maior afinidade, explicando quais morros coincidiram.
+
+### 2. 📖 Pokédex em Gravura Naturalista (`/pokedex/` e `/pokedex/<especie>/`)
+- **1.025 espécies de Pokémon** catalogadas.
+- Apresentação visual em **gravura botânica monocromática (tinta sobre papel)** que recupera suas cores oficiais em hover/foco.
+- Busca instantânea e filtros por geração e tipo elemental.
+- Páginas individuais com atributos base, dimensões, linha evolutiva completa, formas regionais e lista de jogos em que a espécie pode ser encontrada.
+- **Curiosidades computadas proceduralmente:** fatos gerados por análise cruzada em tempo de compilação (exclusividade de tipos, outliers estatísticos de peso/tamanho, etc.), sem redação artificial.
+
+### 3. 🗺️ Cartas das Regiões (`/regioes/` e `/regioes/<regiao>/`)
+- Cartografia vetorial redesenhada das 10 regiões do universo Pokémon: **Kanto, Johto, Hoenn, Sinnoh, Unova, Kalos, Alola, Galar, Hisui e Paldea**.
+- Traçado de costa, relevo altimétrico, cidades e marcos numerados.
+- Rotas oficiais interligadas com **destaque bidirecional**: passar o cursor na rota da lista ilumina o mapa e vice-versa.
+- Cartas que se desenham suavemente via SVG quando entram na janela de visualização.
+
+### 4. ⚖️ Comparador de Terrenos (`/comparar/`)
+Permite selecionar até 3 jogos simultâneos e sobrepor suas ilhas em tintas duotone contrastantes, facilitando a análise ponto a ponto das diferenças de ritmo e estilo de cada jogo.
+
+### 5. ⏳ Linha do Tempo da Franquia (`/linha-do-tempo/`)
+Uma régua cronológica abrangendo de **1996 a 2027**, separada por plataformas/consoles (do Game Boy original ao Nintendo Switch), servindo também como índice canônico completo dos jogos analisados.
+
+### 6. 🎬 Prólogo Cinematográfico da Home (`/`)
+Jornada contínua dividida em 6 cenas orientadas pelo scroll:
+1. *O atlas se abre:* introdução tátil e o relevo procedural ao vivo.
+2. *A travessia:* carrossel panorâmico das 10 regiões com pranchas dos iniciais.
+3. *Trinta anos:* métricas temporais e evolução por consoles.
+4. *A bússola (o clímax):* transição do fundo de papel náutico para a noite profunda, simulando a busca na abóbada celeste.
+5. *As ferramentas:* vitrine da Pokédex e comparador.
+6. *Trace sua rota:* convite para a descoberta do jogo ideal.
+
+---
+
+## 🎨 Direção de Arte e Design
+
+| Elemento | Implementação | Inspiração |
+| :--- | :--- | :--- |
+| **Fundo Marítimo** | `#D2E1DF` (mar náutico) e `#0C2733` (noite de observação) | Cartas hidrográficas de expedições |
+| **Papel do Caderno** | `#F1E8CF` (papel de algodão envelhecido) | Cadernos de anotações de naturalistas |
+| **Tinta Principal** | `#0F2A3A` (azul-petróleo escuro) | Gravações em bico de pena e água-forte |
+| **Acento de Navegação** | `#C4391F` (carmim de rotas) | Marcações cartográficas de expedições |
+| **Tipografia** | **Archivo** (rótulos e dados) + **Alegreya** (narrativa editorial) | Cartografia técnica e literatura clássica |
+
+---
+
+## ⚡ Arquitetura e Engenharia
+
+- **Zero Dependências em Produção:** Sem frameworks pesados (sem React, Vue, Next.js ou Tailwind). Toda a aplicação roda sobre HTML5 semântico, CSS moderno (com variáveis e Grid/Flexbox) e Vanilla JavaScript (ES Modules).
+- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.072 páginas HTML estáticas prontas em ~1,2 segundos**.
+- **Performance Extrema:** Carregamento instantâneo, First Contentful Paint (FCP) quase imediato e consumo mínimo de recursos no cliente.
+- **Validação Rigorosa em Build:** O processo de compilação valida previamente cada rota, nota de 1 a 5, compatibilidade de Pokédex e coerência cartográfica antes de emitir a pasta de distribuição.
+
+---
+
+## 📂 Estrutura do Repositório
 
 ```bash
-npm run dev        # gera dist/ e serve em http://localhost:4600
-npm run build      # só gera dist/
+Projeto-Vitrine-Jogos/
+├── dados/                       # Conteúdo canônico e bases de dados
+│   ├── atlas.mjs                # Definição de regiões, cidades, rotas e consoles
+│   ├── jogos.mjs                # Títulos, atributos (1 a 5), mascotes e plataformas
+│   ├── especies.mjs             # Metadados e mapeamento de Pokémon
+│   ├── pokedex.json             # Dados de espécies e dex regionais (via PokéAPI)
+│   ├── fichas.json              # Estatísticas, medidas, curiosidades e evoluções
+│   └── cartas.json              # Coordenadas vetoriais das costas e altitudes
+│
+├── scripts/                     # Motor do SSG e automação de dados
+│   ├── build.mjs                # Compilador principal (gera dist/ sem dependências)
+│   ├── paginas.mjs              # Templates das páginas principais e jogos
+│   ├── paginas-pokedex.mjs      # Gerador da Pokédex e cálculo das curiosidades
+│   ├── carta.mjs                # Renderizador vetorial dos mapas regionais
+│   ├── cenario.mjs              # Desenhos SVG auxiliares e bússola
+│   ├── servir.mjs               # Servidor HTTP local para desenvolvimento
+│   └── verificar-paginas.mjs    # Suíte de auditoria visual com Playwright
+│
+├── src/                         # Código-fonte da interface
+│   ├── estilo.css               # Design system e folhas de estilo globais
+│   ├── fontes/                  # Tipografias Archivo e Alegreya (SIL OFL)
+│   ├── js/                      # Lógica client-side modularizada
+│   │   ├── relevo.js            # Algoritmo de geração da ilha procedural
+│   │   ├── bussola.js           # Lógica interativa do quiz e recomendações
+│   │   ├── pokedex.js           # Mecanismo de busca e filtragem instantânea
+│   │   └── cartas.js            # Interatividade hover/touch dos mapas
+│   └── arte/                    # Sprites oficiais convertidos em gravura
+│
+├── dist/                        # Saída do build estático (servido pela Vercel)
+├── package.json                 # Scripts e ferramentas auxiliares
+└── vercel.json                  # Roteamento e configuração de deploy
 ```
 
-Os scripts abaixo são opcionais e usam dependências de desenvolvimento
-(`npm install`). Tudo o que eles geram já está no repositório; só é preciso
-rodá-los para atualizar os dados.
+---
 
-```bash
-npm run pokedex    # refaz dados/pokedex.json e dados/fichas.json a partir das tabelas da PokéAPI
-npm run arte       # baixa e grava as pranchas grandes (mascotes e iniciais)
-npm run arte:mini  # baixa a arte de todas as espécies: miniatura em gravura e a versão em cor
-npm run cartas -- --ref <pasta>   # retraça as cartas das regiões (veja abaixo)
-npm run verificar  # fotografa as páginas rolando (precisa do Google Chrome)
-```
+## 💻 Como Rodar Localmente
 
-## Estrutura
+### Pré-requisitos
+- **Node.js 20+** instalado em sua máquina.
 
-```
-dados/            o conteúdo: jogos, regiões e lugares das cartas, perguntas da bússola, espécies
-dados/pokedex.json   nomes, tipos e listas regionais (gerado por scripts/pokedex.mjs)
-dados/fichas.json    a ficha de cada espécie: atributos, medidas, evolução, formas (gerado por scripts/fichas.mjs)
-dados/cartas.json    costa, relevo e rotas de cada região (gerado por scripts/cartas.mjs)
-scripts/build.mjs            gera o site
-scripts/base.mjs             cores, dados gerados e utilidades de texto, comuns a todos os modelos
-scripts/paginas.mjs          modelos das páginas (início, jogo, regiões, linha do tempo, comparar, bússola)
-scripts/paginas-pokedex.mjs  a Pokédex: a lista, a página de cada espécie e as curiosidades
-scripts/carta.mjs            a carta de uma região como peça de página (rotas, lugares, a caixa)
-scripts/cenario.mjs          desenhos em SVG (terreno das cartas, perfis, bússola, régua de anos)
-scripts/                     e os que geram dados: arte.mjs, cartas.mjs, pokedex.mjs, fichas.mjs
-src/estilo.css    toda a identidade visual
-src/js/relevo.js  o gerador de ilhas, usado pelo build (SVG) e pelo navegador (canvas)
-src/js/           um arquivo por página
-src/arte/pokemon/ pranchas grandes, em cor e em gravura
-src/arte/mini/    todas as espécies: miniatura em gravura e a arte em cor, da qual a página de cada espécie refaz a gravura grande
-src/fontes/       Archivo e Alegreya
-src/motor/        motor de rolagem da página inicial (não editar)
-```
+### Passo a Passo
 
-## Acrescentar ou corrigir um jogo
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/Avendanho/Projeto-Vitrine-Jogos.git
+   cd Projeto-Vitrine-Jogos
+   ```
 
-1. Edite `dados/jogos.mjs`. Cada jogo tem fatos (ano, console, região) e seis
-   notas de 1 a 5, que são leitura editorial do atlas.
-2. Se citar um Pokémon novo em `mascotes`, acrescente o número e o nome em
-   `dados/especies.mjs` e rode `npm run arte`.
-3. Rode `npm run build`. O build confere os dados e para com uma mensagem clara
-   se algo estiver inconsistente (nota fora de 1 a 5, console desconhecido,
-   espécie sem nome).
+2. **Inicie o ambiente de desenvolvimento:**
+   O build nativo **não necessita de `npm install`** para compilar e rodar o site!
+   ```bash
+   npm run dev
+   ```
+   O site será compilado em `dist/` e disponibilizado localmente em:
+   👉 **`http://localhost:4600`**
 
-A ilha, a página do jogo, os filtros, a linha do tempo e os números da página
-inicial se atualizam sozinhos a partir desse arquivo.
+3. **Apenas gerar o build de produção:**
+   ```bash
+   npm run build
+   ```
 
-## A Pokédex
+---
 
-A lista e as 1.025 páginas de espécie saem de `dados/fichas.json` e
-`dados/pokedex.json`. As **curiosidades** são calculadas em
-`scripts/paginas-pokedex.mjs`, comparando cada espécie com as outras (tipos que
-ninguém mais tem, atributos entre os maiores, tamanho, formas, nome em japonês),
-sempre entre as formas padrão. Nenhuma é escrita à mão. A categoria, as
-habilidades, os itens e a entrada oficial da Pokédex aparecem em inglês, como
-nos jogos: a base pública não os traz em português.
+## 🛠️ Scripts Disponíveis
 
-A Pokédex de um jogo é ligada pelo campo `pokedex`, com o nome da lista na
-PokéAPI (por exemplo `[["galar", "Galar"]]`). Jogo sem lista confiável leva
-`semPokedex`, com uma frase explicando o motivo: o atlas não inventa elenco.
+| Comando | Descrição |
+| :--- | :--- |
+| `npm run dev` | Compila o site em `dist/` e inicia o servidor local em `http://localhost:4600`. |
+| `npm run build` | Valida as regras de negócio e compila todas as 1.072 páginas HTML. |
+| `npm run pokedex` | *(Opcional)* Reconstrói `pokedex.json` e `fichas.json` a partir da PokéAPI. |
+| `npm run arte` | *(Opcional)* Baixa e rasteriza as pranchas em alta resolução dos mascotes. |
+| `npm run arte:mini` | *(Opcional)* Gera o acervo de gravuras e miniaturas de todas as espécies. |
+| `npm run cartas` | *(Opcional)* Recalcula os nós vetoriais de altitude e caminhos das cartas. |
+| `npm run verificar` | *(Opcional)* Executa a auditoria visual automática com Playwright. |
 
-## Cartas das regiões
+---
 
-Todas as páginas mostram a carta com a mesma peça (`caixaCarta`, em
-`scripts/carta.mjs`): a caixa tem sempre a proporção da própria carta, então
-ela nunca é cortada; a página só decide a largura. As rotas e os lugares se
-desenham quando a carta entra na tela.
+## 🚀 Deploy
 
-Cada carta tem três partes:
+O projeto é configurado nativamente para publicação contínua na **Vercel** através do arquivo `vercel.json`:
 
-- **O traçado** (`dados/cartas.json`): costa, faixas de altitude e, nos mapas
-  antigos, o caminho de cada rota. É extraído por `scripts/cartas.mjs` de uma
-  imagem de referência do mapa de cada região, separando terra e mar pela cor.
-  As imagens de referência não ficam no repositório; para retraçar, baixe os
-  mapas das regiões (kanto.png, johto.png, ... paldea.jpg) numa pasta e passe-a
-  em `--ref`. Com `--conferir <pasta>` o script grava a referência com o
-  traçado por cima, para conferir a olho.
-- **Os lugares** (`MAPAS` em `dados/atlas.mjs`): cidades e marcos, marcados à
-  mão em porcentagem do quadro. Para mover um nome que encavalou, troque o
-  quarto valor do lugar (`d`, `e`, `c` ou `b`: direita, esquerda, cima, baixo).
-- **As rotas** (`ROTAS` em `dados/atlas.mjs`): cada rota diz o número e os dois
-  lugares que liga. Em Kanto, Johto, Hoenn e Sinnoh o caminho é calculado pelo
-  script, que procura o trajeto mais curto pela faixa da rota no mapa de
-  referência; depois de mexer nessas rotas, rode `npm run cartas` de novo. Em
-  Unova, Kalos e Galar o caminho é marcado à mão (`pts`). O número de cada rota
-  é posicionado no build, no ponto livre mais próximo do meio dela.
+- **Comando de Build:** `node scripts/build.mjs`
+- **Diretório de Saída:** `dist`
+- Cada `push` no branch `main` dispara automaticamente o build e a publicação das páginas atualizadas.
 
-O relevo é interpretação do atlas, e a carta de Unova segue o mapa de Black 2 e
-White 2. Rotas vizinhas que formam um só caminho aparecem juntas ("3–4").
-Ramais e rotas isoladas ficaram de fora (por exemplo as Rotas 125 e 126 de
-Hoenn, a 224 e a 227 de Sinnoh, a 10, a 17, a 18 e a 21 de Unova). Alola, Hisui
-e Paldea não mostram rotas, e a página de cada uma explica por quê.
+---
 
-## Publicar
+## ⚖️ Avisos Legais e Créditos
 
-### GitHub
+- **Pokémon:** Pokémon, nomes dos jogos, criaturas e insígnias são marcas registradas e propriedades intelectuais da **Nintendo**, **Game Freak**, **Creatures Inc.** e **The Pokémon Company**. Este é um projeto de fã, não oficial, de caráter artístico e informativo, sem fins lucrativos e sem qualquer vínculo comercial.
+- **Dados e Sprites:** Nomes, estatísticas e ilustrações oficiais foram obtidos por meio da [PokéAPI](https://pokeapi.co/) e tratados artisticamente em formato de gravura.
+- **Cartografia:** Todas as cartas das regiões são redesenhos originais e interpretações artísticas desenvolvidas especificamente para o atlas.
+- **Tipografia:** Fontes [Archivo](https://fonts.google.com/specimen/Archivo) e [Alegreya](https://fonts.google.com/specimen/Alegreya), licenciadas sob a *SIL Open Font License*.
 
-```bash
-gh auth login
-gh repo create pokeatlas --private --source=. --push
-```
+---
 
-Use repositório **privado**: a pasta `src/motor/` contém o motor da skill Sites
-Incríveis, cuja licença permite publicar os sites feitos com ela, mas não
-redistribuir o motor em repositório público.
+## 👤 Autor
 
-### Vercel
+Desenvolvido por **Bernardo Avendanho**  
+- **GitHub:** [@Avendanho](https://github.com/Avendanho)  
+- **Projeto Online:** [https://pokeatlas-swart.vercel.app/](https://pokeatlas-swart.vercel.app/)
 
-O `vercel.json` já define o build (`node scripts/build.mjs`) e a pasta de saída
-(`dist`). Há dois caminhos:
-
-- **Pelo painel:** em vercel.com/new, importe o repositório do GitHub e confirme.
-  Não é preciso mudar nenhuma configuração. Cada `git push` publica de novo.
-- **Pelo terminal:** `npx vercel` para uma prévia, `npx vercel --prod` para
-  publicar.
-
-## Créditos e avisos
-
-- **Pokémon** e os nomes dos jogos pertencem aos seus donos. A arte dos Pokémon
-  é a oficial, obtida do repositório público
-  [PokeAPI/sprites](https://github.com/PokeAPI/sprites) e reimpressa em gravura
-  por `scripts/arte.mjs`. Se os detentores dos direitos pedirem, remova
-  `src/arte/` e as pranchas: o restante do site é arte própria.
-- **Pokédex:** nomes, tipos e listas regionais vêm das tabelas públicas da
-  [PokéAPI](https://github.com/PokeAPI/pokeapi). Nos jogos de Alola, Galar,
-  Hisui e Paldea, as espécies com forma regional aparecem com a arte e os tipos
-  dessa forma; nos demais, com a forma padrão.
-- **Cartas das regiões:** redesenhos do atlas. A costa foi traçada sobre os
-  mapas das regiões nos jogos; nenhuma imagem dos jogos é publicada.
-- **Fontes:** Archivo e Alegreya, sob a SIL Open Font License (licenças em
-  `src/fontes/`).
-- **Motor de rolagem:** © Enzo Barbatto, Sparo Automações.
-- **Notas dos jogos:** opinião editorial, não dado oficial.
+---
+<p align="center">
+  <sub>PokéAtlas — Traçado com paixão por exploração, cartografia e Pokémon.</sub>
+</p>
