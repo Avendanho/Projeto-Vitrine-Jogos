@@ -143,8 +143,8 @@ function concluir(rolar) {
   }
 
   resultado.hidden = false;
-  history.replaceState(null, "", `#r=${respostas.join("")}`);
   if (rolar) {
+    history.replaceState(null, "", `#r=${respostas.join("")}`);
     const titulo = resultado.querySelector("h2");
     titulo.focus({ preventScroll: true });
     titulo.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });

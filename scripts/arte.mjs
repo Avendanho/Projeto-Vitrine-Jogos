@@ -135,8 +135,9 @@ await mkdir(pasta, { recursive: true });
 let ids = pedidos;
 if (!ids.length) {
   if (mini) {
-    const { dex } = JSON.parse(await readFile(join(RAIZ, "dados", "pokedex.json"), "utf8"));
-    ids = [...new Set(Object.values(dex).flat().map(([, especie]) => especie))].sort((a, b) => a - b);
+    const { dex, formas } = JSON.parse(await readFile(join(RAIZ, "dados", "pokedex.json"), "utf8"));
+    const regionais = Object.values(formas).flatMap((f) => Object.values(f).map(([id]) => id));
+    ids = [...new Set([...Object.values(dex).flat().map(([, especie]) => especie), ...regionais])].sort((a, b) => a - b);
   } else {
     ids = await idsDosDados();
   }

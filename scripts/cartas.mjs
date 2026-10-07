@@ -15,6 +15,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { criarMalha, aneis, ruido, NIVEIS } from "../src/js/relevo.js";
+import { MAPAS, ROTAS } from "../dados/atlas.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -31,9 +32,10 @@ if (!REF) { console.error("Informe --ref <pasta das imagens de referência>."); 
 
 const ciano = (r, g, b) => (b > g && g > r + 60 && r < 110) ||     // mar dos mapas em pixel
   (g > 232 && b > 208 && r > 130 && r < 206);                      // e os lagos, em verde-água claro
-const laranja = (r, g, b) => r >= 236 && g >= 148 && g <= 212 && b <= 132;
-const cidadeVermelha = (r, g, b) => r > 196 && g < 140 && b < 150;
-const cidadeAzul = (r, g, b) => b > 196 && g < 160 && r < 140;
+// as faixas de rota e os quadradinhos de cidade, incluindo a borda escura e o lado sombreado de cada um
+const laranja = (r, g, b) => r >= 188 && g >= 108 && g <= 216 && b <= 140 && r - g >= 40 && r - b >= 80;
+const cidadeVermelha = (r, g, b) => r > 136 && g < 140 && b < 150 && r - g >= 56;
+const cidadeAzul = (r, g, b) => b > 136 && g < 160 && r < 150 && b - r >= 56 && b - g >= 48;
 const claro = (r, g, b) => r > 208 && g > 208 && b > 208;
 // nos mapas em pixel, a cor do terreno já diz a altitude: verde é baixo, amarelo e oliva são altos
 const altitudePelaCor = (r, g) => (r - g + 64) / 72;
@@ -58,14 +60,15 @@ const PIXEL = {
  *   ilhota    menor mancha de terra que conta, em fração da área (abaixo disso é ruído)
  *   furo      menor mancha de água dentro da terra que conta
  *   semRotas  as rotas desta região são traçadas à mão em dados/atlas.mjs
+ *   ilhas     ilhas pequenas que a referência esconde sob a faixa de uma rota: [x%, y%, raio%]
  */
 const REGIOES = {
   kanto: { arquivo: "kanto.png", recorte: [0, 0, 200, 150], ...PIXEL },
   johto: { arquivo: "johto.png", ...PIXEL },
-  hoenn: { arquivo: "hoenn.png", ...PIXEL },
+  hoenn: { arquivo: "hoenn.png", ...PIXEL, ilhas: [[66, 51, 2.3]] },     // Sootopolis, dentro da cratera
   sinnoh: { arquivo: "sinnoh.png", ...PIXEL },
   unova: {
-    arquivo: "unova.png", semRotas: true,
+    arquivo: "unova.png", semRotas: true, furo: 0.004,        // o miolo azul de cada marcador de cidade não é lago
     mar: (r, g, b) => b > r + 60 && b > g + 18,
     rota: (r, g, b) => r > 215 && g > 150 && g < 225 && b < 150
   },
@@ -201,33 +204,6 @@ function manchas(marca, w, h) {
   return lista;
 }
 
-/* Afinamento de Zhang-Suen: descasca a máscara até restar uma linha de um pixel. */
-function afinar(m, w, h) {
-  const apagar = [];
-  for (let mudou = true; mudou;) {
-    mudou = false;
-    for (let fase = 0; fase < 2; fase++) {
-      apagar.length = 0;
-      for (let y = 1; y < h - 1; y++) {
-        for (let x = 1; x < w - 1; x++) {
-          const i = y * w + x;
-          if (!m[i]) continue;
-          const p2 = m[i - w], p3 = m[i - w + 1], p4 = m[i + 1], p5 = m[i + w + 1];
-          const p6 = m[i + w], p7 = m[i + w - 1], p8 = m[i - 1], p9 = m[i - w - 1];
-          const vizinhos = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
-          if (vizinhos < 2 || vizinhos > 6) continue;
-          const voltas = (!p2 && p3) + (!p3 && p4) + (!p4 && p5) + (!p5 && p6) + (!p6 && p7) + (!p7 && p8) + (!p8 && p9) + (!p9 && p2);
-          if (voltas !== 1) continue;
-          if (fase === 0 ? (p2 && p4 && p6) || (p4 && p6 && p8) : (p2 && p4 && p8) || (p2 && p6 && p8)) continue;
-          apagar.push(i);
-        }
-      }
-      for (const i of apagar) m[i] = 0;
-      if (apagar.length) mudou = true;
-    }
-  }
-}
-
 /* Distância de um ponto à reta entre dois outros, para simplificar linhas. */
 function simplificar(pts, tolerancia) {
   if (pts.length < 3) return pts;
@@ -242,56 +218,51 @@ function simplificar(pts, tolerancia) {
   return [...simplificar(pts.slice(0, onde + 1), tolerancia).slice(0, -1), ...simplificar(pts.slice(onde), tolerancia)];
 }
 
-/* Percorre a linha de um pixel e devolve um caminho de segmentos retos. */
-function linhasDoEixo(m, w, h, farpa) {
-  const vizinhos = (i) => {
-    const x = i % w, y = (i / w) | 0, lista = [];
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const xx = x + dx, yy = y + dy;
-      if (xx >= 0 && yy >= 0 && xx < w && yy < h && m[yy * w + xx]) lista.push(yy * w + xx);
+/* O ponto da faixa mais próximo de (px, py), dentro de um raio pequeno. */
+function encaixar(faixa, w, h, px, py) {
+  let melhor = -1, menor = 1e9;
+  for (let y = Math.max(0, Math.floor(py - 9)); y <= Math.min(h - 1, py + 9); y++) {
+    for (let x = Math.max(0, Math.floor(px - 9)); x <= Math.min(w - 1, px + 9); x++) {
+      if (!faixa[y * w + x]) continue;
+      const d = (x + 0.5 - px) ** 2 + (y + 0.5 - py) ** 2;
+      if (d < menor) { menor = d; melhor = y * w + x; }
     }
-    // a diagonal só conta quando não há caminho em L pelos lados
-    for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {
-      const xx = x + dx, yy = y + dy;
-      if (xx < 0 || yy < 0 || xx >= w || yy >= h || !m[yy * w + xx]) continue;
-      if (m[y * w + xx] || m[yy * w + x]) continue;
-      lista.push(yy * w + xx);
-    }
-    return lista;
-  };
-  const usado = new Set();
-  const chave = (a, b) => (a < b ? a * w * h + b : b * w * h + a);
-  const pontos = [];
-  for (let i = 0; i < w * h; i++) if (m[i]) pontos.push(i);
-  const grau = new Map(pontos.map((i) => [i, vizinhos(i).length]));
-  const linhas = [];
-  function seguir(inicio, primeiro) {
-    const linha = [inicio];
-    let anterior = inicio, atual = primeiro;
-    usado.add(chave(inicio, primeiro));
-    for (;;) {
-      linha.push(atual);
-      if (grau.get(atual) !== 2) break;
-      const proximo = vizinhos(atual).find((v) => v !== anterior && !usado.has(chave(atual, v)));
-      if (proximo === undefined) break;
-      usado.add(chave(atual, proximo));
-      anterior = atual; atual = proximo;
-    }
-    linhas.push(linha);
   }
-  for (const i of pontos) if (grau.get(i) !== 2) for (const v of vizinhos(i)) if (!usado.has(chave(i, v))) seguir(i, v);
-  for (const i of pontos) for (const v of vizinhos(i)) if (!usado.has(chave(i, v))) seguir(i, v);   // voltas fechadas
+  return melhor;
+}
 
-  const ex = LARGURA / w, ey = (LARGURA * h) / w / h;
-  let d = "";
-  for (const linha of linhas) {
-    const pts = simplificar(linha.map((i) => [i % w + 0.5, ((i / w) | 0) + 0.5]), 1.3);
-    const comprimento = pts.reduce((s, p, k) => (k ? s + Math.hypot(p[0] - pts[k - 1][0], p[1] - pts[k - 1][1]) : 0), 0);
-    const ponta = grau.get(linha[0]) === 1 || grau.get(linha[linha.length - 1]) === 1;
-    if (ponta && comprimento < Math.min(w, h) * farpa) continue;      // farpas do afinamento
-    d += pts.map((p, k) => `${k ? "L" : "M"}${Math.round(p[0] * ex)} ${Math.round(p[1] * ey)}`).join("");
+/* Menor caminho entre dois pontos andando só pela faixa das rotas. Andar perto
+ * da borda custa mais, então o traçado segue o meio da faixa. */
+function menorCaminho(faixa, folga, w, h, inicio, fim) {
+  const custo = new Float64Array(w * h).fill(Infinity);
+  const veio = new Int32Array(w * h).fill(-1);
+  const pilha = [[0, inicio]];
+  custo[inicio] = 0;
+  const subir = (i) => { while (i > 0) { const pai = (i - 1) >> 1; if (pilha[pai][0] <= pilha[i][0]) break; [pilha[pai], pilha[i]] = [pilha[i], pilha[pai]]; i = pai; } };
+  const descer = (i) => { for (;;) { let m = i; const a = 2 * i + 1, b = a + 1; if (a < pilha.length && pilha[a][0] < pilha[m][0]) m = a; if (b < pilha.length && pilha[b][0] < pilha[m][0]) m = b; if (m === i) break; [pilha[m], pilha[i]] = [pilha[i], pilha[m]]; i = m; } };
+  while (pilha.length) {
+    const [c, i] = pilha[0];
+    const ultimo = pilha.pop();
+    if (pilha.length) { pilha[0] = ultimo; descer(0); }
+    if (c > custo[i]) continue;
+    if (i === fim) break;
+    const x = i % w, y = (i / w) | 0;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue;
+        const xx = x + dx, yy = y + dy;
+        if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+        const j = yy * w + xx;
+        if (!faixa[j]) continue;
+        const passo = (dx && dy ? 1.414 : 1) * (1 + 9 / (1 + folga[j] * folga[j]));
+        if (c + passo < custo[j]) { custo[j] = c + passo; veio[j] = i; pilha.push([c + passo, j]); subir(pilha.length - 1); }
+      }
+    }
   }
-  return d;
+  if (custo[fim] === Infinity) return null;
+  const linha = [];
+  for (let i = fim; i !== -1; i = veio[i]) linha.push(i);
+  return linha.reverse();
 }
 
 /* ---------- da grade de pixels ao caminho vetorial ---------- */
@@ -369,6 +340,11 @@ async function tracar(id) {
   limparManchas(mascara, w, h, 1, Math.max(10, Math.round(n * (c.ilhota || 0.0007))));   // ilhotas falsas: rótulos, ícones, nuvens
   limparManchas(mascara, w, h, 0, Math.max(10, Math.round(n * (c.furo || 0.0007))));     // furos falsos: marcadores sobre a terra
 
+  for (const [ix, iy, raio] of c.ilhas || []) {
+    const r = (raio / 100) * w;
+    for (let i = 0; i < n; i++) if (Math.hypot((i % w) - (ix / 100) * w, ((i / w) | 0) - (iy / 100) * h) <= r) mascara[i] = 1;
+  }
+
   // 2. relevo: 0 no mar; em terra, 1 na costa subindo até 5 nos cumes
   const raio = Math.max(1, Math.min(w, h) / 110);
   const terraSuave = borrar(Float32Array.from(mascara), w, h, raio);
@@ -408,19 +384,42 @@ async function tracar(id) {
   const nos = id === "galar" ? 96 : 190;
   const niveis = tracarNiveis(campo, w, h, [...NIVEIS], nos);
 
-  // 3. rotas: a faixa larga do mapa é afinada até sobrar só o eixo, que vira linha
-  let rotas = "";
-  if (c.rota && !c.semRotas) {
-    // marcos e lagos ficam como furos dentro da faixa: tapados, não viram laço
-    const faixa = Uint8Array.from(rota);
-    limparManchas(faixa, w, h, 0, Math.round(n * 0.012));
-    // ampliada e arredondada antes de afinar: quadrados de cidade deixam de soltar farpas nas quinas
-    const W = w * 2, H = h * 2;
-    const dobro = new Float32Array(W * H);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) dobro[y * W + x] = faixa[(y >> 1) * w + (x >> 1)];
-    const redonda = Uint8Array.from(borrar(dobro, W, H, 3), (v) => (v > 0.5 ? 1 : 0));
-    afinar(redonda, W, H);
-    rotas = linhasDoEixo(redonda, W, H, 0.045);
+  // 3. rotas: cada uma é o menor caminho, pela faixa do mapa, entre os dois lugares que ela liga
+  const rotas = [];
+  const pedidas = ROTAS[id] || [];
+  if (c.rota && !c.semRotas && pedidas.length) {
+    // engordada em um pixel: fecha as frestas que o lado sombreado dos quadradinhos deixa na faixa
+    const faixa = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
+      if (!rota[i]) continue;
+      const x = i % w, y = (i / w) | 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const xx = x + dx, yy = y + dy;
+        if (xx >= 0 && yy >= 0 && xx < w && yy < h) faixa[yy * w + xx] = 1;
+      }
+    }
+    limparManchas(faixa, w, h, 0, 90);                          // marcos e lagos são furos na faixa: tapados
+    const folga = distanciaAoMar(faixa, w, h);                    // distância de cada ponto à borda da faixa
+    if (CONFERIR) {
+      // a faixa por onde as rotas podem passar, para achar interrupções a olho
+      await mkdir(CONFERIR, { recursive: true });
+      await sharp(Buffer.from(Uint8Array.from(faixa, (v) => v * 255)), { raw: { width: w, height: h, channels: 1 } })
+        .resize(w * 5, h * 5, { kernel: "nearest" }).png().toFile(join(CONFERIR, `${id}-faixa.png`));
+    }
+    const lugares = Object.fromEntries([...MAPAS[id].cidades, ...MAPAS[id].marcos].map(([nome, x, y]) => [nome, [x, y]]));
+    for (const r of pedidas) {
+      const paradas = [r.de, ...(r.via || []), r.para].map((p) => (typeof p === "string" ? lugares[p] : p));
+      let linha = [];
+      for (let k = 0; k < paradas.length - 1; k++) {
+        const a = encaixar(faixa, w, h, (paradas[k][0] / 100) * w, (paradas[k][1] / 100) * h);
+        const b = encaixar(faixa, w, h, (paradas[k + 1][0] / 100) * w, (paradas[k + 1][1] / 100) * h);
+        const trecho = a >= 0 && b >= 0 ? menorCaminho(faixa, folga, w, h, a, b) : null;
+        if (!trecho) throw new Error(`${id}: sem caminho pela faixa para a rota ${r.n} (${JSON.stringify(paradas[k])} -> ${JSON.stringify(paradas[k + 1])})`);
+        linha = linha.concat(k ? trecho.slice(1) : trecho);
+      }
+      const pts = simplificar(linha.map((i) => [i % w + 0.5, ((i / w) | 0) + 0.5]), 1.1);
+      rotas.push(pts.map(([x, y]) => [+((x / w) * 100).toFixed(1), +((y / h) * 100).toFixed(1)]));
+    }
   }
 
   const resultado = { proporcao: +(w / h).toFixed(4), altura: Math.round((LARGURA * h) / w), niveis, rotas };
@@ -448,7 +447,7 @@ async function conferir(id, c, w, h, carta, cidades) {
     <g transform="scale(${esc})" fill="none">
       <path d="${carta.niveis[0]}" stroke="#E4007C" stroke-width="2.4"/>
       <path d="${carta.niveis.slice(1).join("")}" stroke="#E4007C" stroke-width="1" stroke-opacity=".6"/>
-      <path d="${carta.rotas}" stroke="#0057FF" stroke-width="4" stroke-linejoin="round"/>
+      <path d="${carta.rotas.map((r) => r.map(([x, y], k) => `${k ? "L" : "M"}${x * 10} ${(y * carta.altura) / 100}`).join("")).join("")}" stroke="#0057FF" stroke-width="4" stroke-linejoin="round"/>
     </g>${grade}${marcas}</svg>`;
   await mkdir(CONFERIR, { recursive: true });
   await sharp(fundo).composite([{ input: Buffer.from(svg) }]).png().toFile(join(CONFERIR, `${id}.png`));
@@ -464,7 +463,7 @@ try { cartas = JSON.parse(await readFile(destino, "utf8")); } catch { /* primeir
 for (const id of pedidas) {
   const { resultado, cidades } = await tracar(id);
   cartas[id] = resultado;
-  const tamanho = resultado.niveis.join("").length + resultado.rotas.length;
+  const tamanho = resultado.niveis.join("").length + JSON.stringify(resultado.rotas).length;
   console.log(`${id}: ${Math.round(tamanho / 1024)} KB de traçado, proporção ${resultado.proporcao}` +
     (cidades.length ? `\n  cidades detectadas: ${cidades.map((p, i) => `${i}(${Math.round(p.x * 100)},${Math.round(p.y * 100)})`).join(" ")}` : ""));
 }

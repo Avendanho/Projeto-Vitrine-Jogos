@@ -5,12 +5,12 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JOGOS } from "../dados/jogos.mjs";
 import { ESPECIES } from "../dados/especies.mjs";
-import { REGIOES, CONSOLES, ESTILOS, PEDIDOS, MAPAS } from "../dados/atlas.mjs";
+import { REGIOES, CONSOLES, ESTILOS, PEDIDOS, MAPAS, ROTAS } from "../dados/atlas.mjs";
 import { cartaSVG } from "./cenario.mjs";
 import { svgIlha, valoresDe, sementeDe, malhaQuadrada, EIXOS } from "../src/js/relevo.js";
 import {
   paginaInicio, paginaBiblioteca, paginaJogo, paginaLinha, paginaComparar, paginaBussola,
-  paginaRegiao, paginaRegioes, indiceDeEspecies,
+  paginaRegiao, paginaRegioes, indiceDeEspecies, rotasDaCarta,
   pagina404, dadosDoNavegador, DEMO_COMPARAR, MAR, TINTA, POKEDEX, CARTAS
 } from "./paginas.mjs";
 
@@ -41,6 +41,12 @@ function conferir() {
     if (!CARTAS[r.id]) erros.push(`${r.id}: sem traçado em cartas.json (rode scripts/cartas.mjs)`);
     const m = MAPAS[r.id];
     if (!m) { erros.push(`${r.id}: sem lugares em MAPAS`); continue; }
+    const rotas = ROTAS[r.id] || [];
+    if (!rotas.length && !m.semRotas) erros.push(`${r.id}: sem rotas e sem a frase "semRotas"`);
+    const calculadas = rotas.filter((t) => !t.pts).length;
+    if (calculadas && (CARTAS[r.id]?.rotas || []).length !== rotas.length) erros.push(`${r.id}: rotas de cartas.json fora de sincronia com ROTAS (rode scripts/cartas.mjs)`);
+    const nomes = new Set([...m.cidades, ...m.marcos].map((l) => l[0]));
+    for (const t of rotas) for (const ponta of [t.de, t.para]) if (typeof ponta === "string" && !nomes.has(ponta)) erros.push(`${r.id}: rota ${t.n || t.nome} cita "${ponta}", que não está na carta`);
     for (const [nome, x, y] of [...m.cidades, ...m.marcos, ...(m.areas || [])]) {
       if (!(x >= 0 && x <= 100 && y >= 0 && y <= 100)) erros.push(`${r.id}: ${nome} fora do quadro`);
     }
@@ -91,7 +97,7 @@ const [demoA, demoB] = DEMO_COMPARAR.map((slug) => JOGOS.find((j) => j.slug === 
 await escrever("ilhas/demo-a.svg", svgIlha(valoresDe(demoA.atributos), sementeDe(demoA.slug), "#1F7BA6", malha));
 await escrever("ilhas/demo-b.svg", svgIlha(valoresDe(demoB.atributos), sementeDe(demoB.slug), "#C4391F", malha));
 
-for (const r of REGIOES) await escrever(`cartas/${r.id}.svg`, cartaSVG(CARTAS[r.id], MAPAS[r.id]));
+for (const r of REGIOES) await escrever(`cartas/${r.id}.svg`, cartaSVG(CARTAS[r.id], MAPAS[r.id], rotasDaCarta(r.id)));
 
 await escrever("js/dados.js", dadosDoNavegador());
 await escrever("js/onde.js", indiceDeEspecies());

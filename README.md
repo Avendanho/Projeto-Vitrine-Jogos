@@ -16,7 +16,7 @@ Creatures ou The Pokémon Company.
 | Bússola | `/bussola/` | Oito perguntas; o relevo do visitante se desenha a cada resposta e o resultado explica cada recomendação |
 | Biblioteca | `/biblioteca/` | Os 30 jogos, filtráveis por geração, região, console, estilo e perfil de jogador, e por Pokémon ("em quais jogos está o Lucario?") |
 | Jogo | `/jogos/<nome>/` | Página de cada título: relevo, ficha, para quem é, espécimes, Pokédex completa com busca e filtro por tipo, jogos parecidos |
-| Regiões | `/regioes/` e `/regioes/<nome>/` | A carta de cada região, redesenhada a partir do mapa dos jogos, com cidades, marcos e rotas |
+| Regiões | `/regioes/` e `/regioes/<nome>/` | A carta de cada região, redesenhada a partir do mapa dos jogos, com cidades, marcos e rotas numeradas; a lista e a carta se destacam uma à outra |
 | Linha do tempo | `/linha-do-tempo/` | De 1996 a 2027, com filtro por categoria |
 | Comparar | `/comparar/` | Dois ou três jogos sobrepostos, nota por nota |
 
@@ -79,19 +79,27 @@ PokéAPI (por exemplo `[["galar", "Galar"]]`). Jogo sem lista confiável leva
 Cada carta tem duas partes:
 
 - **O traçado** (`dados/cartas.json`): costa, faixas de altitude e, nos mapas
-  antigos, as rotas. É extraído por `scripts/cartas.mjs` de uma imagem de
-  referência do mapa de cada região, separando terra e mar pela cor. As imagens
-  de referência não ficam no repositório; para retraçar, baixe os mapas das
-  regiões (kanto.png, johto.png, ... paldea.jpg) numa pasta e passe-a em
-  `--ref`. Com `--conferir <pasta>` o script grava a referência com o traçado
-  por cima, para conferir a olho.
-- **Os lugares** (`MAPAS` em `dados/atlas.mjs`): cidades, marcos e, onde o mapa
-  não traz rotas em faixa, as rotas, tudo marcado à mão em porcentagem do
-  quadro. Para mover um nome que encavalou, troque o quarto valor do lugar
-  (`d`, `e`, `c` ou `b`: direita, esquerda, cima, baixo).
+  antigos, o caminho de cada rota. É extraído por `scripts/cartas.mjs` de uma
+  imagem de referência do mapa de cada região, separando terra e mar pela cor.
+  As imagens de referência não ficam no repositório; para retraçar, baixe os
+  mapas das regiões (kanto.png, johto.png, ... paldea.jpg) numa pasta e passe-a
+  em `--ref`. Com `--conferir <pasta>` o script grava a referência com o
+  traçado por cima, para conferir a olho.
+- **Os lugares** (`MAPAS` em `dados/atlas.mjs`): cidades e marcos, marcados à
+  mão em porcentagem do quadro. Para mover um nome que encavalou, troque o
+  quarto valor do lugar (`d`, `e`, `c` ou `b`: direita, esquerda, cima, baixo).
+- **As rotas** (`ROTAS` em `dados/atlas.mjs`): cada rota diz o número e os dois
+  lugares que liga. Em Kanto, Johto, Hoenn e Sinnoh o caminho é calculado pelo
+  script, que procura o trajeto mais curto pela faixa da rota no mapa de
+  referência; depois de mexer nessas rotas, rode `npm run cartas` de novo. Em
+  Unova, Kalos e Galar o caminho é marcado à mão (`pts`). O número de cada rota
+  é posicionado no build, no ponto livre mais próximo do meio dela.
 
-O relevo é interpretação do atlas. As rotas não têm numeração, e a carta de
-Unova segue o mapa de Black 2 e White 2.
+O relevo é interpretação do atlas, e a carta de Unova segue o mapa de Black 2 e
+White 2. Rotas vizinhas que formam um só caminho aparecem juntas ("3–4").
+Ramais e rotas isoladas ficaram de fora (por exemplo as Rotas 125 e 126 de
+Hoenn, a 224 e a 227 de Sinnoh, a 10, a 17, a 18 e a 21 de Unova). Alola, Hisui
+e Paldea não mostram rotas, e a página de cada uma explica por quê.
 
 ## Publicar
 
@@ -124,8 +132,9 @@ O `vercel.json` já define o build (`node scripts/build.mjs`) e a pasta de saíd
   por `scripts/arte.mjs`. Se os detentores dos direitos pedirem, remova
   `src/arte/` e as pranchas: o restante do site é arte própria.
 - **Pokédex:** nomes, tipos e listas regionais vêm das tabelas públicas da
-  [PokéAPI](https://github.com/PokeAPI/pokeapi). Arte e tipos são os da forma
-  padrão de cada espécie; formas regionais não são distinguidas.
+  [PokéAPI](https://github.com/PokeAPI/pokeapi). Nos jogos de Alola, Galar,
+  Hisui e Paldea, as espécies com forma regional aparecem com a arte e os tipos
+  dessa forma; nos demais, com a forma padrão.
 - **Cartas das regiões:** redesenhos do atlas. A costa foi traçada sobre os
   mapas das regiões nos jogos; nenhuma imagem dos jogos é publicada.
 - **Fontes:** Archivo e Alegreya, sob a SIL Open Font License (licenças em

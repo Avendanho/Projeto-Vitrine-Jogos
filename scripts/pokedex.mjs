@@ -29,8 +29,8 @@ async function tabela(nome) {
   return linhas.map((l) => Object.fromEntries(l.split(",").map((v, i) => [colunas[i], v])));
 }
 
-const [dexes, numeros, nomes, tiposDe, tipos] = await Promise.all(
-  ["pokedexes", "pokemon_dex_numbers", "pokemon_species_names", "pokemon_types", "types"].map(tabela));
+const [dexes, numeros, nomes, tiposDe, tipos, pokemon] = await Promise.all(
+  ["pokedexes", "pokemon_dex_numbers", "pokemon_species_names", "pokemon_types", "types", "pokemon"].map(tabela));
 
 const idTipo = Object.fromEntries(tipos.map((t) => [t.id, t.identifier]));
 const especies = {};
@@ -49,8 +49,23 @@ for (const n of numeros) {
 }
 for (const lista of Object.values(dex)) lista.sort((a, b) => a[0] - b[0]);
 
+/* Formas regionais: em Alola, Galar, Hisui e Paldea, algumas espécies têm uma
+ * forma própria, com outra arte e outros tipos. Para cada região, guarda-se
+ * espécie -> [id da forma, tipos]. Formas de totem, de boné e afins ficam de fora. */
+const formas = { alola: {}, galar: {}, hisui: {}, paldea: {} };
+const tiposDaForma = {};
+for (const t of tiposDe) (tiposDaForma[t.pokemon_id] ??= []).push(TIPOS[idTipo[t.type_id]]);
+for (const p of pokemon.sort((a, b) => a.id - b.id)) {
+  if (Number(p.id) < 10000 || /totem|-cap$|gmax|starter/.test(p.identifier)) continue;
+  for (const regiao of Object.keys(formas)) {
+    const ehDaRegiao = p.identifier.endsWith(`-${regiao}`) || p.identifier.includes(`-${regiao}-`);
+    if (ehDaRegiao && !formas[regiao][p.species_id]) formas[regiao][p.species_id] = [Number(p.id), tiposDaForma[p.id]];
+  }
+}
+
 const semTipo = Object.entries(especies).filter(([, v]) => !v[1].length || v[1].includes(undefined));
 if (semTipo.length) throw new Error(`espécies sem tipo: ${semTipo.map(([k]) => k).join(", ")}`);
 
-await writeFile(join(RAIZ, "dados", "pokedex.json"), JSON.stringify({ especies, dex }), "utf8");
-console.log(`pokedex.json: ${Object.keys(especies).length} espécies, ${Object.keys(dex).length} Pokédex regionais`);
+await writeFile(join(RAIZ, "dados", "pokedex.json"), JSON.stringify({ especies, dex, formas }), "utf8");
+console.log(`pokedex.json: ${Object.keys(especies).length} espécies, ${Object.keys(dex).length} Pokédex regionais, ` +
+  `formas regionais: ${Object.entries(formas).map(([r, f]) => `${r} ${Object.keys(f).length}`).join(", ")}`);

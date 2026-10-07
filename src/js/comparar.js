@@ -84,7 +84,7 @@ function desenharTabela(pares) {
   <tbody>${linhas.map(([titulo, valor]) => `<tr><th scope="row">${titulo}</th>${pares.map(({ jogo }) => `<td>${valor(jogo)}</td>`).join("")}</tr>`).join("")}</tbody>`;
 }
 
-function atualizar() {
+function atualizar(gravar = true) {
   const pares = escolhidos();
   ilha.definir(pares.map(({ serie, jogo }) => ({
     valores: jogo.valores, semente: sementeDe(jogo.slug),
@@ -98,9 +98,9 @@ function atualizar() {
 
   const nova = new URLSearchParams();
   for (const s of SERIES) if (formulario.elements[s.id].value) nova.set(s.id, formulario.elements[s.id].value);
-  history.replaceState(null, "", `?${nova}`);
+  if (gravar) history.replaceState(null, "", `?${nova}`);
 }
 
-formulario.addEventListener("change", atualizar);
+formulario.addEventListener("change", () => atualizar());
 formulario.addEventListener("submit", (e) => e.preventDefault());
-atualizar();
+atualizar(false);

@@ -136,3 +136,20 @@ Escolhas feitas na entrevista:
   outros dez dizem por que não têm Pokédex, em vez de exibir lista inventada.
 - **Melhorias aceitas** — busca por Pokémon na biblioteca ("onde ele está"),
   página própria por região, e tipos com filtro na Pokédex.
+
+## Terceira rodada
+
+Pedido: numerar as rotas, com liberdade para outras melhorias.
+
+- **Rotas numeradas** em sete cartas (Kanto, Johto, Hoenn, Sinnoh, Unova, Kalos
+  e Galar), com a lista de cada rota e os dois lugares que ela liga. Só entram
+  números de que o atlas tem certeza; ramais ficam de fora, e Alola, Hisui e
+  Paldea explicam por que não mostram rotas.
+- **Lista e carta ligadas:** apontar ou tocar um lugar ou uma rota num dos dois
+  destaca o par no outro. No celular, tocar um número da carta mostra o nome.
+- **Formas regionais na Pokédex:** nos jogos de Alola, Galar, Hisui e Paldea, a
+  espécie aparece com a arte e os tipos da forma nativa.
+- **Busca por Pokémon na página inicial**, que leva à biblioteca já filtrada.
+- **"Onde se passa" na página de cada jogo**, com a carta da região.
+- **Correções:** Sootopolis voltou a ser ilha em Hoenn; Unova perdeu os falsos
+  lagos sob as cidades; a transição entre páginas não é mais interrompida.

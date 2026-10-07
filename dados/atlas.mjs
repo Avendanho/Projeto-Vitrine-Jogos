@@ -124,7 +124,6 @@ export const ROMANOS = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "I
  * Cada lugar: [nome, x, y, lado]. x e y são porcentagens do quadro; "lado" diz
  * para onde o nome se afasta do ponto: d (direita), e (esquerda), c (cima), b (baixo).
  * "areas" são nomes de extensões de terra ou mar, escritos sem ponto.
- * "rotas" são linhas [[x, y], ...] para as regiões cujo mapa não traz as rotas em faixa.
  */
 export const MAPAS = {
   kanto: {
@@ -190,14 +189,7 @@ export const MAPAS = {
       ["Castelia City", 51.5, 77, "b"], ["Accumula Town", 90, 82, "e"], ["Aspertia City", 5, 91, "d"],
       ["Nuvema Town", 90, 93, "e"]
     ],
-    marcos: [],
-    rotas: [
-      [[5, 91], [5.5, 78], [12.5, 76], [26.5, 76], [51.5, 77]],
-      [[51.5, 77], [51.5, 54], [28.5, 54], [15.5, 40], [28.5, 26], [51.5, 26], [74, 26], [87.5, 40], [74, 54], [51.5, 54]],
-      [[87.5, 40], [73, 40]],
-      [[51.5, 26], [52.5, 19], [62, 18], [63.5, 14], [66, 8], [76, 9.5], [76.5, 21], [91, 20], [91.5, 30], [87.5, 40]],
-      [[51.5, 77], [79, 70], [89, 70], [90, 82], [90, 93]]
-    ]
+    marcos: []
   },
   kalos: {
     cidades: [
@@ -205,28 +197,18 @@ export const MAPAS = {
       ["Shalour City", 15, 36, "c"], ["Lumiose City", 51.5, 37, "d"], ["Anistar City", 87, 37, "c"],
       ["Pokémon League", 73, 43, "c"], ["Couriway Town", 93, 45, "e"], ["Geosenge Town", 9, 47, "d"],
       ["Snowbelle City", 84, 55, "d"], ["Santalune City", 61, 56, "e"], ["Cyllage City", 17, 57, "e"],
-      ["Camphrier Town", 41, 57, "b"], ["Aquacorde Town", 66, 74, "e"], ["Ambrette Town", 22, 75, "e"],
+      ["Camphrier Town", 41, 57, "d"], ["Aquacorde Town", 66, 74, "e"], ["Ambrette Town", 22, 75, "e"],
       ["Vaniville Town", 66, 85, "e"], ["Kiloude City", 75, 91, "d"]
     ],
     marcos: [
-      ["Poké Ball Factory", 51.5, 6, "e"], ["Parfum Palace", 29, 44, "c"], ["Victory Road", 73, 55, "b"],
+      ["Poké Ball Factory", 51.5, 6, "e"], ["Parfum Palace", 29, 44, "c"], ["Connecting Cave", 22, 57, "b"], ["Victory Road", 73, 55, "b"],
       ["Santalune Forest", 66, 64, "d"], ["Glittering Cave", 36, 75, "d"], ["Pokémon Village", 80, 75, "d"]
-    ],
-    rotas: [
-      [[66, 85], [66, 74], [66, 64], [61, 56], [51.5, 37]],
-      [[51.5, 37], [41, 57], [22, 57], [17, 57], [22, 75], [36, 75]],
-      [[41, 57], [29, 44]],
-      [[17, 57], [9, 47], [12, 40], [15, 36], [34, 30], [51.5, 37]],
-      [[51.5, 6], [51.5, 11], [51.5, 37]],
-      [[51.5, 11], [68, 30], [51.5, 37]],
-      [[68, 30], [87, 37], [93, 45], [84, 55], [80, 75]],
-      [[84, 55], [73, 55], [73, 43]],
-      [[61, 56], [73, 55]]
     ]
   },
   alola: {
+    semRotas: "As rotas de Alola, de 1 a 17, correm por dentro das ilhas e não aparecem numa carta desta escala.",
     cidades: [
-      ["Paniola Town", 61, 20, "e"], ["Hau'oli City", 31, 29, "b"], ["Heahea City", 57, 36, "e"],
+      ["Iki Town", 35, 15.5, "d"], ["Paniola Town", 61, 20, "e"], ["Hau'oli City", 31, 29, "b"], ["Heahea City", 57, 36, "e"],
       ["Konikoni City", 71, 38, "d"], ["Seafolk Village", 20, 45, "d"], ["Po Town", 78, 52, "e"],
       ["Malie City", 90.5, 64, "c"], ["Tapu Village", 86, 81, "b"]
     ],
@@ -241,18 +223,10 @@ export const MAPAS = {
       ["Wedgehurst", 51, 90, "d"], ["Postwick", 51, 96.5, "d"]
     ],
     marcos: [["Slumbering Weald", 30, 97, "e"]],
-    areas: [["Wild Area", 45, 77]],
-    rotas: [
-      [[51, 96.5], [51, 90], [45, 84.5], [47, 76], [48, 71], [48, 65.5]],
-      [[51, 90], [60, 88.3], [69, 86]],
-      [[48, 65.5], [28, 65.7], [17, 65.5], [17, 60], [23, 58.5], [37, 58.2], [71, 58], [73, 62], [70, 65.3], [62, 65.5], [48, 65.5]],
-      [[48, 65.5], [52, 60], [53, 52], [48, 49.7]],
-      [[48, 49.7], [30, 49.7], [27, 47], [23, 44.5], [23, 38], [19, 34.5]],
-      [[48, 49.7], [65, 49.7], [66, 46], [69, 43], [71, 40], [72, 38.5], [80, 37], [88, 38.3], [88, 44], [82, 47.5], [87, 49.5], [81, 49.8], [65, 49.7]],
-      [[48, 49.7], [49, 36], [49, 33], [55, 31.5], [49, 28.5], [49, 21], [48, 13]]
-    ]
+    areas: [["Wild Area", 45, 77]]
   },
   hisui: {
+    semRotas: "Hisui não tem rotas: o território se divide em cinco grandes áreas, todas alcançadas a partir de Jubilife Village.",
     cidades: [["Jubilife Village", 29, 57, "e"]],
     marcos: [
       ["Lake Acuity", 36, 5, "d"], ["Firespit Island", 84, 25, "c"], ["Mount Coronet", 51, 36, "c"],
@@ -264,6 +238,7 @@ export const MAPAS = {
     ]
   },
   paldea: {
+    semRotas: "Paldea não tem rotas numeradas: o mapa é contínuo e se divide em quatro províncias, cada uma com suas áreas.",
     cidades: [
       ["Montenevera", 55, 28, "c"], ["Medali", 40, 46, "c"], ["Porto Marinada", 10, 49, "c"],
       ["Cascarrafa", 29, 52, "c"], ["Zapapico", 63, 54, "c"], ["Levincia", 81, 56, "e"],
@@ -273,7 +248,170 @@ export const MAPAS = {
     marcos: [["Pokémon League", 39, 68, "e"]],
     areas: [
       ["Glaseado Mountain", 52, 21], ["Casseroya Lake", 23, 31], ["Asado Desert", 19, 56],
-      ["Grande Cratera", 48, 60]
+      ["Grande Cratera", 48, 60], ["North Province", 73, 33], ["East Province", 80, 66],
+      ["South Province", 62, 86], ["West Province", 14, 70]
     ]
   }
+};
+
+/* ---------- rotas de cada carta ----------
+ * Cada rota liga dois lugares. "de" e "para" são nomes de lugares da carta ou,
+ * quando a rota termina num entroncamento, um ponto [x, y] com o texto que o
+ * descreve em "desde" ou "ate".
+ *
+ *   n     o número, ou vários ("3–4", "12–15"); vazio quando o trecho não é rota numerada
+ *   nome  como chamar um trecho sem número (ponte, túnel, travessia)
+ *   via   pontos por onde o traçado tem de passar, quando há mais de um caminho
+ *   por   um lugar pelo qual a rota passa, para a descrição
+ *   pts   o traçado inteiro, à mão, nas regiões cujo mapa não traz as rotas em faixa
+ *
+ * Em Kanto, Johto, Hoenn e Sinnoh não há "pts": scripts/cartas.mjs calcula o
+ * traçado sobre a faixa da rota no mapa de referência e o grava em cartas.json.
+ * Só entram números de que o atlas tem certeza; na dúvida, o trecho fica sem número.
+ */
+export const ROTAS = {
+  kanto: [
+    { n: "1", de: "Pallet Town", para: "Viridian City" },
+    { n: "2", de: "Viridian City", para: "Pewter City" },
+    { n: "3–4", de: "Pewter City", para: "Cerulean City" },
+    { n: "5", de: "Cerulean City", para: "Saffron City" },
+    { n: "6", de: "Saffron City", para: "Vermilion City" },
+    { n: "7", de: "Celadon City", para: "Saffron City" },
+    { n: "8", de: "Saffron City", para: "Lavender Town" },
+    { n: "9–10", de: "Cerulean City", para: "Lavender Town", via: [[82, 29]] },
+    { n: "11", de: "Vermilion City", para: [82, 61], ate: "a Rota 12" },
+    { n: "12–15", de: "Lavender Town", para: "Fuchsia City", via: [[82, 61]] },
+    { n: "16–18", de: "Celadon City", para: "Fuchsia City", via: [[38, 62]] },
+    { n: "19–20", de: "Fuchsia City", para: "Cinnabar Island", via: [[40, 88]] },
+    { n: "21", de: "Cinnabar Island", para: "Pallet Town" },
+    { n: "22–23", de: "Viridian City", para: "Indigo Plateau" },
+    { n: "24–25", de: "Cerulean City", para: [73, 18.5], ate: "o Sea Cottage" },
+    { n: "26–27", de: [13.5, 56], desde: "A Rota 22", para: [1.5, 75], ate: "Johto" },
+    { n: "28", de: [13.5, 56], desde: "A Rota 22", para: [1.5, 56], ate: "o Mt. Silver" }
+  ],
+  johto: [
+    { n: "29", de: "New Bark Town", para: "Cherrygrove City" },
+    { n: "30–31", de: "Cherrygrove City", para: "Violet City" },
+    { n: "32–33", de: "Violet City", para: "Azalea Town", via: [[57, 92]] },
+    { n: "34", de: "Azalea Town", para: "Goldenrod City", via: [[34, 92]] },
+    { n: "35", de: "Goldenrod City", para: "National Park" },
+    { n: "36", de: "National Park", para: "Violet City" },
+    { n: "37", de: [46, 44], desde: "A Rota 36", para: "Ecruteak City" },
+    { n: "38–39", de: "Ecruteak City", para: "Olivine City" },
+    { n: "40–41", de: "Olivine City", para: "Cianwood City" },
+    { n: "42", de: "Ecruteak City", para: "Mahogany Town" },
+    { n: "43", de: "Mahogany Town", para: "Lake of Rage" },
+    { n: "44", de: "Mahogany Town", para: "Blackthorn City" },
+    { n: "45–46", de: "Blackthorn City", para: [81.5, 79], ate: "a Rota 29" },
+    { n: "27", de: "New Bark Town", para: [98.5, 79], ate: "Kanto" },
+    { n: "47–48", de: "Cianwood City", para: [1.5, 73], ate: "a Safari Zone" }
+  ],
+  hoenn: [
+    { n: "101", de: "Littleroot Town", para: "Oldale Town" },
+    { n: "102", de: "Oldale Town", para: "Petalburg City" },
+    { n: "103", de: "Oldale Town", para: [29.5, 54], ate: "a Rota 110" },
+    { n: "104", de: "Petalburg City", para: "Rustboro City" },
+    { n: "105–106", de: "Petalburg City", para: "Dewford Town", via: [[5, 75]] },
+    { n: "107–109", de: "Dewford Town", para: "Slateport City" },
+    { n: "110", de: "Slateport City", para: "Mauville City" },
+    { n: "111, 113", de: "Mauville City", para: "Fallarbor Town", via: [[29, 26]] },
+    { n: "112", de: [29, 31], desde: "A Rota 111", para: "Lavaridge Town" },
+    { n: "114–115", de: "Fallarbor Town", para: "Rustboro City", via: [[9, 24]] },
+    { n: "116", de: "Rustboro City", para: "Verdanturf Town" },
+    { n: "117", de: "Verdanturf Town", para: "Mauville City" },
+    { n: "118–119", de: "Mauville City", para: "Fortree City", via: [[34.5, 32]] },
+    { n: "120–121", de: "Fortree City", para: "Lilycove City" },
+    { n: "122–123", de: [47, 30], desde: "A Rota 121", para: [34.5, 43], ate: "a Rota 118", via: [[47, 40]] },
+    { n: "124", de: "Lilycove City", para: "Mossdeep City" },
+    { n: "127–128", de: "Mossdeep City", para: "Ever Grande City" },
+    { n: "129–131", de: "Ever Grande City", para: "Pacifidlog Town" },
+    { n: "132–134", de: "Pacifidlog Town", para: "Slateport City" }
+  ],
+  sinnoh: [
+    { n: "201", de: "Twinleaf Town", para: "Sandgem Town" },
+    { n: "202", de: "Sandgem Town", para: "Jubilife City" },
+    { n: "203", de: "Jubilife City", para: "Oreburgh City" },
+    { n: "204", de: "Jubilife City", para: "Floaroma Town" },
+    { n: "205", de: "Floaroma Town", para: "Eterna City" },
+    { n: "206–207", de: "Eterna City", para: "Oreburgh City", via: [[31, 62]] },
+    { n: "208", de: [31, 70], desde: "A Rota 207", para: "Hearthome City" },
+    { n: "209", de: "Hearthome City", para: "Solaceon Town" },
+    { n: "210", de: "Solaceon Town", para: "Celestic Town" },
+    { n: "211", de: "Eterna City", para: "Celestic Town" },
+    { n: "212", de: "Hearthome City", para: "Pastoria City" },
+    { n: "213", de: "Pastoria City", para: "Lake Valor" },
+    { n: "214", de: "Lake Valor", para: "Veilstone City" },
+    { n: "215", de: "Veilstone City", para: [57, 54], ate: "a Rota 210" },
+    { n: "216–217", de: [41, 46], desde: "O Mt. Coronet", para: "Snowpoint City" },
+    { n: "218", de: "Jubilife City", para: "Canalave City" },
+    { n: "219–221", de: "Sandgem Town", para: [32, 94], ate: "o Pal Park" },
+    { n: "222", de: "Lake Valor", para: "Sunyshore City" },
+    { n: "223", de: "Sunyshore City", para: "Pokémon League" },
+    { n: "225", de: "Fight Area", para: "Survival Area" },
+    { n: "226, 228", de: "Survival Area", para: "Resort Area" },
+    { n: "229–230", de: "Resort Area", para: "Fight Area" }
+  ],
+  unova: [
+    { n: "1", de: "Nuvema Town", para: "Accumula Town", pts: [[90, 93], [90, 82]] },
+    { n: "2", de: "Accumula Town", para: "Striaton City", pts: [[90, 82], [89, 70]] },
+    { n: "3", de: "Striaton City", para: "Nacrene City", pts: [[89, 70], [79, 70]] },
+    { n: "", nome: "Skyarrow Bridge", de: "Nacrene City", para: "Castelia City", pts: [[79, 70], [51.5, 77]] },
+    { n: "4", de: "Castelia City", para: "Nimbasa City", pts: [[51.5, 77], [51.5, 54]] },
+    { n: "5", de: "Nimbasa City", para: "Driftveil City", pts: [[51.5, 54], [28.5, 54]] },
+    { n: "6", de: "Driftveil City", para: "Mistralton City", pts: [[28.5, 54], [15.5, 40]] },
+    { n: "7", de: "Mistralton City", para: "Icirrus City", pts: [[15.5, 40], [28.5, 26]] },
+    { n: "8–9", de: "Icirrus City", para: "Opelucid City", pts: [[28.5, 26], [51.5, 26]] },
+    { n: "11–12", de: "Opelucid City", para: "Lacunosa Town", pts: [[51.5, 26], [74, 26]] },
+    { n: "13", de: "Lacunosa Town", para: "Undella Town", pts: [[74, 26], [87.5, 40]] },
+    { n: "14", de: "Undella Town", para: "Black City e White Forest", pts: [[87.5, 40], [74, 54]] },
+    { n: "15–16", de: "Black City e White Forest", para: "Nimbasa City", pts: [[74, 54], [51.5, 54]] },
+    { n: "", nome: "Reversal Mountain", de: "Undella Town", para: "Lentimas Town", pts: [[87.5, 40], [73, 40]] },
+    { n: "", nome: "Marine Tube", de: "Undella Town", para: "Humilau City", pts: [[87.5, 40], [91.5, 30], [91, 20]] },
+    { n: "22–23", de: "Humilau City", para: "Pokémon League", pts: [[91, 20], [76.5, 21], [76, 9.5], [66, 8]] },
+    { n: "19", de: "Aspertia City", para: "Floccesy Town", pts: [[5, 91], [5.5, 78], [12.5, 76]] },
+    { n: "20", de: "Floccesy Town", para: "Virbank City", pts: [[12.5, 76], [26.5, 76]] },
+    { n: "", nome: "Travessia de barco", de: "Virbank City", para: "Castelia City", pts: [[26.5, 76], [51.5, 77]] }
+  ],
+  kalos: [
+    { n: "1", de: "Vaniville Town", para: "Aquacorde Town", pts: [[66, 85], [66, 74]] },
+    { n: "2", de: "Aquacorde Town", para: "Santalune Forest", pts: [[66, 74], [66, 64]] },
+    { n: "3", de: "Santalune Forest", para: "Santalune City", pts: [[66, 64], [61, 56]] },
+    { n: "4", de: "Santalune City", para: "Lumiose City", pts: [[61, 56], [51.5, 37]] },
+    { n: "5", de: "Lumiose City", para: "Camphrier Town", pts: [[51.5, 37], [41, 57]] },
+    { n: "6", de: "Camphrier Town", para: "Parfum Palace", pts: [[41, 57], [29, 44]] },
+    { n: "7", de: "Camphrier Town", para: "Connecting Cave", pts: [[41, 57], [22, 57]] },
+    { n: "8", de: "Connecting Cave", para: "Ambrette Town", por: "Cyllage City", pts: [[22, 57], [17, 57], [22, 75]] },
+    { n: "9", de: "Ambrette Town", para: "Glittering Cave", pts: [[22, 75], [36, 75]] },
+    { n: "10", de: "Cyllage City", para: "Geosenge Town", pts: [[17, 57], [9, 47]] },
+    { n: "11", de: "Geosenge Town", para: "Shalour City", pts: [[9, 47], [12, 40], [15, 36]] },
+    { n: "12", de: "Shalour City", para: "Coumarine City", pts: [[15, 36], [34, 30]] },
+    { n: "13", de: "Coumarine City", para: "Lumiose City", pts: [[34, 30], [51.5, 37]] },
+    { n: "14", de: "Lumiose City", para: "Laverre City", pts: [[51.5, 37], [51.5, 11]] },
+    { n: "", nome: "Acesso à fábrica", de: "Laverre City", para: "Poké Ball Factory", pts: [[51.5, 11], [51.5, 6]] },
+    { n: "15", de: "Laverre City", para: "Dendemille Town", pts: [[51.5, 11], [63, 32.1], [68, 30]] },
+    { n: "16", de: "Lumiose City", para: [63, 32.1], ate: "a Rota 15", pts: [[51.5, 37], [63, 32.1]] },
+    { n: "17", de: "Dendemille Town", para: "Anistar City", pts: [[68, 30], [87, 37]] },
+    { n: "18", de: "Anistar City", para: "Couriway Town", pts: [[87, 37], [93, 45]] },
+    { n: "19", de: "Couriway Town", para: "Snowbelle City", pts: [[93, 45], [84, 55]] },
+    { n: "20", de: "Snowbelle City", para: "Pokémon Village", pts: [[84, 55], [80, 75]] },
+    { n: "21", de: "Snowbelle City", para: "Victory Road", pts: [[84, 55], [73, 55]] },
+    { n: "22", de: "Santalune City", para: "Victory Road", pts: [[61, 56], [73, 55]] },
+    { n: "", nome: "Victory Road", de: "Victory Road", para: "Pokémon League", pts: [[73, 55], [73, 43]] }
+  ],
+  galar: [
+    { n: "1", de: "Postwick", para: "Wedgehurst", pts: [[51, 96.5], [51, 90]] },
+    { n: "2", de: "Wedgehurst", para: [69, 86], ate: "a casa da professora", pts: [[51, 90], [60, 88.3], [69, 86]] },
+    { n: "", nome: "Wild Area, parte sul", de: "Wedgehurst", para: "Motostoke", pts: [[51, 90], [45, 84.5], [47, 76], [48, 71], [48, 65.5]] },
+    { n: "3–4", de: "Motostoke", para: "Turffield", pts: [[48, 65.5], [28, 65.7], [17, 65.5], [17, 60], [23, 58.5]] },
+    { n: "5", de: "Turffield", para: "Hulbury", pts: [[23, 58.5], [37, 58.2], [71, 58]] },
+    { n: "", nome: "Galar Mine No. 2", de: "Hulbury", para: "Motostoke", pts: [[71, 58], [73, 62], [70, 65.3], [62, 65.5], [48, 65.5]] },
+    { n: "", nome: "Wild Area, parte norte", de: "Motostoke", para: "Hammerlocke", pts: [[48, 65.5], [52, 60], [53, 52], [48, 49.7]] },
+    { n: "6", de: "Hammerlocke", para: "Stow-on-Side", pts: [[48, 49.7], [30, 49.7], [27, 47], [23, 44.5]] },
+    { n: "", nome: "Glimwood Tangle", de: "Stow-on-Side", para: "Ballonlea", pts: [[23, 44.5], [23, 38], [19, 34.5]] },
+    { n: "7", de: "Hammerlocke", para: [65, 49.7], ate: "a Rota 8", pts: [[48, 49.7], [65, 49.7]] },
+    { n: "8", de: [65, 49.7], desde: "A Rota 7", para: "Circhester", pts: [[65, 49.7], [66, 46], [69, 43], [71, 40], [72, 38.5], [80, 37]] },
+    { n: "9", de: "Circhester", para: "Spikemuth", pts: [[80, 37], [88, 38.3], [88, 44], [82, 47.5], [87, 49.5]] },
+    { n: "", nome: "Túnel da Rota 9", de: "Spikemuth", para: [65, 49.7], ate: "a Rota 7", pts: [[87, 49.5], [81, 49.8], [65, 49.7]] },
+    { n: "10", de: [49, 33], desde: "A estação ao norte de Hammerlocke", para: "Wyndon", pts: [[49, 33], [55, 31.5], [49, 28.5], [49, 21], [48, 13]] }
+  ]
 };

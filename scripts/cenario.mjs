@@ -144,7 +144,7 @@ export function reguaDeAnos(jogos, anoFinal) {
 
 /* A carta de uma região: o traçado de dados/cartas.json nas cores do atlas,
  * com as rotas em vermelhão e um ponto em cada lugar de dados/atlas.mjs. */
-export function cartaSVG(carta, mapa) {
+export function cartaSVG(carta, mapa, rotas) {
   const A = carta.altura, T = TINTAS.dia;
   const px = (x) => (x * 10).toFixed(1), py = (y) => ((y * A) / 100).toFixed(1);
   // cada caminho é escrito uma vez e reaproveitado para preencher e para contornar
@@ -153,9 +153,8 @@ export function cartaSVG(carta, mapa) {
   carta.niveis.forEach((d, i) => { if (d) svg += `<use href="#n${i}" fill="${T.terra[i]}" fill-rule="evenodd"/>`; });
   svg += `<g fill="none" stroke="${T.curva}" stroke-width="1.6">${carta.niveis.slice(1).map((d, i) => (d ? `<use href="#n${i + 1}"/>` : "")).join("")}</g>`;
   svg += `<use href="#n0" fill="none" stroke="${T.costa}" stroke-width="3" stroke-linejoin="round"/>`;
-  const aMao = (mapa.rotas || []).map((l) => l.map(([x, y], k) => `${k ? "L" : "M"}${px(x)} ${py(y)}`).join("")).join("");
-  if (carta.rotas || aMao) {
-    svg += `<path d="${carta.rotas}${aMao}" fill="none" stroke="#C4391F" stroke-width="4.5" stroke-dasharray="13 8" stroke-linejoin="round" stroke-linecap="round"/>`;
+  if (rotas.length) {
+    svg += `<path d="${rotas.map((r) => r.d).join("")}" fill="none" stroke="#C4391F" stroke-width="4.5" stroke-dasharray="13 8" stroke-linejoin="round" stroke-linecap="round"/>`;
   }
   for (const [, x, y] of mapa.marcos) {
     svg += `<rect x="-5" y="-5" width="10" height="10" transform="translate(${px(x)} ${py(y)}) rotate(45)" fill="${TINTA}"/>`;

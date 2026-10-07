@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { JOGOS } from "../dados/jogos.mjs";
 import { ESPECIES } from "../dados/especies.mjs";
-import { REGIOES, OUTRAS_REGIOES, CONSOLES, ESTILOS, TIPOS, PERFIS, PEDIDOS, MARCOS, HORIZONTE, ROMANOS, MAPAS } from "../dados/atlas.mjs";
+import { REGIOES, OUTRAS_REGIOES, CONSOLES, ESTILOS, TIPOS, PERFIS, PEDIDOS, MARCOS, HORIZONTE, ROMANOS, MAPAS, ROTAS } from "../dados/atlas.mjs";
 import { PERGUNTAS } from "../dados/quiz.mjs";
 import { EIXOS, valoresDe, encaixe } from "../src/js/relevo.js";
 import { perfilRegiao, rosaDosVentos, posicoesDosEixos, reguaDeAnos } from "./cenario.mjs";
@@ -138,6 +138,7 @@ ${[modulo, extra].filter(Boolean).map((m) => `<script type="module" src="/js/${m
 const DESTAQUES_ABERTURA = ["heartgold-soulsilver", "scarlet-violet", "black-white", "legends-arceus", "champions", "red-blue-yellow"];
 const MOSAICO = ["ruby-sapphire-emerald", "pokemon-go", "sun-moon", "pokopia", "diamond-pearl-platinum", "new-pokemon-snap", "sword-shield"];
 export const DEMO_COMPARAR = ["red-blue-yellow", "scarlet-violet"];
+const FAVORITOS = [25, 448, 94, 133, 6, 143, 700, 248];
 
 function folhaRegiao(r) {
   const jogos = ORDENADOS.filter((j) => j.regiao === r.id);
@@ -277,6 +278,22 @@ export function paginaInicio() {
       <figcaption><span class="serie serie-a"></span>${esc(da.curto)} <span class="serie serie-b"></span>${esc(db.curto)}</figcaption>
     </figure>
   </div>
+  <div class="ferramenta ferramenta-pokemon">
+    <ul class="favoritos" aria-label="Alguns Pokémon para começar">
+      ${FAVORITOS.map((e) => `<li><a href="/biblioteca/?pokemon=${e}"><img src="/arte/mini/${e}.webp" alt="" width="92" height="92" loading="lazy" decoding="async"><span>${esc(POKEDEX.especies[e][0])}</span></a></li>`).join("\n      ")}
+    </ul>
+    <div class="ferramenta-texto">
+      <h2>Ou comece pelo seu Pokémon</h2>
+      <p class="prosa">Diga um nome e o atlas mostra em quais ilhas ele mora. São ${Object.keys(POKEDEX.especies).length} espécies catalogadas, com a Pokédex inteira de cada jogo.</p>
+      <form class="busca-inicio" action="/biblioteca/" method="get">
+        <label for="pokemon-inicio">Nome do Pokémon</label>
+        <div class="busca-inicio-linha">
+          <input id="pokemon-inicio" name="pokemon" type="search" placeholder="Lucario" autocomplete="off" spellcheck="false" required>
+          <button class="botao" type="submit">Procurar ilhas</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </section>
 
 <section class="fechamento" ${DIA} aria-labelledby="t-fechamento">
@@ -408,6 +425,16 @@ export function paginaJogo(j) {
       </div>
     </div>
   </section>
+
+  ${j.regiao === "outras" ? "" : `<section class="jogo-regiao" aria-labelledby="t-regiao">
+    <a class="jogo-regiao-carta" href="/regioes/${j.regiao}/"><img src="/cartas/${j.regiao}.svg" alt="" width="1000" height="${CARTAS[j.regiao].altura}" loading="lazy" decoding="async"></a>
+    <div>
+      <h2 id="t-regiao">Onde se passa</h2>
+      <p class="jogo-regiao-nome">${esc(lugar)}</p>
+      <p class="prosa">${esc(REGIOES.find((x) => x.id === j.regiao).texto)}</p>
+      <a class="botao botao-contorno" href="/regioes/${j.regiao}/">Abrir a carta de ${esc(lugar)}</a>
+    </div>
+  </section>`}
 
   <section class="jogo-especimes" aria-labelledby="t-especimes">
     <h2 id="t-especimes">Espécimes deste jogo</h2>
@@ -591,6 +618,14 @@ export function pagina404() {
 
 /* ---------- Pokédex de um jogo ---------- */
 
+/* Em que região cada lista se passa, para mostrar a forma regional nativa. */
+const REGIAO_DA_LISTA = {
+  "original-alola": "alola", "updated-alola": "alola",
+  galar: "galar", "isle-of-armor": "galar", "crown-tundra": "galar",
+  hisui: "hisui", paldea: "paldea"
+};
+const NOME_DA_REGIAO = { alola: "Alola", galar: "Galar", hisui: "Hisui", paldea: "Paldea" };
+
 function secaoPokedex(j) {
   if (!j.pokedex) {
     return `<section class="jogo-pokedex" aria-labelledby="t-pokedex">
@@ -605,13 +640,16 @@ function secaoPokedex(j) {
   const titulo = !unica ? "Pokédex" : listas[0].rotulo === "Elenco" ? "Elenco de Pokémon" : `Pokédex de ${listas[0].rotulo}`;
   const gaveta = (l, i) => `<ol class="gaveta" data-lista="${l.id}"${i ? " hidden" : ""}>
       ${l.entradas.map(([n, e]) => {
-        const [nome, ts] = POKEDEX.especies[e];
-        return `<li data-nome="${esc(semAcento(nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="/biblioteca/?pokemon=${e}"><span class="dex-arte"><img src="/arte/mini/${e}.webp" data-cor="/arte/mini/${e}-cor.webp" alt="" width="92" height="92" loading="lazy" decoding="async"></span><span class="dex-numero">${String(n).padStart(3, "0")}</span><span class="dex-nome">${esc(nome)}</span><span class="dex-tipos">${ts.join(", ")}</span></a></li>`;
+        const nome = POKEDEX.especies[e][0];
+        const regiao = REGIAO_DA_LISTA[l.id];
+        const forma = regiao && POKEDEX.formas[regiao][e];
+        const [arte, ts] = forma || [e, POKEDEX.especies[e][1]];
+        return `<li data-nome="${esc(semAcento(nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="/biblioteca/?pokemon=${e}"><span class="dex-arte"><img src="/arte/mini/${arte}.webp" data-cor="/arte/mini/${arte}-cor.webp" alt="" width="92" height="92" loading="lazy" decoding="async"></span><span class="dex-numero">${String(n).padStart(3, "0")}</span><span class="dex-nome">${esc(nome)}</span>${forma ? `<span class="dex-forma">forma de ${NOME_DA_REGIAO[regiao]}</span>` : ""}<span class="dex-tipos">${ts.join(", ")}</span></a></li>`;
       }).join("")}
     </ol>`;
   return `<section class="jogo-pokedex" aria-labelledby="t-pokedex" data-pokedex>
     <h2 id="t-pokedex">${titulo}</h2>
-    <p class="nota-editorial">${j.pokedexNota ? `${esc(j.pokedexNota)} ` : ""}A arte e os tipos são os da forma padrão de cada espécie; formas regionais não aparecem. Escolha uma espécie para ver em quais jogos do atlas ela está.</p>
+    <p class="nota-editorial">${j.pokedexNota ? `${esc(j.pokedexNota)} ` : ""}${listas.some((l) => REGIAO_DA_LISTA[l.id]) ? "Quando a espécie tem uma forma regional nativa deste jogo, é ela que aparece, com os tipos dela. " : "A arte e os tipos são os da forma padrão de cada espécie. "}Escolha uma espécie para ver em quais jogos do atlas ela está.</p>
     <div class="dex-controles">
       ${unica ? "" : `<div class="filtro-opcoes" role="group" aria-label="Lista">${listas.map((l, i) => `<button type="button" class="ficha" data-aba="${l.id}" aria-pressed="${i === 0}">${esc(l.rotulo)} <span class="dex-conta">${l.entradas.length}</span></button>`).join("")}</div>`}
       <div class="dex-busca">
@@ -629,6 +667,67 @@ function secaoPokedex(j) {
 
 /* ---------- regiões ---------- */
 
+/* As rotas de uma carta, prontas para desenhar e para listar. O traçado vem
+ * de cartas.json (mapas antigos) ou dos pontos marcados à mão em ROTAS. */
+export function rotasDaCarta(id) {
+  const carta = CARTAS[id], mapa = MAPAS[id], A = carta.altura;
+  // tamanho com que a carta costuma aparecer na tela, para estimar o que cada rótulo cobre
+  const L = carta.proporcao < 0.7 ? 460 : 1100, H = L / carta.proporcao;
+  const ocupado = [];
+  const lugar = (x, y, nome, lado, marco) => {
+    const px = (x / 100) * L, py = (y / 100) * H, w = nome.length * (marco ? 6.6 : 7.4);
+    ocupado.push([px - 13, py - 13, px + 13, py + 13]);
+    if (lado === "d") ocupado.push([px + 14, py - 9, px + 16 + w, py + 9]);
+    if (lado === "e") ocupado.push([px - 16 - w, py - 9, px - 14, py + 9]);
+    if (lado === "c") ocupado.push([px - w / 2, py - 31, px + w / 2, py - 13]);
+    if (lado === "b") ocupado.push([px - w / 2, py + 13, px + w / 2, py + 31]);
+  };
+  for (const [nome, x, y, lado] of mapa.cidades) lugar(x, y, nome, lado, false);
+  for (const [nome, x, y, lado] of mapa.marcos) lugar(x, y, nome, lado, true);
+  for (const [nome, x, y] of mapa.areas || []) {
+    const px = (x / 100) * L, py = (y / 100) * H, w = nome.length * 8.6;
+    ocupado.push([px - w / 2, py - 10, px + w / 2, py + 10]);
+  }
+  const sobrepoe = (c) => ocupado.reduce((soma, o) =>
+    soma + Math.max(0, Math.min(c[2], o[2]) - Math.max(c[0], o[0])) * Math.max(0, Math.min(c[3], o[3]) - Math.max(c[1], o[1])), 0);
+
+  return (ROTAS[id] || []).map((r, k) => {
+    const pts = r.pts || carta.rotas[k];
+    const d = pts.map(([x, y], i) => `${i ? "L" : "M"}${(x * 10).toFixed(1)} ${((y * A) / 100).toFixed(1)}`).join("");
+    // o número fica sobre a rota, no ponto livre mais próximo do meio dela
+    let x = null, y = null;
+    if (r.n) {
+      const tela = pts.map(([px, py]) => [(px / 100) * L, (py / 100) * H]);
+      const trechos = tela.slice(1).map((q, i) => Math.hypot(q[0] - tela[i][0], q[1] - tela[i][1]));
+      const total = trechos.reduce((a, b) => a + b, 0);
+      const em = (t) => {
+        let resto = total * t;
+        for (let i = 0; i < trechos.length; i++) {
+          if (resto <= trechos[i] || i === trechos.length - 1) {
+            const f = trechos[i] ? Math.min(1, resto / trechos[i]) : 0;
+            return [tela[i][0] + (tela[i + 1][0] - tela[i][0]) * f, tela[i][1] + (tela[i + 1][1] - tela[i][1]) * f];
+          }
+          resto -= trechos[i];
+        }
+      };
+      const meiaLargura = 8 + r.n.length * 3.4;
+      let melhor = null;
+      for (const t of [0.5, 0.42, 0.58, 0.35, 0.65, 0.28, 0.72, 0.2, 0.8, 0.13, 0.87]) {
+        const [cx, cy] = em(t);
+        const caixa = [cx - meiaLargura, cy - 10, cx + meiaLargura, cy + 10];
+        const custo = sobrepoe(caixa);
+        if (!melhor || custo < melhor.custo) melhor = { custo, caixa, cx, cy };
+        if (custo === 0) break;
+      }
+      ocupado.push(melhor.caixa);
+      x = (melhor.cx / L) * 100; y = (melhor.cy / H) * 100;
+    }
+    const de = typeof r.de === "string" ? `De ${r.de}` : r.desde.replace(/^A /, "Da ").replace(/^O /, "Do ");
+    const para = typeof r.para === "string" ? `a ${r.para}` : `até ${r.ate}`;
+    return { n: r.n, nome: r.nome, d, x, y, texto: `${de} ${para}${r.por ? `, por ${r.por}` : ""}` };
+  });
+}
+
 function numerados(mapa) {
   return [
     ...mapa.cidades.map((l, i) => ({ nome: l[0], x: l[1], y: l[2], lado: l[3], n: i + 1, tipo: "cidade" })),
@@ -641,6 +740,7 @@ export function paginaRegiao(r) {
   const anterior = REGIOES[i - 1], proxima = REGIOES[i + 1];
   const mapa = MAPAS[r.id], carta = CARTAS[r.id];
   const pontos = numerados(mapa);
+  const rotas = rotasDaCarta(r.id);
   const jogos = ORDENADOS.filter((j) => j.regiao === r.id);
   const alta = carta.proporcao < 0.7;
   const descricao = `Carta de ${r.nome}, com ${mapa.cidades.length} ${mapa.cidades.length === 1 ? "povoado marcado" : "cidades marcadas"}${mapa.marcos.length ? ` e ${mapa.marcos.length} ${mapa.marcos.length === 1 ? "marco" : "marcos"}` : ""}. A lista completa vem logo abaixo.`;
@@ -659,19 +759,26 @@ export function paginaRegiao(r) {
     <figure class="carta">
       <div class="carta-quadro" style="--proporcao:${carta.proporcao}">
         <img src="/cartas/${r.id}.svg" alt="${esc(descricao)}" width="1000" height="${carta.altura}">
+        ${rotas.length ? `<svg class="carta-rotas" viewBox="0 0 1000 ${carta.altura}" aria-hidden="true" focusable="false">${rotas.map((t, k) => `<path data-rota="${k}" d="${t.d}"/>`).join("")}</svg>` : ""}
         <ol class="carta-pontos" aria-hidden="true">
-          ${pontos.map((p) => `<li class="ponto ponto-${p.tipo} lado-${p.lado}" style="left:${p.x}%;top:${p.y}%"><span class="ponto-marca">${p.n}</span><span class="ponto-nome">${esc(p.nome)}</span></li>`).join("\n          ")}
+          ${pontos.map((p) => `<li class="ponto ponto-${p.tipo} lado-${p.lado}" data-lugar="${p.n}" style="left:${p.x}%;top:${p.y}%"><span class="ponto-marca">${p.n}</span><span class="ponto-nome">${esc(p.nome)}</span></li>`).join("\n          ")}
           ${(mapa.areas || []).map(([nome, x, y]) => `<li class="ponto-area" style="left:${x}%;top:${y}%">${esc(nome)}</li>`).join("\n          ")}
+          ${rotas.map((t, k) => (t.n ? `<li class="rota-numero" data-rota="${k}" style="left:${t.x.toFixed(1)}%;top:${t.y.toFixed(1)}%">${t.n}</li>` : "")).join("")}
         </ol>
       </div>
-      <figcaption>Carta redesenhada pelo atlas a partir do mapa da região nos jogos: a costa segue o original, o relevo é interpretação. As linhas vermelhas são rotas, sem numeração.${mapa.nota ? ` ${esc(mapa.nota)}` : ""}</figcaption>
+      <figcaption>Carta redesenhada pelo atlas a partir do mapa da região nos jogos: a costa segue o original, o relevo é interpretação.${rotas.length ? " As linhas vermelhas são as rotas, cada uma com o seu número." : ""} Aponte ou toque num lugar${rotas.length ? " ou numa rota" : ""} para destacá-lo.${mapa.nota ? ` ${esc(mapa.nota)}` : ""}</figcaption>
     </figure>
     <div class="carta-legenda">
       <h2>Lugares na carta</h2>
       <ol class="legenda-lista">
-        ${pontos.map((p) => `<li class="legenda-${p.tipo}"><span class="ponto-marca" aria-hidden="true">${p.n}</span>${esc(p.nome)}</li>`).join("\n        ")}
+        ${pontos.map((p) => `<li class="legenda-${p.tipo}" data-lugar="${p.n}"><span class="ponto-marca" aria-hidden="true">${p.n}</span>${esc(p.nome)}</li>`).join("\n        ")}
       </ol>
       ${(mapa.areas || []).length ? `<p class="nota-editorial">Também na carta, sem número: ${mapa.areas.map(([n]) => esc(n)).join(", ")}.</p>` : ""}
+      <h2 class="legenda-rotas">Rotas</h2>
+      ${rotas.length ? `<ul class="rotas-lista">
+        ${rotas.map((t, k) => `<li data-rota="${k}"><span class="rota-n${t.n ? "" : " rota-sem"}">${t.n || "sem nº"}</span><span>${t.nome ? `${esc(t.nome)}. ` : ""}${esc(t.texto)}</span></li>`).join("\n        ")}
+      </ul>
+      <p class="nota-editorial">Rotas vizinhas que formam um só caminho aparecem juntas, como “3–4”. Trechos sem número são pontes, túneis e travessias que os jogos não numeram.</p>` : `<p class="prosa">${esc(mapa.semRotas)}</p>`}
     </div>
   </section>
 
@@ -683,7 +790,7 @@ export function paginaRegiao(r) {
   <section class="regiao-jogos" aria-labelledby="t-jogos">
     <h2 id="t-jogos">${jogos.length === 1 ? "O jogo que se passa aqui" : "Jogos que se passam aqui"}</h2>
     <ul class="arquipelago arquipelago-curto">
-      ${jogos.map((j) => `<li>${itemIlha(j)}</li>`).join("\n      ")}
+      ${jogos.map((j) => `<li>${itemIlha(j)}${j.pokedex ? `<a class="ligacao" href="/jogos/${j.slug}/#t-pokedex">Ver a Pokédex</a>` : ""}</li>`).join("\n      ")}
     </ul>
   </section>
 
@@ -696,7 +803,7 @@ export function paginaRegiao(r) {
 </article>`;
 
   return moldura({
-    titulo: `${r.nome}, a carta da região`, caminho: `/regioes/${r.id}/`, classe: "pagina-regiao", corpo,
+    titulo: `${r.nome}, a carta da região`, caminho: `/regioes/${r.id}/`, classe: "pagina-regiao", corpo, modulo: "regiao",
     descricao: `${r.texto} Veja a carta de ${r.nome}, as cidades, os iniciais e os jogos que se passam nela.`
   });
 }

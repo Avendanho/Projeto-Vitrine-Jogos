@@ -172,5 +172,25 @@ function pico() {
   pedir();
 }
 
+/* O paralaxe do motor mede cada elemento já deslocado, e por isso só assenta
+ * depois de algumas medições. Rolando aos poucos isso não se nota; depois de um
+ * salto (tecla End, barra de rolagem), pedem-se mais algumas medições seguidas. */
+function assentarParalaxe() {
+  let ultimo = window.scrollY, restam = 0;
+  window.addEventListener("scroll", () => {
+    const salto = Math.abs(window.scrollY - ultimo);
+    ultimo = window.scrollY;
+    if (restam || salto < window.innerHeight * 0.5) return;
+    restam = 5;
+    (function repetir() {
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event("scroll"));
+        if (--restam > 0) repetir();
+      });
+    })();
+  }, { passive: true });
+}
+
 abertura();
 pico();
+if (!REDUZIDO) assentarParalaxe();

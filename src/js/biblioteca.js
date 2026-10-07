@@ -43,7 +43,7 @@ function combina(li) {
   return CHAVES.every((c) => !estado[c] || (li.dataset[c] || "").split(" ").includes(estado[c]));
 }
 
-function aplicar() {
+function aplicar(gravar = true) {
   let visiveis = 0;
   for (const li of itens) {
     const ok = combina(li);
@@ -67,13 +67,13 @@ function aplicar() {
   for (const c of ativos) busca.set(c, estado[c]);
   if (especie) busca.set("pokemon", especie.id);
   const texto = busca.toString();
-  history.replaceState(null, "", texto ? `?${texto}` : location.pathname);
+  if (gravar) history.replaceState(null, "", texto ? `?${texto}` : location.pathname);
 }
 
 function mudar() {
   if (!document.startViewTransition || REDUZIDO) { aplicar(); return; }
   // uma transição nova interrompe a anterior, e isso não é erro
-  const transicao = document.startViewTransition(aplicar);
+  const transicao = document.startViewTransition(() => aplicar());
   for (const promessa of [transicao.ready, transicao.finished, transicao.updateCallbackDone]) promessa.catch(() => {});
 }
 
@@ -117,10 +117,16 @@ campo.addEventListener("input", () => buscar(false));
 campo.addEventListener("change", () => buscar(true));
 campo.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); buscar(true); } });
 
-const pedido = Number(inicial.get("pokemon"));
+/* o endereço pode trazer o número da espécie (links do atlas) ou um nome (a busca da página inicial) */
+const pedido = (inicial.get("pokemon") || "").trim();
 if (pedido) {
-  await carregarIndice();
-  escolherEspecie(pedido);
-  if (especie) campo.value = especie.nome;
+  const { NOMES } = await carregarIndice();
+  const texto = semAcento(pedido);
+  const achado = /^\d+$/.test(pedido)
+    ? NOMES.find(([n]) => n === Number(pedido))
+    : NOMES.find(([, nome]) => semAcento(nome) === texto) || NOMES.find(([, nome]) => semAcento(nome).startsWith(texto));
+  if (achado) escolherEspecie(achado[0]);
+  campo.value = especie ? especie.nome : pedido;
 }
-aplicar();
+aplicar(false);
+if (pedido && !especie) resultado.textContent = `Nenhum Pokémon chamado “${pedido}”. Confira a grafia em inglês.`;
