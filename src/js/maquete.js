@@ -1,7 +1,10 @@
 /* A maquete que gira. Cada <figure data-maquete="/maquetes/nome.json"> mostra uma imagem parada;
  * quando alguém pede (um clique no botão ou na própria imagem; nas páginas que marcam
  * data-maquete-auto, ao entrar na tela), os blocos são baixados e desenhados em WebGL no lugar da imagem.
- * Arrastar gira; as setas do teclado também. Só uma maquete fica viva por vez.
+ * Arrastar gira; as setas do teclado também. Para aproximar: a roda do mouse (depois de clicar na
+ * maquete, para a página continuar rolando normalmente), os botões + e −, a pinça no toque ou as teclas
+ * + e −. Com Shift, ou com o botão direito, o arrasto desloca. Dois cliques voltam ao começo.
+ * Só uma maquete fica viva por vez.
  * Funciona com ou sem WebGL: ver os dois desenhistas, abaixo. */
 import { malhaDaMaquete } from "./maquete-malha.js";
 
@@ -50,15 +53,15 @@ function desenhistaWebgl(tela, malha, [W, H, D]) {
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   const raio = Math.hypot(W, H, D) / 2;
   return {
-    desenhar(guinada, inclina) {
+    desenhar(guinada, inclina, zoom, dx, dy) {
       const lado = Math.round(tela.clientWidth * Math.min(devicePixelRatio || 1, 2)) || 480;
       if (tela.width !== lado) tela.width = tela.height = lado;
       gl.viewport(0, 0, lado, lado);
       const cg = Math.cos(guinada), sg = Math.sin(guinada), ci = Math.cos(inclina), si = Math.sin(inclina);
-      const s = 0.97 / raio, k = 0.9 / raio, X = [cg, 0, sg], Y = [sg * si, ci, -cg * si], Z = [-sg * ci, si, cg * ci];
+      const s = (0.97 / raio) * zoom, k = 0.9 / raio, X = [cg, 0, sg], Y = [sg * si, ci, -cg * si], Z = [-sg * ci, si, cg * ci];
       const centro = [W / 2, H / 2, D / 2], t = (v) => -(v[0] * centro[0] + v[1] * centro[1] + v[2] * centro[2]);
       gl.uniformMatrix4fv(matriz, false, new Float32Array([
-        s * X[0], s * Y[0], -k * Z[0], 0, s * X[1], s * Y[1], -k * Z[1], 0, s * X[2], s * Y[2], -k * Z[2], 0, s * t(X), s * t(Y), -k * t(Z), 1
+        s * X[0], s * Y[0], -k * Z[0], 0, s * X[1], s * Y[1], -k * Z[1], 0, s * X[2], s * Y[2], -k * Z[2], 0, s * t(X) + dx, s * t(Y) + dy, -k * t(Z), 1
       ]));
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -81,17 +84,17 @@ function desenhistaDeSoftware(tela, malha, [W, H, D]) {
   const raio = Math.hypot(W, H, D) / 2, pontos = new Float32Array(malha.n * 12);
   let lado = 0, imagem = null, fundo = null;
   return {
-    desenhar(guinada, inclina) {
-      const L = Math.min(680, Math.round(tela.clientWidth * Math.min(devicePixelRatio || 1, 1.5)) || 480);
+    desenhar(guinada, inclina, zoom, dx, dy) {
+      const L = Math.min(document.fullscreenElement ? 1000 : 680, Math.round(tela.clientWidth * Math.min(devicePixelRatio || 1, 1.5)) || 480);
       if (L !== lado) { lado = tela.width = tela.height = L; imagem = ctx.createImageData(L, L); fundo = new Float32Array(L * L); }
       const d = imagem.data;
       d.fill(0);
       fundo.fill(-Infinity);
-      const cg = Math.cos(guinada), sg = Math.sin(guinada), ci = Math.cos(inclina), si = Math.sin(inclina), escala = (0.97 / raio) * (L / 2), meio = L / 2;
+      const cg = Math.cos(guinada), sg = Math.sin(guinada), ci = Math.cos(inclina), si = Math.sin(inclina), escala = (0.97 / raio) * (L / 2) * zoom, meio = L / 2;
       for (let i = 0; i < malha.n * 4; i++) {
         const a = malha.pos[i * 3] - W / 2, b = malha.pos[i * 3 + 1] - H / 2, c = malha.pos[i * 3 + 2] - D / 2, z1 = -a * sg + c * cg;
-        pontos[i * 3] = meio + (a * cg + c * sg) * escala;
-        pontos[i * 3 + 1] = meio - (b * ci - z1 * si) * escala;
+        pontos[i * 3] = meio + (a * cg + c * sg) * escala + dx * meio;
+        pontos[i * 3 + 1] = meio - (b * ci - z1 * si) * escala - dy * meio;
         pontos[i * 3 + 2] = b * si + z1 * ci;        // maior = mais perto de quem olha
       }
       for (let f = 0; f < malha.n; f++) {
@@ -133,6 +136,7 @@ function ligar(figura, modelo, semWebgl = false) {
   if (!desenhista) { tela = document.createElement("canvas"); desenhista = desenhistaDeSoftware(tela, malha, modelo.t); }
   if (!desenhista) return null;
   let guinada = GUINADA, inclina = INCLINA, sozinha = !calmo, quadro = 0, antes = 0, visivel = true;
+  let zoom = 1, dx = 0, dy = 0;                       // dx e dy em metades de tela: 1 leva o centro até a borda
 
   function passo(agora) {
     quadro = 0;
@@ -142,29 +146,68 @@ function ligar(figura, modelo, semWebgl = false) {
       quadro = requestAnimationFrame(passo);
     }
     const inicio = performance.now();
-    desenhista.desenhar(guinada, inclina);
+    desenhista.desenhar(guinada, inclina, zoom, dx, dy);
     if (performance.now() - inicio > 70) sozinha = false;       // maquete pesada demais para girar sozinha: fica só o arrasto
   }
   const pedir = () => { if (!quadro) quadro = requestAnimationFrame(passo); };
 
-  let arrasto = null;
+  /* aproxima ou afasta mantendo parado o ponto (cx, cy) da tela, de -1 a 1 */
+  const aproximar = (fator, cx = 0, cy = 0) => {
+    const novo = Math.min(16, Math.max(1, zoom * fator)), f = novo / zoom;
+    dx = cx - (cx - dx) * f;
+    dy = cy - (cy - dy) * f;
+    zoom = novo;
+    if (zoom === 1) dx = dy = 0;
+    sozinha = false;
+    pedir();
+  };
+  const voltar = () => { zoom = 1; dx = dy = 0; guinada = GUINADA; inclina = INCLINA; pedir(); };
+  const naTela = (x, y) => { const r = tela.getBoundingClientRect(); return [((x - r.left) / r.width) * 2 - 1, 1 - ((y - r.top) / r.height) * 2]; };
+  const deslocar = (px, py) => { const r = tela.getBoundingClientRect(); dx += (px / r.width) * 2; dy -= (py / r.height) * 2; };
+
+  const dedos = new Map();
   tela.addEventListener("pointerdown", (e) => {
-    arrasto = { x: e.clientX, y: e.clientY };
+    dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
     sozinha = false;
     tela.setPointerCapture(e.pointerId);
+    tela.focus({ preventScroll: true });
     figura.classList.add("girando");
   });
   tela.addEventListener("pointermove", (e) => {
-    if (!arrasto) return;
-    guinada += (e.clientX - arrasto.x) * 0.011;
-    inclina = Math.min(1.45, Math.max(0.04, inclina + (e.clientY - arrasto.y) * 0.008));
-    arrasto = { x: e.clientX, y: e.clientY };
+    const antes = dedos.get(e.pointerId);
+    if (!antes) return;
+    const agora = { x: e.clientX, y: e.clientY };
+    if (dedos.size === 1) {
+      if (e.shiftKey || e.buttons === 2 || e.buttons === 4) deslocar(agora.x - antes.x, agora.y - antes.y);
+      else {
+        guinada += (agora.x - antes.x) * 0.011;
+        inclina = Math.min(1.45, Math.max(0.04, inclina + (agora.y - antes.y) * 0.008));
+      }
+    } else {                                         // dois dedos: a distância entre eles aproxima, o meio deles desloca
+      const outro = [...dedos].find(([id]) => id !== e.pointerId)[1];
+      const d0 = Math.hypot(antes.x - outro.x, antes.y - outro.y), d1 = Math.hypot(agora.x - outro.x, agora.y - outro.y);
+      if (d0 > 4) aproximar(d1 / d0, ...naTela((agora.x + outro.x) / 2, (agora.y + outro.y) / 2));
+      deslocar((agora.x - antes.x) / 2, (agora.y - antes.y) / 2);
+    }
+    dedos.set(e.pointerId, agora);
     pedir();
   });
-  const soltar = () => { arrasto = null; figura.classList.remove("girando"); };
+  const soltar = (e) => { dedos.delete(e.pointerId); if (!dedos.size) figura.classList.remove("girando"); };
   tela.addEventListener("pointerup", soltar);
   tela.addEventListener("pointercancel", soltar);
+  tela.addEventListener("pointerleave", () => { if (!dedos.size) tela.blur(); });
+  tela.addEventListener("contextmenu", (e) => e.preventDefault());
+  tela.addEventListener("dblclick", voltar);
+  // a roda só aproxima depois de um clique na maquete (ou com Ctrl); fora disso, a página rola como sempre
+  tela.addEventListener("wheel", (e) => {
+    if (!e.ctrlKey && document.activeElement !== tela) return;
+    e.preventDefault();
+    aproximar(Math.exp(-e.deltaY * (e.deltaMode ? 0.05 : 0.0022)), ...naTela(e.clientX, e.clientY));
+  }, { passive: false });
   tela.addEventListener("keydown", (e) => {
+    if (e.key === "+" || e.key === "=") { e.preventDefault(); return aproximar(1.3); }
+    if (e.key === "-" || e.key === "_") { e.preventDefault(); return aproximar(1 / 1.3); }
+    if (e.key === "0") { e.preventDefault(); return voltar(); }
     const passos = { ArrowLeft: [-0.2, 0], ArrowRight: [0.2, 0], ArrowUp: [0, 0.12], ArrowDown: [0, -0.12] }[e.key];
     if (!passos) return;
     e.preventDefault();
@@ -173,6 +216,24 @@ function ligar(figura, modelo, semWebgl = false) {
     inclina = Math.min(1.45, Math.max(0.04, inclina + passos[1]));
     pedir();
   });
+  /* os botões: aproximar, afastar e tela cheia */
+  const barra = document.createElement("div");
+  barra.className = "maquete-barra";
+  barra.innerHTML = `<button type="button" data-zoom="1.5" aria-label="Aproximar">+</button><button type="button" data-zoom="0.667" aria-label="Afastar">−</button>${figura.requestFullscreen ? '<button type="button" data-cheia>Tela cheia</button>' : ""}`;
+  barra.addEventListener("click", (e) => {
+    const botao = e.target.closest("button");
+    if (!botao) return;
+    if (botao.dataset.zoom) aproximar(Number(botao.dataset.zoom));
+    else if (document.fullscreenElement === figura) document.exitFullscreen();
+    else figura.requestFullscreen().catch(() => {});
+  });
+  const aoMudarDeTela = () => {
+    const cheia = document.fullscreenElement === figura, botao = barra.querySelector("[data-cheia]");
+    if (botao) botao.textContent = cheia ? "Sair da tela cheia" : "Tela cheia";
+    requestAnimationFrame(pedir);
+  };
+  figura.addEventListener("fullscreenchange", aoMudarDeTela);
+  figura.append(barra);
   const olho = "IntersectionObserver" in window ? new IntersectionObserver(([e]) => { visivel = e.isIntersecting; antes = 0; if (visivel) pedir(); }) : null;
   olho?.observe(tela);
   addEventListener("resize", pedir);
@@ -180,7 +241,7 @@ function ligar(figura, modelo, semWebgl = false) {
   tela.className = "maquete-tela";
   tela.tabIndex = 0;
   tela.setAttribute("role", "img");
-  tela.setAttribute("aria-label", `${figura.querySelector("img")?.alt || "Maquete"}. Arraste ou use as setas para girar.`);
+  tela.setAttribute("aria-label", `${figura.querySelector("img")?.alt || "Maquete"}. Arraste ou use as setas para girar; + e − aproximam.`);
   figura.append(tela);
   figura.classList.add("viva");
   pedir();
@@ -190,6 +251,9 @@ function ligar(figura, modelo, semWebgl = false) {
     olho?.disconnect();
     removeEventListener("resize", pedir);
     desenhista.soltar();
+    figura.removeEventListener("fullscreenchange", aoMudarDeTela);
+    if (document.fullscreenElement === figura) document.exitFullscreen();
+    barra.remove();
     tela.remove();
     figura.classList.remove("viva", "girando");
   };

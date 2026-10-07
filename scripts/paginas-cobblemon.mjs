@@ -35,8 +35,8 @@ export function slot(n, { ligacao = true, lado = 96, preguica = true } = {}) {
 /* O ícone de um item, recortado do atlas src/arte/itens.png. Com o ponteiro em cima ele gira, como item largado no chão. */
 function icone(id) {
   const i = ITENS_ARTE.itens[id];
-  return i === undefined
-    ? `<span class="slot slot-item" aria-hidden="true"></span>`
+  return i === undefined          // os que são blocos com modelo próprio vêm desenhados em 3D, cada um no seu arquivo
+    ? `<span class="slot slot-item" aria-hidden="true"><img class="item-bloco" src="/arte/item/${id}.png" alt="" width="48" height="48" loading="lazy" decoding="async"></span>`
     : `<span class="slot slot-item" aria-hidden="true"><span class="item-icone" style="--cx:${i % ITENS_ARTE.colunas};--cy:${Math.floor(i / ITENS_ARTE.colunas)}"></span></span>`;
 }
 /* Uma maquete de blocos: a imagem parada e o botão que a troca pelo modelo que gira (src/js/maquete.js). */
@@ -44,7 +44,7 @@ function maquete(info, legenda, { auto = false, preguica = true } = {}) {
   return `<figure class="maquete"${auto ? " data-maquete-auto" : ""} data-maquete="/maquetes/${info.nome}.json">
     <img src="/arte/maquete/${info.nome}.webp" alt="${esc(legenda)}" width="480" height="480"${preguica ? ' loading="lazy" decoding="async"' : ""}>
     <button type="button" class="maquete-girar">Girar em 3D</button>
-    <span class="maquete-dica" aria-hidden="true">Arraste para girar</span>
+    <span class="maquete-dica" aria-hidden="true">Arraste para girar, role para aproximar</span>
   </figure>`;
 }
 /* Em que ambiente do atlas cai cada estrutura, pelo nome do bioma em que o mod a gera. */
@@ -177,9 +177,7 @@ export function paginaCobblemonInicio() {
 /* ---------- lista de Pokémon ---------- */
 
 export function paginaCobblemonPokemon() {
-  const item = (e) => `<li data-n="${e.n}" data-nome="${esc(semAcento(e.nome))}" data-tipos="${e.tipos.map(semAcento).join(" ")}" data-ambientes="${e.ambientes.join(" ")}" data-raridade="${e.raridade ?? ""}"${montavel(e) ? " data-monta" : ""}${e.impl ? "" : " data-falta hidden"}>${e.impl
-    ? `<a href="${enderecoCobblemon(e.n)}">${slot(e.n, { ligacao: false })}<span class="dex-numero">${n4(e.n)}</span><span class="dex-nome">${esc(e.nome)}</span><span class="dex-tipos">${e.tipos.join(", ")}</span></a>`
-    : `<span class="cb-falta">${slot(e.n, { ligacao: false })}<span class="dex-numero">${n4(e.n)}</span><span class="dex-nome">${esc(e.nome)}</span><span class="dex-tipos">Ainda não está no mod</span></span>`}</li>`;
+  const item = (e) => `<li data-n="${e.n}" data-nome="${esc(semAcento(e.nome))}" data-tipos="${e.tipos.map(semAcento).join(" ")}" data-ambientes="${e.ambientes.join(" ")}" data-raridade="${e.raridade ?? ""}"${montavel(e) ? " data-monta" : ""}><a href="${enderecoCobblemon(e.n)}">${slot(e.n, { ligacao: false })}<span class="dex-numero">${n4(e.n)}</span><span class="dex-nome">${esc(e.nome)}</span><span class="dex-tipos">${e.tipos.join(", ")}</span></a></li>`;
   const corpo = `
 <section class="cabecalho">
   <h1>Pokémon</h1>
@@ -195,10 +193,10 @@ export function paginaCobblemonPokemon() {
     <div class="filtro-opcoes" role="group" aria-label="Onde nasce">${C.ambientes.map((a) => `<button type="button" class="ficha" data-filtro="ambiente" data-valor="${a.id}" aria-pressed="false">${esc(a.nome)}</button>`).join("")}</div>
     <div class="filtro-opcoes" role="group" aria-label="Raridade">${Object.entries(RARIDADES).map(([id, nome]) => `<button type="button" class="ficha" data-filtro="raridade" data-valor="${id}" aria-pressed="false">${nome}</button>`).join("")}<button type="button" class="ficha" data-filtro="monta" data-valor="1" aria-pressed="false">Dá para montar</button></div>
     <div class="filtro-opcoes" role="group" aria-label="Tipo">${ORDEM_TIPOS.map((t) => `<button type="button" class="ficha ficha-tipo" data-filtro="tipo" data-valor="${semAcento(t)}" aria-pressed="false">${t}</button>`).join("")}</div>
-    <p class="dex-resumo"><span aria-live="polite"><strong data-dex-contagem>${NUMEROS.noMod}</strong> <span data-dex-rotulo>espécies</span></span> <button type="button" class="ligacao" data-dex-limpar hidden>Limpar</button> <button type="button" class="ligacao" data-dex-faltam aria-pressed="false">Mostrar também as ${NUMEROS.faltam} que ainda faltam</button></p>
+    <p class="dex-resumo"><span aria-live="polite"><strong data-dex-contagem>${NUMEROS.noMod}</strong> <span data-dex-rotulo>espécies</span></span> <button type="button" class="ligacao" data-dex-limpar hidden>Limpar</button></p>
   </form>
   <ol class="gaveta gaveta-cb">
-    ${ESPECIES.map(item).join("")}
+    ${NO_MOD.map(item).join("")}
   </ol>
   <p class="vazio" data-dex-vazio hidden>Nenhuma espécie com essa combinação. Tire um filtro ou confira a grafia em inglês.</p>
 </section>`;
@@ -352,7 +350,7 @@ export function paginaCobblemonEstruturas() {
   const corpo = `
 <section class="cabecalho">
   <h1>Estruturas</h1>
-  <p class="prosa">O Cobblemon ${esc(C.versao)} espalha ${NUMEROS.estruturas} estruturas próprias pelo mundo. Cada uma aparece aqui em maquete de blocos, montada a partir das peças do próprio mod: clique em Girar em 3D e arraste para ver de todos os lados. Junto, o bioma em que ela é gerada e os Pokémon que têm regra de spawn ligada a ela.</p>
+  <p class="prosa">O Cobblemon ${esc(C.versao)} espalha ${NUMEROS.estruturas} estruturas próprias pelo mundo. Cada uma aparece aqui em maquete de blocos, montada a partir das peças do próprio mod: clique em Girar em 3D, arraste para ver de todos os lados e use a roda do mouse, a pinça ou os botões + e − para aproximar. Tela cheia abre a maquete no monitor inteiro. Junto, o bioma em que ela é gerada e os Pokémon que têm regra de spawn ligada a ela.</p>
   <p class="nota-editorial">As maquetes usam a cor média de cada bloco, sem textura, e não trazem o terreno em volta. Estruturas com peças sorteadas mudam de um mundo para outro; a maquete mostra uma das combinações.</p>
   <p class="nota-editorial">${semNomeOficial} delas não têm nome na tradução do mod: aparecem com o nome interno, em inglês.</p>
 </section>

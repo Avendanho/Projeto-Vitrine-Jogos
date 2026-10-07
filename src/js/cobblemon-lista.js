@@ -9,12 +9,11 @@ const botoes = [...secao.querySelectorAll("button[data-filtro]")];
 const contagem = secao.querySelector("[data-dex-contagem]");
 const rotulo = secao.querySelector("[data-dex-rotulo]");
 const limpar = secao.querySelector("[data-dex-limpar]");
-const faltam = secao.querySelector("[data-dex-faltam]");
 const vazio = secao.querySelector("[data-dex-vazio]");
 
 const CHAVES = ["ambiente", "raridade", "tipo", "monta"];
 const inicial = new URLSearchParams(location.search);
-const estado = { q: inicial.get("q") || "", faltam: false };
+const estado = { q: inicial.get("q") || "" };
 for (const c of CHAVES) {
   const v = inicial.get(c) || "";
   estado[c] = botoes.some((b) => b.dataset.filtro === c && b.dataset.valor === v) ? v : "";
@@ -27,8 +26,7 @@ function aplicar(gravar = true) {
   let visiveis = 0;
   for (const li of itens) {
     const d = li.dataset;
-    const ok = (estado.faltam || !("falta" in d)) &&
-      (!texto || (numero !== null ? Number(d.n) === numero : d.nome.includes(texto))) &&
+    const ok = (!texto || (numero !== null ? Number(d.n) === numero : d.nome.includes(texto))) &&
       (!estado.ambiente || d.ambientes.split(" ").includes(estado.ambiente)) &&
       (!estado.raridade || d.raridade === estado.raridade) &&
       (!estado.tipo || d.tipos.split(" ").includes(estado.tipo)) &&
@@ -37,7 +35,6 @@ function aplicar(gravar = true) {
     if (ok) visiveis++;
   }
   for (const b of botoes) b.setAttribute("aria-pressed", String(estado[b.dataset.filtro] === b.dataset.valor));
-  faltam.setAttribute("aria-pressed", String(estado.faltam));
   contagem.textContent = visiveis.toLocaleString("pt-BR");
   rotulo.textContent = visiveis === 1 ? "espécie" : "espécies";
   limpar.hidden = !(estado.q || CHAVES.some((c) => estado[c]));
@@ -60,7 +57,6 @@ for (const b of botoes) {
   });
 }
 limpar.addEventListener("click", () => { estado.q = ""; campo.value = ""; for (const c of CHAVES) estado[c] = ""; aplicar(); campo.focus(); });
-faltam.addEventListener("click", () => { estado.faltam = !estado.faltam; aplicar(); });
 secao.querySelector("form").addEventListener("submit", (e) => {
   e.preventDefault();
   const sobraram = itens.filter((li) => !li.hidden && li.querySelector("a"));
@@ -74,7 +70,7 @@ if (linhaVistos) {
   const CHAVE = "pokeatlas.cobblemon.vistos";
   let vistos = [];
   try { vistos = JSON.parse(localStorage.getItem(CHAVE) || "[]"); } catch { /* sem armazenamento */ }
-  const naLista = new Set(itens.filter((li) => !("falta" in li.dataset)).map((li) => Number(li.dataset.n)));
+  const naLista = new Set(itens.map((li) => Number(li.dataset.n)));
   const quantos = vistos.filter((n) => naLista.has(Number(n))).length;
   if (quantos) {
     linhaVistos.querySelector("[data-vistos-contagem]").textContent = quantos;

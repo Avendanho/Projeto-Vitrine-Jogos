@@ -274,3 +274,15 @@ que no início do tema Pokémon ficava com o nome "Pokémon" invisível.
 - **Seletor.** A edição marcada herdava a cor de letra clara e usava essa
   mesma cor como fundo. Agora o fundo é a tinta da vez e a letra, o fundo da vez.
 
+
+Ajustes pedidos depois, na mesma rodada:
+
+- A maquete só entra com um clique (antes entrava com o ponteiro parado em cima
+  e o botão sumia), e funciona também sem WebGL, com um desenhista de software.
+- Zoom nas maquetes: roda do mouse depois de clicar, botões + e −, pinça,
+  teclas + e −, deslocar com Shift ou botão direito, dois cliques para voltar,
+  e tela cheia.
+- Saiu do atlas o que o mod não traz na 1.8.1: duas estruturas sem peça
+  inicial, dois itens sem textura nem modelo e, da lista de Pokémon, as 137
+  espécies que ainda não estão no mod. As oito máquinas em bloco, que existem
+  na versão, ganharam ícone desenhado em 3D a partir do modelo do bloco.

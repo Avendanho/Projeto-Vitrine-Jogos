@@ -103,8 +103,8 @@ Uma régua cronológica abrangendo de **1996 a 2027**, separada por plataformas/
 ### 7. ⛏️ Edição Cobblemon (`/cobblemon/`)
 Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) para Minecraft, escolhida no seletor do topo. Tem tema próprio (pergaminho de mapa, painéis de inventário, letra de pixel) e os Pokémon desenhados a partir dos modelos do próprio mod: nas listas eles ficam em tinta de mapa e ganham a cor do jogo quando você aponta; os que você abre ficam revelados de vez. Os itens têm o ícone do mod e giram ao apontar; as estruturas e os biomas aparecem em maquetes de blocos que giram em 3D (WebGL, sem biblioteca).
 - **Pokémon** (`/cobblemon/pokemon/`): as 888 espécies já implementadas, com os biomas em que nascem, raridade, condições, o que deixam cair, montaria e como evoluem dentro do mod.
-- **Itens** (`/cobblemon/itens/`): 492 itens e blocos em português, com as receitas de bancada.
-- **Estruturas** (`/cobblemon/estruturas/`): as 67 estruturas do mod, com o bioma de cada uma e os Pokémon que nascem ali.
+- **Itens** (`/cobblemon/itens/`): 490 itens e blocos em português, com ícone e as receitas de bancada.
+- **Estruturas** (`/cobblemon/estruturas/`): as 65 estruturas que o mod gera, em maquetes 3D com zoom, com o bioma de cada uma e os Pokémon que nascem ali.
 - **Biomas** (`/cobblemon/biomas/`): os 11 ambientes em maquetes 3D que giram, com as espécies e as estruturas de cada um, e as informações gerais do mod (como ele decide o que nasce, fósseis, versões e curiosidades calculadas dos dados).
 - **Desafios** (`/cobblemon/desafios/`): cinco desafios para começar um mundo novo, e a roleta.
 - Todos os dados são extraídos dos arquivos da versão **1.8.1** do mod por `scripts/cobblemon.mjs`.
