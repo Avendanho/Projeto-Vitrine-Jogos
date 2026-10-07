@@ -13,6 +13,8 @@
     "arte:pixel": "node scripts/arte.mjs --pixel",
     "cobblemon": "node scripts/cobblemon.mjs",
     "modelos": "node scripts/modelos.mjs",
+    "itens": "node scripts/itens-arte.mjs",
+    "maquetes": "node scripts/maquetes.mjs",
     "pokedex": "node scripts/pokedex.mjs && node scripts/fichas.mjs",
     "cartas": "node scripts/cartas.mjs",
     "verificar": "node scripts/verificar-paginas.mjs"

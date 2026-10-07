@@ -247,3 +247,30 @@ PokéAtlas; e animar os Pokémon nos dois temas.
   impressa na chegada seguindo o ângulo da trama, o espécime flutua devagar e
   se inclina para o ponteiro; nas gavetas, quem recebe o ponteiro dá um pulinho.
 - Com movimento reduzido, tudo aparece pronto e parado.
+
+## Rodada 7: itens, estruturas e biomas em 3D
+
+Pedido: imagem dos itens e das estruturas do Cobblemon, em 3D se possível, com
+estruturas que dê para girar; trocar a aba Guia por Biomas, com representação
+de cada um, estruturas e informações gerais; e corrigir o seletor de edição,
+que no início do tema Pokémon ficava com o nome "Pokémon" invisível.
+
+- **Itens.** Ícone de cada item tirado das texturas do mod, num atlas só
+  (`scripts/itens-arte.mjs`). Com o ponteiro em cima o ícone gira com
+  espessura, como item largado no chão do jogo. Dez itens (máquinas em bloco
+  e dois doces) não têm ícone plano no mod e ficam com o slot vazio.
+- **Estruturas.** `scripts/maquetes.mjs` lê as peças `.nbt` do mod, monta cada
+  estrutura pelos encaixes (jigsaw) com sorteio fixo, aplica as regras que
+  trocam os blocos marcadores e grava uma maquete de blocos. No site, imagem
+  parada que vira modelo giratório em WebGL próprio (`src/js/maquete.js`).
+  Os blocos entram com a cor média da textura, sem textura: combina com o
+  mapa e não redistribui arte do Minecraft. Duas estruturas que o mod não
+  gera nesta versão ficam sem maquete, e isso é dito no cartão.
+- **Biomas.** Nova aba no lugar do Guia: os onze ambientes, cada um com uma
+  maquete de terreno desenhada pelo atlas (`scripts/lib/dioramas.mjs`), que
+  acorda e gira quando chega ao meio da tela, as espécies, os biomas que
+  entram nele e as estruturas geradas ali. O conteúdo do Guia virou a seção
+  "Informações gerais" da mesma página; `/cobblemon/guia/` redireciona.
+- **Seletor.** A edição marcada herdava a cor de letra clara e usava essa
+  mesma cor como fundo. Agora o fundo é a tinta da vez e a letra, o fundo da vez.
+

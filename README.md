@@ -101,11 +101,11 @@ Uma régua cronológica abrangendo de **1996 a 2027**, separada por plataformas/
 - **Roleta de desafios:** sorteia um jogo, uma regra para o time, complicações e uma condição de vitória. As espécies e os tipos sorteados existem na Pokédex do jogo sorteado, e cada sorteio tem link próprio (`?roleta=...`), que reproduz o mesmo desafio.
 
 ### 7. ⛏️ Edição Cobblemon (`/cobblemon/`)
-Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) para Minecraft, escolhida no seletor do topo. Tem tema próprio (pergaminho de mapa, painéis de inventário, letra de pixel) e os Pokémon desenhados a partir dos modelos do próprio mod: nas listas eles ficam em tinta de mapa e ganham a cor do jogo quando você aponta; os que você abre ficam revelados de vez.
+Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) para Minecraft, escolhida no seletor do topo. Tem tema próprio (pergaminho de mapa, painéis de inventário, letra de pixel) e os Pokémon desenhados a partir dos modelos do próprio mod: nas listas eles ficam em tinta de mapa e ganham a cor do jogo quando você aponta; os que você abre ficam revelados de vez. Os itens têm o ícone do mod e giram ao apontar; as estruturas e os biomas aparecem em maquetes de blocos que giram em 3D (WebGL, sem biblioteca).
 - **Pokémon** (`/cobblemon/pokemon/`): as 888 espécies já implementadas, com os biomas em que nascem, raridade, condições, o que deixam cair, montaria e como evoluem dentro do mod.
 - **Itens** (`/cobblemon/itens/`): 492 itens e blocos em português, com as receitas de bancada.
 - **Estruturas** (`/cobblemon/estruturas/`): as 67 estruturas do mod, com o bioma de cada uma e os Pokémon que nascem ali.
-- **Guia** (`/cobblemon/guia/`): como o mod decide o que nasce, fósseis, glossário de biomas, versões e curiosidades calculadas dos dados.
+- **Biomas** (`/cobblemon/biomas/`): os 11 ambientes em maquetes 3D que giram, com as espécies e as estruturas de cada um, e as informações gerais do mod (como ele decide o que nasce, fósseis, versões e curiosidades calculadas dos dados).
 - **Desafios** (`/cobblemon/desafios/`): cinco desafios para começar um mundo novo, e a roleta.
 - Todos os dados são extraídos dos arquivos da versão **1.8.1** do mod por `scripts/cobblemon.mjs`.
 
@@ -227,6 +227,8 @@ Projeto-Vitrine-Jogos/
 | `npm run arte:formas` | *(Opcional)* Baixa a arte das formas especiais (megas, Gigantamax, regionais). |
 | `npm run arte:pixel` | *(Opcional)* Gera os sprites em pixel das espécies que ainda não estão no Cobblemon. |
 | `npm run modelos -- --fonte <pasta>` | *(Opcional)* Desenha os Pokémon da edição Cobblemon a partir dos modelos e texturas de um clone do repositório do mod. |
+| `npm run itens -- --ativos <pasta>` | *(Opcional)* Monta o atlas de ícones dos itens do Cobblemon a partir das texturas do mod. |
+| `npm run maquetes -- --dados <pasta> --ativos <pasta> --minecraft <pasta>` | *(Opcional)* Monta as maquetes 3D das estruturas (peças `.nbt` do mod) e dos biomas. |
 | `npm run cobblemon -- --fonte <pasta>` | *(Opcional)* Reconstrói `cobblemon.json` a partir de um clone do repositório do mod. |
 | `npm run cartas` | *(Opcional)* Recalcula os nós vetoriais de altitude e caminhos das cartas. |
 | `npm run verificar` | *(Opcional)* Executa a auditoria visual automática com Playwright. |
@@ -249,7 +251,7 @@ O projeto é configurado nativamente para publicação contínua na **Vercel** a
 - **Dados e Sprites:** Nomes, estatísticas e ilustrações oficiais foram obtidos por meio da [PokéAPI](https://pokeapi.co/) e tratados artisticamente em formato de gravura.
 - **Cartografia:** Todas as cartas das regiões são redesenhos originais e interpretações artísticas desenvolvidas especificamente para o atlas.
 - **Tipografia:** Fontes [Archivo](https://fonts.google.com/specimen/Archivo), [Alegreya](https://fonts.google.com/specimen/Alegreya) e [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans), licenciadas sob a *SIL Open Font License*.
-- **Cobblemon:** mod de código aberto da equipe Cobblemon, sob a licença *MPL 2.0*. `dados/cobblemon.json` é derivado dos arquivos de dados e da tradução em português do mod. As imagens em `src/arte/modelo/` são desenhadas por `scripts/modelos.mjs` a partir dos modelos, texturas e poses do mod, que são obra da equipe do Cobblemon. Os nomes de itens e biomas do jogo base vêm da tradução oficial do Minecraft, marca da Mojang e da Microsoft. Este projeto não tem vínculo com nenhuma delas.
+- **Cobblemon:** mod de código aberto da equipe Cobblemon, sob a licença *MPL 2.0*. `dados/cobblemon.json` é derivado dos arquivos de dados e da tradução em português do mod. As imagens em `src/arte/modelo/` são desenhadas por `scripts/modelos.mjs` a partir dos modelos, texturas e poses do mod, que são obra da equipe do Cobblemon; o mesmo vale para os ícones de `src/arte/itens.png` e para as peças de estrutura usadas nas maquetes de `src/maquetes/`. As maquetes não levam textura: cada bloco entra com a cor média da textura dele, calculada a partir dos arquivos do jogo, que não são redistribuídos. Os nomes de itens e biomas do jogo base vêm da tradução oficial do Minecraft, marca da Mojang e da Microsoft. Este projeto não tem vínculo com nenhuma delas.
 
 ---
 

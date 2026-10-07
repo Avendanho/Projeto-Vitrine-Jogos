@@ -86,12 +86,12 @@ export const EDICOES = {
       { href: "/cobblemon/pokemon/", texto: "Pokémon" },
       { href: "/cobblemon/itens/", texto: "Itens" },
       { href: "/cobblemon/estruturas/", texto: "Estruturas" },
-      { href: "/cobblemon/guia/", texto: "Guia" },
+      { href: "/cobblemon/biomas/", texto: "Biomas" },
       { href: "/cobblemon/desafios/", texto: "Desafios" }
     ],
     avisos: [
       "Projeto de fã, sem fins lucrativos. Cobblemon é um mod de código aberto feito pela equipe Cobblemon; este site não tem vínculo com ela, nem com a Mojang, a Microsoft, a Nintendo ou a The Pokémon Company.",
-      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. Os Pokémon são desenhados a partir dos modelos e das texturas do próprio mod, feitos pela equipe do Cobblemon; os que ainda não estão nele aparecem com a arte oficial, do repositório público PokeAPI/sprites, redesenhada em pixel. Fontes: Pixelify Sans, Archivo e Alegreya."
+      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. Os Pokémon são desenhados a partir dos modelos e das texturas do próprio mod, feitos pela equipe do Cobblemon; os que ainda não estão nele aparecem com a arte oficial, do repositório público PokeAPI/sprites, redesenhada em pixel. Os ícones dos itens são as texturas do mod, e as maquetes das estruturas são montadas com as peças dele, em blocos de uma cor só. Fontes: Pixelify Sans, Archivo e Alegreya."
     ]
   }
 };
@@ -104,8 +104,8 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
   // dentro de uma seção (a página de uma espécie, de uma região), a aba da seção continua marcada
   const link = (n) => `<a href="${n.href}"${caminho.startsWith(n.href) ? ' aria-current="page"' : ""}>${n.texto}</a>`;
   const seletor = Object.entries(EDICOES).map(([id, e]) => (id === edicao
-    ? `<a href="${e.inicio}" aria-current="true">${e.nome}</a>`
-    : `<a href="${espelho ?? e.inicio}">${e.nome}</a>`)).join("");
+    ? `<a href="${e.inicio}" aria-current="true"><span>${e.nome}</span></a>`
+    : `<a href="${espelho ?? e.inicio}"><span>${e.nome}</span></a>`)).join("");
   return `<!doctype html>
 <html lang="pt-BR">
 <head>

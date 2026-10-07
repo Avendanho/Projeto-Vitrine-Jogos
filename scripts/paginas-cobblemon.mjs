@@ -1,7 +1,7 @@
 /* A edição Cobblemon do atlas: início, lista de Pokémon, página de cada espécie,
  * itens, estruturas e guia. Tudo sai de dados/cobblemon.json, que é extraído dos
  * arquivos do próprio mod; as curiosidades e os números são calculados aqui. */
-import { MODELOS, COBBLEMON, FICHAS, ORDEM_TIPOS, esc, semAcento, numero, extenso, maiuscula, enumerar, enderecoEspecie, enderecoCobblemon } from "./base.mjs";
+import { MODELOS, MAQUETES, ITENS_ARTE, COBBLEMON, FICHAS, ORDEM_TIPOS, esc, semAcento, numero, extenso, maiuscula, enumerar, enderecoEspecie, enderecoCobblemon } from "./base.mjs";
 import { moldura } from "./paginas.mjs";
 
 const C = COBBLEMON;
@@ -32,6 +32,31 @@ export function slot(n, { ligacao = true, lado = 96, preguica = true } = {}) {
     ? `<a class="slot"${marca} href="${enderecoCobblemon(n)}" title="${esc(e.nome)}" aria-label="${esc(e.nome)}">${figura}</a>`
     : `<span class="slot"${marca} title="${esc(e.nome)}">${figura}</span>`;
 }
+/* O ícone de um item, recortado do atlas src/arte/itens.png. Com o ponteiro em cima ele gira, como item largado no chão. */
+function icone(id) {
+  const i = ITENS_ARTE.itens[id];
+  return i === undefined
+    ? `<span class="slot slot-item" aria-hidden="true"></span>`
+    : `<span class="slot slot-item" aria-hidden="true"><span class="item-icone" style="--cx:${i % ITENS_ARTE.colunas};--cy:${Math.floor(i / ITENS_ARTE.colunas)}"></span></span>`;
+}
+/* Uma maquete de blocos: a imagem parada e o botão que a troca pelo modelo que gira (src/js/maquete.js). */
+function maquete(info, legenda, { auto = false, preguica = true } = {}) {
+  return `<figure class="maquete"${auto ? " data-maquete-auto" : ""} data-maquete="/maquetes/${info.nome}.json">
+    <img src="/arte/maquete/${info.nome}.webp" alt="${esc(legenda)}" width="480" height="480"${preguica ? ' loading="lazy" decoding="async"' : ""}>
+    <button type="button" class="maquete-girar">Girar em 3D</button>
+    <span class="maquete-dica" aria-hidden="true">Arraste para girar</span>
+  </figure>`;
+}
+/* Em que ambiente do atlas cai cada estrutura, pelo nome do bioma em que o mod a gera. */
+const PISTAS = [
+  ["caverna", /caverna/], ["oceano", /ocean|prai|litoral/], ["frio", /neva|gelo|congel|tundra|glacia/], ["arido", /areia|árid|ermo|savana|desert/],
+  ["agua-doce", /pântano|lama|rio|água doce/], ["selva", /selva|bambu|tropic|ilha/], ["floresta", /taiga|florest|bosque|cogumelo|cerej/],
+  ["montanha", /terras altas|montanh|colina|pico|céu/], ["campo", /planíc|pradaria|temperad|florid|mágic/]
+];
+const ambienteDoBioma = (nome) => C.biomas.find((b) => b.nome === nome)?.ambiente ?? PISTAS.find(([, r]) => r.test(nome.toLowerCase()))?.[0];
+const ambientesDaEstrutura = (e) => [...new Set(e.biomas.map(ambienteDoBioma).filter(Boolean))];
+const ancora = (e) => e.id.split(":").pop().replace(/\//g, "-");
+
 const fileira = (ns, limite = 18) => `<span class="fileira">${ns.slice(0, limite).map((n) => slot(n, { lado: 48 })).join("")}${ns.length > limite ? `<span class="fileira-resto">e mais ${ns.length - limite}</span>` : ""}</span>`;
 
 const mais = (lista, chave) => { const m = new Map(); for (const x of lista) for (const k of [].concat(chave(x))) m.set(k, (m.get(k) || 0) + 1); return [...m.entries()].sort((a, b) => b[1] - a[1]); };
@@ -133,7 +158,7 @@ export function paginaCobblemonInicio() {
     <li class="painel"><a href="/cobblemon/pokemon/"><span class="fileira">${[25, 194, 448, 94].map((n) => slot(n, { ligacao: false, lado: 64 })).join("")}</span><h3>Pokémon</h3><p>${NUMEROS.noMod} espécies, com onde nascem, o que deixam cair e como evoluem no mod.</p></a></li>
     <li class="painel"><a href="/cobblemon/itens/"><h3>Itens</h3><p>${NUMEROS.itens} itens e blocos em português, das ${NUMEROS.bolas} Poké Bolas às bagas, com as receitas de bancada.</p></a></li>
     <li class="painel"><a href="/cobblemon/estruturas/"><h3>Estruturas</h3><p>${NUMEROS.estruturas} habitats, ruínas e naufrágios, com o bioma de cada um e o que nasce ali.</p></a></li>
-    <li class="painel"><a href="/cobblemon/guia/"><h3>Guia</h3><p>Como o mod decide o que nasce, os ${NUMEROS.fosseis} fósseis, o glossário de biomas e as curiosidades.</p></a></li>
+    <li class="painel"><a href="/cobblemon/biomas/"><h3>Biomas</h3><p>Os ${C.ambientes.length} ambientes em maquetes que giram, com as estruturas de cada um, e como o mod decide o que nasce.</p></a></li>
   </ul>
 </section>
 
@@ -293,7 +318,7 @@ export function paginaCobblemonItens() {
   const corpo = `
 <section class="cabecalho">
   <h1>Itens</h1>
-  <p class="prosa">${NUMEROS.itens} itens e blocos do Cobblemon ${esc(C.versao)}, com o nome e a descrição da tradução do próprio mod. Onde há receita de bancada, ela vem junto.</p>
+  <p class="prosa">${NUMEROS.itens} itens e blocos do Cobblemon ${esc(C.versao)}, com o ícone, o nome e a descrição do próprio mod. Onde há receita de bancada, ela vem junto. Aponte para um item e ele gira, como quando cai no chão.</p>
 </section>
 <section class="cb-itens" data-cb-itens>
   <form class="dex-controles" role="search" aria-label="Procurar item">
@@ -308,7 +333,7 @@ export function paginaCobblemonItens() {
     <h2 id="t-${g.id}">${esc(g.nome)}</h2>
     ${NOTAS[g.id] ? `<p class="nota-editorial">${NOTAS[g.id]}</p>` : ""}
     <ul class="cb-itens-lista">
-      ${g.itens.map((i) => `<li data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>` : ""}</li>`).join("\n      ")}
+      ${g.itens.map((i) => `<li data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>` : ""}</div></li>`).join("\n      ")}
     </ul>
   </section>`).join("\n  ")}
   <p class="vazio" data-dex-vazio hidden>Nenhum item com esse nome ou efeito.</p>
@@ -327,15 +352,18 @@ export function paginaCobblemonEstruturas() {
   const corpo = `
 <section class="cabecalho">
   <h1>Estruturas</h1>
-  <p class="prosa">O Cobblemon ${esc(C.versao)} espalha ${NUMEROS.estruturas} estruturas próprias pelo mundo. Para cada uma, o bioma em que ela é gerada e os Pokémon que têm regra de spawn ligada a ela.</p>
+  <p class="prosa">O Cobblemon ${esc(C.versao)} espalha ${NUMEROS.estruturas} estruturas próprias pelo mundo. Cada uma aparece aqui em maquete de blocos, montada a partir das peças do próprio mod: aponte ou toque em Girar em 3D e arraste para ver de todos os lados. Junto, o bioma em que ela é gerada e os Pokémon que têm regra de spawn ligada a ela.</p>
+  <p class="nota-editorial">As maquetes usam a cor média de cada bloco, sem textura, e não trazem o terreno em volta. Estruturas com peças sorteadas mudam de um mundo para outro; a maquete mostra uma das combinações.</p>
   <p class="nota-editorial">${semNomeOficial} delas não têm nome na tradução do mod: aparecem com o nome interno, em inglês.</p>
 </section>
 <section class="cb-estruturas">
   ${familias.map((f) => `<section aria-labelledby="t-${f.id}">
     <h2 id="t-${f.id}">${esc(f.nome)} <span class="dex-conta">${f.itens.length}</span></h2>
     <ul class="cb-estruturas-lista">
-      ${f.itens.map((e) => `<li class="painel">
+      ${f.itens.map((e) => `<li class="painel" id="${ancora(e)}">
+        ${MAQUETES.estruturas[e.id] ? maquete(MAQUETES.estruturas[e.id], `Maquete de ${e.nome}`) : `<p class="maquete-sem">Sem maquete: o mod não gera esta estrutura na versão ${esc(C.versao)}.</p>`}
         <h3${e.oficial ? "" : ' lang="en"'}>${esc(e.nome)}</h3>
+        ${MAQUETES.estruturas[e.id] ? `<p class="cb-onde">${MAQUETES.estruturas[e.id].tamanho.join(" × ")} blocos${MAQUETES.estruturas[e.id].pecas > 1 ? `, em ${MAQUETES.estruturas[e.id].pecas} peças` : ""}${MAQUETES.estruturas[e.id].parcial ? " (só o miolo: a estrutura inteira é bem maior)" : ""}</p>` : ""}
         <p class="cb-onde">Gerada em: ${esc(enumerar(e.biomas.map((b) => b.toLowerCase())))}</p>
         ${e.especies.length ? `<p class="cb-onde">Nascem aqui:</p>${fileira(e.especies, 16)}` : ""}
       </li>`).join("\n      ")}
@@ -350,24 +378,66 @@ export function paginaCobblemonEstruturas() {
   </section>
 </section>`;
   return moldura({
-    ...base, titulo: "Estruturas do Cobblemon", caminho: "/cobblemon/estruturas/", classe: "pagina-cb-estruturas", corpo, espelho: "/regioes/",
+    ...base, titulo: "Estruturas do Cobblemon", caminho: "/cobblemon/estruturas/", classe: "pagina-cb-estruturas", corpo, modulo: "maquete", espelho: "/regioes/",
     descricao: `As ${NUMEROS.estruturas} estruturas do Cobblemon ${C.versao}: habitats, ruínas, naufrágios e barcos, com o bioma de cada uma e os Pokémon que nascem ali.`
   });
 }
 
-/* ---------- guia ---------- */
+/* ---------- biomas (com as informações gerais que eram do guia) ---------- */
 
-export function paginaCobblemonGuia() {
+export function paginaCobblemonBiomas() {
   const dataBR = (iso) => { const [a, m, d] = iso.split("-"); return `${d}/${m}/${a}`; };
   const cabo = C.itens.find((i) => i.id === "link_cable");
+  const dosBiomas = (id) => C.biomas.filter((b) => b.ambiente === id);
+  const TEXTOS = {
+    campo: "Planícies, pradarias e campos de flores: o terreno aberto em que a maior parte dos jogadores começa.",
+    floresta: "Florestas de carvalho e bétula, taigas e os campos de cogumelos.",
+    selva: "Selvas fechadas, bambuzais e as ilhas tropicais.",
+    montanha: "Colinas, picos e os biomas altos, onde a pedra aparece e a neve começa.",
+    arido: "Desertos, ermos de terracota e savanas.",
+    frio: "Tundras, planícies nevadas, picos de gelo e florestas sob neve.",
+    "agua-doce": "Pântanos, manguezais, rios e lagos.",
+    oceano: "Do litoral ao oceano profundo, frio, morno ou congelado.",
+    caverna: "Tudo o que fica debaixo da terra, das cavernas de pedra às exuberantes.",
+    nether: "A dimensão de baixo, com lava, florestas de fungo e vales de areia das almas.",
+    fim: "A dimensão final: ilhas de pedra do Fim soltas no vazio."
+  };
+  const estruturasDe = (id) => C.estruturas.filter((e) => MAQUETES.estruturas[e.id] && ambientesDaEstrutura(e).includes(id));
   const corpo = `
 <section class="cabecalho">
-  <h1>Guia</h1>
-  <p class="prosa">O essencial sobre o Cobblemon, contado a partir do que está nos arquivos da versão ${esc(C.versao)}.</p>
+  <h1>Biomas</h1>
+  <p class="prosa">O Cobblemon decide o que nasce olhando para o bioma. O atlas junta os biomas em ${extenso(C.ambientes.length)} ambientes; cada um aparece aqui como um pedaço de terreno em blocos, que você pode girar, com as estruturas do mod que são geradas ali.</p>
+  <p class="nota-editorial">As maquetes dos ambientes são desenhos do atlas, feitos com os blocos de cada bioma. As das estruturas são montadas a partir dos arquivos do mod.</p>
+  <nav class="filtro-opcoes cb-biomas-indice" aria-label="Ambientes">${C.ambientes.map((a) => `<a class="ficha" href="#${a.id}">${esc(a.nome)}</a>`).join("")}<a class="ficha" href="#geral">Informações gerais</a></nav>
 </section>
-<article class="cb-guia">
+<div class="cb-biomas">
+  ${C.ambientes.map((a, k) => {
+    const especies = NO_MOD.filter((e) => e.ambientes.includes(a.id)), grupos = dosBiomas(a.id), estruturas = estruturasDe(a.id);
+    return `<section class="cb-bioma" id="${a.id}" aria-labelledby="t-${a.id}">
+    ${maquete(MAQUETES.ambientes[a.id], `Maquete do ambiente ${a.nome}`, { auto: true, preguica: k > 0 })}
+    <div class="cb-bioma-texto">
+      <h2 id="t-${a.id}">${esc(a.nome)}</h2>
+      <p class="prosa">${TEXTOS[a.id]}</p>
+      <p class="cb-bioma-conta"><strong>${especies.length}</strong> espécies com regra de spawn aqui. <a href="/cobblemon/pokemon/?ambiente=${a.id}">Ver todas</a></p>
+      <span class="fileira">${vitrine(a.id, 8).map((e) => slot(e.n, { lado: 64 })).join("")}</span>
+      ${grupos.length ? `<details class="cb-bioma-grupos"><summary>Os biomas que entram aqui</summary><dl class="cb-glossario">
+        ${grupos.map((b) => `<div><dt>${esc(b.nome)}</dt><dd>${b.inclui.length ? esc(b.inclui.join(", ")) : "Só com outros mods de bioma"}</dd></div>`).join("\n        ")}
+      </dl></details>` : ""}
+    </div>
+    ${estruturas.length ? `<div class="cb-bioma-estruturas">
+      <h3>Estruturas geradas aqui <span class="dex-conta">${estruturas.length}</span></h3>
+      <ul>
+        ${estruturas.map((e) => `<li><a href="/cobblemon/estruturas/#${ancora(e)}"><img src="/arte/maquete/${MAQUETES.estruturas[e.id].nome}.webp" alt="" width="96" height="96" loading="lazy" decoding="async"><span${e.oficial ? "" : ' lang="en"'}>${esc(e.nome)}</span></a></li>`).join("\n        ")}
+      </ul>
+    </div>` : ""}
+  </section>`;
+  }).join("\n  ")}
+</div>
+<article class="cb-guia" id="geral" aria-labelledby="t-geral">
+  <h2 id="t-geral">Informações gerais</h2>
+  <p class="prosa">O essencial sobre o Cobblemon, contado a partir do que está nos arquivos da versão ${esc(C.versao)}.</p>
   <section aria-labelledby="t-oque">
-    <h2 id="t-oque">O que é</h2>
+    <h3 id="t-oque">O que é</h3>
     <div class="prosa">
       <p>Cobblemon é um mod de código aberto que põe Pokémon dentro do Minecraft Java Edition. Funciona em Fabric e em NeoForge, e o código é publicado sob a licença MPL 2.0.</p>
       <p>Não há Liga nem história a seguir: os Pokémon passam a fazer parte do mundo, nascem conforme o bioma, a hora e o tempo, e você os captura, cria, monta e batalha do jeito que quiser. As batalhas são por turnos e usam o motor do Pokémon Showdown, que vem junto com o mod.</p>
@@ -375,7 +445,7 @@ export function paginaCobblemonGuia() {
   </section>
 
   <section aria-labelledby="t-numeros">
-    <h2 id="t-numeros">Em números</h2>
+    <h3 id="t-numeros">Em números</h3>
     <dl class="ficha-tecnica ficha-larga cb-contas">
       ${[
         [`${NUMEROS.noMod} de ${numero(NUMEROS.total)}`, "espécies já no mod"],
@@ -395,7 +465,7 @@ export function paginaCobblemonGuia() {
   </section>
 
   <section aria-labelledby="t-nascer">
-    <h2 id="t-nascer">Como o mod decide o que nasce</h2>
+    <h3 id="t-nascer">Como o mod decide o que nasce</h3>
     <div class="prosa">
       <p>Cada espécie tem uma ou mais regras de spawn. Uma regra diz em que grupo de raridade o Pokémon está, em que biomas pode aparecer, em que faixa de nível e sob quais condições.</p>
       <p>São quatro grupos de raridade: comum, incomum, raro e ultrarraro. Das ${NUMEROS.nascem} espécies que nascem no mundo, ${NO_MOD.filter((e) => e.raridade === "common").length} têm ao menos uma regra comum, e ${NO_MOD.filter((e) => e.raridade === "ultra-rare").length} só aparecem como ultrarraras.</p>
@@ -405,7 +475,7 @@ export function paginaCobblemonGuia() {
   </section>
 
   <section aria-labelledby="t-troca">
-    <h2 id="t-troca">Evoluir sem trocar</h2>
+    <h3 id="t-troca">Evoluir sem trocar</h3>
     <div class="prosa">
       <p>${TROCAS} espécies do mod evoluem por troca. Para quem joga sozinho, existe o ${esc(cabo?.nome ?? "Cabo de Ligação")}, que o jogo descreve assim: “${esc(cabo?.dica ?? "")}”.</p>
       <p>Outras evoluções foram adaptadas ao Minecraft: há espécies que dependem do bioma em que estão, de blocos andados ou de estar longe de uma vila. A página de cada Pokémon diz como ele evolui dentro do mod.</p>
@@ -413,30 +483,22 @@ export function paginaCobblemonGuia() {
   </section>
 
   <section aria-labelledby="t-fosseis">
-    <h2 id="t-fosseis">Fósseis</h2>
+    <h3 id="t-fosseis">Fósseis</h3>
     <ul class="cb-fosseis">
       ${C.fosseis.map((f) => `<li>${slot(f.n, { lado: 64 })}<span><strong>${esc(C.especies[f.n].nome)}</strong><span>${esc(enumerar(f.fosseis))}</span></span></li>`).join("\n      ")}
     </ul>
   </section>
 
   <section aria-labelledby="t-curiosidades">
-    <h2 id="t-curiosidades">Curiosidades</h2>
+    <h3 id="t-curiosidades">Curiosidades</h3>
     <ul class="lista-marcada cb-fatos">
       ${curiosidades().map((f) => `<li>${esc(f)}</li>`).join("\n      ")}
     </ul>
     <p class="nota-editorial">Contas feitas sobre as regras de spawn e as fichas das espécies da versão ${esc(C.versao)}.</p>
   </section>
 
-  <section aria-labelledby="t-biomas">
-    <h2 id="t-biomas">Glossário de biomas</h2>
-    <p class="nota-editorial">O mod agrupa os biomas em categorias. Aqui, os biomas do Minecraft que cada uma cobre. As que aparecem sem lista dependem de outros mods de bioma.</p>
-    <dl class="cb-glossario">
-      ${C.biomas.map((b) => `<div><dt>${esc(b.nome)}</dt><dd>${b.inclui.length ? esc(b.inclui.join(", ")) : "Só com outros mods de bioma"}</dd></div>`).join("\n      ")}
-    </dl>
-  </section>
-
   <section aria-labelledby="t-versoes">
-    <h2 id="t-versoes">Versões</h2>
+    <h3 id="t-versoes">Versões</h3>
     <ol class="cb-versoes">
       ${C.versoes.map(([nome, data]) => `<li><strong>${esc(nome)}</strong><span>${dataBR(data)}</span></li>`).join("\n      ")}
     </ol>
@@ -444,12 +506,10 @@ export function paginaCobblemonGuia() {
   </section>
 </article>`;
   return moldura({
-    ...base, titulo: "Guia do Cobblemon", caminho: "/cobblemon/guia/", classe: "pagina-cb-guia", corpo,
-    descricao: `O que é o Cobblemon, como o mod decide o que nasce, os ${NUMEROS.fosseis} fósseis, o glossário de biomas, as versões e curiosidades tiradas dos dados da ${C.versao}.`
+    ...base, titulo: "Biomas do Cobblemon", caminho: "/cobblemon/biomas/", classe: "pagina-cb-biomas", corpo, modulo: "maquete", espelho: "/regioes/",
+    descricao: `Os ${C.ambientes.length} ambientes do Cobblemon ${C.versao} em maquetes de blocos que giram, com os Pokémon e as estruturas de cada um, e como o mod decide o que nasce.`
   });
 }
-
-/* ---------- dados para a roleta de desafios do Cobblemon ---------- */
 
 export function dadosDaRoletaCobblemon() {
   const FRASES = {

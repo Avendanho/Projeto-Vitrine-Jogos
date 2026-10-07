@@ -221,8 +221,9 @@ html:not(.js) [data-trilho] { flex-wrap: wrap; }
 .edicoes a + a { border-left: 1.5px solid currentColor; }
 .edicoes a[aria-current] { background: var(--tinta); color: var(--mar); }
 .edicoes a:not([aria-current]):hover { background: color-mix(in srgb, currentColor 14%, transparent); }
-.pagina-inicio .edicoes a[aria-current], .pagina-cb-inicio .edicoes a[aria-current] { background: currentColor; }
-.pagina-inicio .edicoes a[aria-current]::first-line, .pagina-cb-inicio .edicoes a[aria-current]::first-line { color: var(--fundo-vivo, var(--mar)); }
+/* no início o cabeçalho troca de tinta com a rolagem: a edição marcada usa a tinta da vez como fundo e o fundo da vez como letra */
+.pagina-inicio .edicoes a[aria-current] { color: inherit; background: currentColor; }
+.pagina-inicio .edicoes a[aria-current] span { color: var(--fundo-vivo, var(--mar)); }
 
 @media (max-width: 1080px) {
   .topo { padding-block: 10px 24px; }
@@ -1241,7 +1242,7 @@ html:has(.edicao-cobblemon) { background: #DCCB9F; }
 .edicao-cobblemon .edicoes a { font-size: 1rem; font-weight: 500; }
 .edicao-cobblemon .edicoes a + a { border-left: 2px solid var(--preto); }
 .edicao-cobblemon .edicoes a[aria-current] { background: var(--rota); color: #fff; }
-.edicao-cobblemon.pagina-cb-inicio .edicoes a[aria-current]::first-line { color: #fff; }
+.edicao-cobblemon .edicoes a[aria-current] span { color: #fff; }
 .edicao-cobblemon .topo-nav a:not(.botao) { font-size: 1.1rem; font-weight: 500; }
 .edicao-cobblemon .topo::before { background: linear-gradient(to bottom, var(--fundo-vivo, var(--mar)) 64%, transparent); }
 .edicao-cobblemon :is(.dex-busca input, .busca-inicio input) { background: var(--papel-claro); border: 2px solid var(--preto); border-radius: 0; box-shadow: inset 2px 2px 0 var(--sombra); }
@@ -1320,8 +1321,19 @@ a.slot:hover { background: #B4B4D8; }
 .cb-grupo { margin-top: var(--e6); scroll-margin-top: 80px; }
 .cb-grupo[hidden] { display: none; }
 .cb-itens-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 0 var(--e4); margin-top: var(--e3); }
-.cb-itens-lista li { display: grid; gap: 2px; align-content: start; padding: 11px 0; border-top: 2px solid color-mix(in srgb, currentColor 22%, transparent); }
+.cb-itens-lista li { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; align-items: start; padding: 11px 0; border-top: 2px solid color-mix(in srgb, currentColor 22%, transparent); }
 .cb-itens-lista li[hidden] { display: none; }
+.cb-item-texto { display: grid; gap: 2px; align-content: start; }
+/* O ícone do item, recortado do atlas. São três camadas da mesma figura, uma atrás da outra,
+ * para ele ter espessura quando gira, como o item largado no chão do jogo. */
+.slot-item { width: 56px; height: 56px; perspective: 260px; }
+.item-icone, .item-icone::before, .item-icone::after { background: url("/arte/itens.png") calc(var(--cx) * -48px) calc(var(--cy) * -48px) / calc(32 * 48px) auto no-repeat; image-rendering: pixelated; }
+.item-icone { position: relative; display: block; width: 48px; height: 48px; transform-style: preserve-3d; }
+.item-icone::before, .item-icone::after { content: ""; position: absolute; inset: 0; }
+.item-icone::before { transform: translateZ(-1.5px); }
+.item-icone::after { transform: translateZ(1.5px); }
+.cb-itens-lista li:hover .item-icone { animation: item-gira 2.4s linear infinite; }
+@keyframes item-gira { 0% { transform: translateY(0) rotateY(0deg); } 50% { transform: translateY(-4px) rotateY(180deg); } 100% { transform: translateY(0) rotateY(360deg); } }
 .cb-itens-lista strong { font-family: var(--pixel); font-size: 1.14rem; font-weight: 600; }
 .cb-itens-lista span { font-size: var(--t-pequeno); line-height: 1.4; }
 .cb-receita { color: var(--tinta-suave); }
@@ -1329,7 +1341,44 @@ a.slot:hover { background: #B4B4D8; }
 /* estruturas */
 .cb-estruturas > section + section { margin-top: var(--e6); }
 .cb-estruturas-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); gap: var(--e3); margin-top: var(--e3); }
-.cb-estruturas-lista li { display: grid; align-content: start; gap: 8px; }
+.cb-estruturas-lista li { display: grid; align-content: start; gap: 8px; scroll-margin-top: 96px; }
+.cb-estruturas-lista li:target { outline: 4px solid var(--rota); outline-offset: 2px; }
+
+/* A maquete de blocos: imagem parada que vira modelo giratório (src/js/maquete.js). */
+.maquete { position: relative; display: block; width: 100%; aspect-ratio: 1; background: var(--mar); box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #fff; line-height: 0; overflow: hidden; }
+.maquete img, .maquete-tela { position: absolute; inset: 5%; width: 90%; height: 90%; object-fit: contain; }
+.maquete-tela { cursor: grab; touch-action: pan-y; }
+.maquete.girando .maquete-tela { cursor: grabbing; }
+.maquete.viva img { visibility: hidden; }
+.maquete-girar { position: absolute; right: 8px; bottom: 8px; z-index: 2; padding: 6px 10px; font-family: var(--pixel); font-size: 0.95rem; line-height: 1.2; color: var(--preto); background: var(--papel); border: 2px solid var(--preto); box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--sombra); cursor: pointer; }
+.maquete-girar:hover { background: #B4B4D8; }
+.maquete.viva .maquete-girar, .maquete[data-estado="falhou"] .maquete-girar, html:not(.js) .maquete-girar { display: none; }
+.maquete-dica { display: none; position: absolute; left: 8px; bottom: 8px; padding: 4px 7px; font-family: var(--pixel); font-size: 0.85rem; line-height: 1.2; color: #fff; background: rgb(0 0 0 / 0.55); pointer-events: none; }
+.maquete.viva:not(.girando) .maquete-dica { display: block; }
+.maquete-sem { display: grid; place-items: center; aspect-ratio: 1; padding: var(--e3); font-size: var(--t-pequeno); line-height: 1.4; text-align: center; background: var(--mar); box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #fff; }
+
+/* biomas: um ambiente por faixa, maquete de um lado e texto do outro, alternando */
+.cb-biomas { display: grid; gap: var(--e7); padding: var(--e4) var(--margem) var(--e6); }
+.cb-biomas-indice { margin-top: var(--e3); }
+.cb-bioma { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--e4) var(--e5); align-items: center; scroll-margin-top: 96px; }
+.cb-bioma .maquete { max-width: 560px; justify-self: center; }
+.cb-bioma:nth-child(even) > .maquete { order: 2; }
+.cb-bioma-texto { display: grid; gap: var(--e2); align-content: center; }
+.cb-bioma-conta strong { font-family: var(--pixel); font-size: 1.7rem; font-weight: 600; }
+.cb-bioma-grupos summary { cursor: pointer; font-family: var(--pixel); font-size: 1.05rem; }
+.cb-bioma-grupos .cb-glossario { margin-top: var(--e2); }
+.cb-bioma-estruturas { grid-column: 1 / -1; order: 3; }
+.cb-bioma-estruturas ul { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--e2); }
+.cb-bioma-estruturas a { display: grid; justify-items: center; align-content: start; gap: 4px; width: 118px; height: 100%; padding: 6px; font-size: 0.8rem; line-height: 1.2; text-align: center; text-decoration: none; overflow-wrap: anywhere; background: var(--papel); border: 2px solid var(--preto); box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--sombra); }
+.cb-bioma-estruturas a:hover { background: #B4B4D8; }
+.cb-bioma-estruturas img { width: 96px; height: 96px; }
+.pagina-cb-biomas .cb-guia > h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
+.pagina-cb-biomas .cb-guia > h2 + .prosa { margin-bottom: var(--e5); }
+.pagina-cb-biomas .cb-guia h3 { margin-bottom: var(--e3); font-size: clamp(1.5rem, 3vw, 2.1rem); }
+@media (max-width: 860px) {
+  .cb-bioma { grid-template-columns: minmax(0, 1fr); }
+  .cb-bioma:nth-child(even) > .maquete { order: 0; }
+}
 .cb-onde { font-size: var(--t-pequeno); line-height: 1.35; }
 
 /* guia */

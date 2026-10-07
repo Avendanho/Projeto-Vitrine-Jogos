@@ -7,11 +7,12 @@
   "cleanUrls": true,
   "trailingSlash": true,
   "redirects": [
-    { "source": "/biblioteca/", "destination": "/pokedex/", "permanent": false }
+    { "source": "/biblioteca/", "destination": "/pokedex/", "permanent": false },
+    { "source": "/cobblemon/guia/", "destination": "/cobblemon/biomas/", "permanent": false }
   ],
   "headers": [
     {
-      "source": "/(fontes|arte)/(.*)",
+      "source": "/(fontes|arte|maquetes)/(.*)",
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     },
     {
