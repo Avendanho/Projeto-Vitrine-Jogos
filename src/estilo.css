@@ -233,6 +233,13 @@ h3 { font-size: var(--t-subtitulo); font-weight: 680; font-stretch: 106%; letter
 }
 .prancha:hover .prancha-cor, .prancha:focus-visible .prancha-cor, .prancha.revelada .prancha-cor { opacity: 1; transform: none; }
 .prancha:hover .prancha-tinta, .prancha:focus-visible .prancha-tinta, .prancha.revelada .prancha-tinta { opacity: 0; }
+/* na página de cada espécie a gravura é feita na hora, num canvas; até lá, vale a miniatura */
+.prancha-rascunho, .prancha-gravura { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transition: opacity 0.5s ease; }
+.prancha-gravura { opacity: 0; }
+.gravada .prancha-gravura { opacity: 1; }
+.gravada .prancha-rascunho { opacity: 0; }
+.prancha:hover .prancha-gravura, .prancha:focus-visible .prancha-gravura, .prancha.revelada .prancha-gravura,
+.prancha:hover .prancha-rascunho, .prancha:focus-visible .prancha-rascunho, .prancha.revelada .prancha-rascunho { opacity: 0; }
 .prancha figcaption { margin-top: 6px; font-size: var(--t-menor); font-weight: 600; line-height: 1.25; text-align: center; }
 .prancha-numero { display: block; font-weight: 440; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
 
@@ -307,39 +314,53 @@ h3 { font-size: var(--t-subtitulo); font-weight: 680; font-stretch: 106%; letter
 .folha-intro { flex: 0 0 min(78vw, 440px); }
 .folha-intro h2 { margin-bottom: var(--e3); }
 
+/* Cada folha é uma página dupla de atlas: o texto de um lado, a carta do outro.
+ * A carta aparece inteira, na proporção dela; é a largura da folha que se ajusta. */
 .folha {
-  flex: 0 0 min(86vw, 700px);
+  --borda: clamp(18px, 2.4vw, 32px);
+  --alto: calc(min(78svh, 700px) - 2 * var(--borda));
+  flex: 0 0 auto; max-width: 100%;
   height: min(78svh, 700px);
-  display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: clamp(8px, 1.6vh, 18px);
-  padding: clamp(18px, 2.6vw, 34px);
+  display: grid; grid-template-columns: clamp(240px, 21vw, 320px) auto; gap: clamp(20px, 2.6vw, 40px);
+  align-items: center;
+  padding: var(--borda);
   background: var(--papel); color: var(--tinta);
   border: 1.5px solid var(--tinta);
   outline: 1px solid color-mix(in srgb, var(--tinta) 30%, transparent); outline-offset: -8px;
 }
-.folha-topo { display: grid; grid-template-columns: 1fr auto; align-items: end; column-gap: var(--e2); }
-.folha-geracao { grid-column: 1 / -1; font-size: var(--t-pequeno); font-weight: 600; }
+.folha .carta-caixa { width: min(46vw, 640px, calc(var(--alto) * var(--proporcao))); }
+.folha-texto-coluna { display: grid; gap: clamp(10px, 1.8vh, 20px); align-content: center; min-width: 0; }
+.folha-geracao { font-size: var(--t-pequeno); font-weight: 600; }
 .folha-nome {
-  font-size: clamp(2.5rem, 6.2vw, 5rem); font-weight: 820; font-stretch: 125%;
-  letter-spacing: 0.02em; text-transform: uppercase; line-height: 0.9;
+  font-size: clamp(2.2rem, 3.5vw, 3.3rem); font-weight: 820; font-stretch: 125%;
+  letter-spacing: 0.02em; text-transform: uppercase; line-height: 0.95;
 }
-.folha-inspiracao { font-family: var(--caderno); font-style: italic; font-size: 1.1rem; text-align: right; padding-bottom: 0.25em; }
-.folha-texto { font-family: var(--caderno); font-size: 1.14rem; line-height: 1.4; max-width: 52ch; }
-.perfil { width: 100%; height: 100%; min-height: 70px; align-self: end; }
-.folha-base { display: grid; grid-template-columns: auto 1fr; gap: clamp(16px, 3vw, 40px); align-items: end; }
-.folha-iniciais { display: flex; gap: clamp(6px, 1vw, 14px); }
-.folha-iniciais .prancha { width: clamp(64px, 8.4vw, 112px); }
+.folha-nome a { text-decoration: none; }
+.folha-nome a:hover { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 4px; text-underline-offset: 0.12em; }
+.folha-inspiracao { margin-top: 4px; font-family: var(--caderno); font-style: italic; font-size: 1.1rem; }
+.folha-texto { font-family: var(--caderno); font-size: 1.1rem; line-height: 1.4; }
+.folha-iniciais { display: flex; gap: 8px; }
+.folha-iniciais .prancha { width: 31%; max-width: 96px; }
 .folha-jogos { display: grid; gap: 4px; }
-.folha-jogos a { display: grid; grid-template-columns: clamp(44px, 5vw, 62px) 1fr; align-items: center; gap: 10px; text-decoration: none; }
+.folha-jogos a { display: grid; grid-template-columns: 50px 1fr; align-items: center; gap: 10px; text-decoration: none; }
 .folha-jogos .ilha-nome { font-size: var(--t-pequeno); }
 .folha-jogos a:hover .ilha-nome { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 2px; }
+.perfil { width: 100%; height: 100%; min-height: 70px; align-self: end; }
 
-@media (max-width: 620px) {
-  .folha { grid-template-rows: auto auto minmax(60px, 1fr) auto; }
-  .folha-topo { grid-template-columns: 1fr; }
-  .folha-inspiracao { text-align: left; }
-  .folha-texto { font-size: 1.05rem; }
-  .folha-base { grid-template-columns: 1fr; gap: 12px; }
-  .folha-iniciais .prancha { width: 30%; max-width: 96px; }
+/* tela baixa: o parágrafo sai para o resto caber */
+@media (max-height: 760px) { .folha-texto { display: none; } }
+/* tela estreita: uma coluna só, com a carta logo depois do nome */
+@media (max-width: 760px) {
+  .folha { flex-basis: 86vw; width: 86vw; grid-template-columns: 1fr; align-content: center; gap: 12px; }
+  .folha-texto-coluna { display: contents; }
+  .folha-topo { order: 1; }
+  .folha .carta-caixa { order: 2; justify-self: center; width: min(100%, calc(29svh * var(--proporcao))); }
+  .folha-iniciais { order: 3; }
+  .folha-jogos { order: 4; }
+  .folha-texto { display: none; }
+  .folha-nome { font-size: 2.2rem; }
+  .folha-iniciais .prancha { max-width: 84px; }
+  .folha-jogos a { grid-template-columns: 40px 1fr; }
 }
 
 /* ---------- início: trinta anos ---------- */
@@ -458,26 +479,26 @@ h3 { font-size: var(--t-subtitulo); font-weight: 680; font-stretch: 106%; letter
 .ferramenta-comparar { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
 .ferramenta-texto h2 { margin-bottom: var(--e3); }
 .ferramenta-texto .botao { margin-top: var(--e4); }
-.mosaico { position: relative; height: clamp(340px, 44vw, 600px); }
+.mosaico { position: relative; height: clamp(330px, 42vw, 560px); }
 .mosaico-ilha { position: absolute; }
-.mosaico-ilha:nth-child(1) { left: -2%; top: 0; width: 44%; }
-.mosaico-ilha:nth-child(2) { left: 36%; top: -4%; width: 30%; }
-.mosaico-ilha:nth-child(3) { left: 58%; top: 12%; width: 46%; }
-.mosaico-ilha:nth-child(4) { left: 8%; top: 52%; width: 34%; }
-.mosaico-ilha:nth-child(5) { left: 34%; top: 38%; width: 40%; }
-.mosaico-ilha:nth-child(6) { left: 70%; top: 62%; width: 30%; }
-.mosaico-ilha:nth-child(7) { left: -4%; top: 84%; width: 22%; }
+.mosaico-ilha:nth-child(1) { left: 0; top: 2%; width: 30%; }
+.mosaico-ilha:nth-child(2) { left: 33%; top: 0; width: 22%; }
+.mosaico-ilha:nth-child(3) { left: 62%; top: 6%; width: 26%; }
+.mosaico-ilha:nth-child(4) { left: 12%; top: 36%; width: 27%; }
+.mosaico-ilha:nth-child(5) { left: 44%; top: 32%; width: 30%; }
+.mosaico-ilha:nth-child(6) { left: 76%; top: 40%; width: 22%; }
+.mosaico-ilha:nth-child(7) { left: 2%; top: 68%; width: 26%; }
+.mosaico-ilha:nth-child(8) { left: 34%; top: 70%; width: 22%; }
+.mosaico-ilha:nth-child(9) { left: 60%; top: 66%; width: 30%; }
+.mosaico-ilha a { display: block; }
+.mosaico-ilha img { width: 100%; transition: transform 0.6s var(--suave); }
+.mosaico-ilha a:hover img { transform: translateY(-8px) scale(1.06); }
 .sobreposicao { justify-self: center; width: min(100%, 560px); }
 .sobreposicao-ilhas { position: relative; aspect-ratio: 1; }
 .sobreposicao-ilhas img { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: multiply; }
 .sobreposicao figcaption { font-size: var(--t-pequeno); font-weight: 560; text-align: center; }
 .sobreposicao figcaption .serie-b { margin-left: var(--e3); }
 
-.favoritos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--e3) var(--e1); max-width: 520px; justify-self: center; width: 100%; }
-.favoritos a { display: grid; justify-items: center; gap: 2px; text-decoration: none; font-size: var(--t-menor); font-weight: 660; }
-.favoritos img { width: 100%; max-width: 104px; transition: transform 0.6s var(--suave); }
-.favoritos a:hover img { transform: translateY(-6px) scale(1.06); }
-.favoritos a:hover span { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 2px; }
 .busca-inicio { margin-top: var(--e4); display: grid; gap: 7px; max-width: 30rem; }
 .busca-inicio label { font-size: var(--t-pequeno); font-weight: 660; }
 .busca-inicio-linha { display: flex; gap: 8px; }
@@ -524,29 +545,20 @@ h3 { font-size: var(--t-subtitulo); font-weight: 680; font-stretch: 106%; letter
 .cabecalho-perdido { min-height: 76svh; align-content: center; }
 .cabecalho-perdido h1 { font-size: clamp(2.6rem, 7vw, 6rem); max-width: 14ch; }
 
-/* ---------- biblioteca ---------- */
+/* ---------- fichas de filtro e arquipélago de jogos ---------- */
 
-.filtros { display: grid; gap: 14px; padding: var(--e3) var(--margem) 0; }
-.filtro { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); align-items: baseline; gap: var(--e2); }
-.filtro legend { float: left; padding: 0; font-size: var(--t-pequeno); font-weight: 660; }
+.filtro { border: 0; padding: 0; margin: 0; min-width: 0; }
 .filtro-opcoes { display: flex; flex-wrap: wrap; gap: 7px; }
-.filtros-resumo { display: flex; align-items: baseline; gap: var(--e3); margin-top: var(--e2); padding-top: var(--e2); border-top: 1.5px solid currentColor; font-size: var(--t-texto); }
-.filtros-resumo strong { font-weight: 800; font-stretch: 118%; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
 
 .arquipelago {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(min(44%, 216px), 1fr));
   gap: var(--e5) var(--e3);
-  padding: var(--e5) var(--margem) var(--e7);
 }
 .arquipelago > li { display: grid; justify-items: center; align-content: start; gap: 6px; }
-.arquipelago > li:nth-child(3n + 2) { margin-top: 30px; }
-.arquipelago > li[hidden] { display: none; }
 .arquipelago-curto { padding: var(--e4) 0 0; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.arquipelago-curto > li:nth-child(3n + 2) { margin-top: 0; }
-.vazio { padding: 0 var(--margem) var(--e7); font-family: var(--caderno); font-style: italic; font-size: 1.4rem; }
+.vazio { padding: var(--e4) 0 0; font-family: var(--caderno); font-style: italic; font-size: 1.4rem; }
 
 @media (max-width: 720px) {
-  .filtro { grid-template-columns: 1fr; gap: 6px; }
   .filtro-opcoes { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--margem) * -1); padding: 2px var(--margem) 6px; scrollbar-width: none; }
   .filtro-opcoes::-webkit-scrollbar { display: none; }
   .ficha { padding: 10px 14px; }
@@ -594,10 +606,7 @@ h3 { font-size: var(--t-subtitulo); font-weight: 680; font-stretch: 106%; letter
 
 .jogo-especimes h2, .jogo-vizinhas h2 { margin-bottom: var(--e3); }
 .jogo-regiao { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: var(--e5); align-items: center; }
-.jogo-regiao-carta { display: block; aspect-ratio: 4 / 3; overflow: hidden; border: 1.5px solid var(--tinta); }
-.jogo-regiao-carta img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--suave); }
-.jogo-regiao-carta img[src$="galar.svg"] { object-position: 50% 56%; }
-.jogo-regiao-carta:hover img { transform: scale(1.04); }
+.jogo-regiao .carta-caixa { justify-self: center; width: min(100%, calc(52svh * var(--proporcao))); }
 .jogo-regiao h2 { font-size: var(--t-subtitulo); }
 .jogo-regiao-nome { margin: 6px 0 var(--e2); font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 820; font-stretch: 125%; letter-spacing: 0.02em; text-transform: uppercase; line-height: 0.95; }
 .jogo-regiao .botao { margin-top: var(--e3); }
@@ -771,30 +780,19 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
   .resultado-lista .mapa-vivo { max-width: 300px; margin-inline: auto; }
 }
 
-/* ---------- carta na folha da região (início) ---------- */
-
-.folha-nome a { text-decoration: none; }
-.folha-nome a:hover { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 4px; text-underline-offset: 0.12em; }
-.folha-carta {
-  display: block; min-height: 70px; height: 100%; overflow: hidden;
-  background: var(--mar); border: 1.5px solid var(--tinta);
-}
-.folha-carta img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--suave); }
-.folha-carta:hover img { transform: scale(1.04); }
-
 /* ---------- Pokédex na página de jogo ---------- */
 
 .jogo-pokedex h2 { margin-bottom: 6px; }
 .jogo-pokedex .nota-editorial { max-width: 78ch; }
 .dex-controles { display: grid; gap: 12px; margin-top: var(--e3); padding-bottom: var(--e2); border-bottom: 1.5px solid currentColor; }
 .dex-busca { display: grid; gap: 6px; max-width: 22rem; }
-.dex-busca label, .filtro-busca label { font-size: var(--t-pequeno); font-weight: 660; }
-.dex-busca input, .busca input {
+.dex-busca label { font-size: var(--t-pequeno); font-weight: 660; }
+.dex-busca input {
   width: 100%; padding: 11px 12px;
   font: 540 1rem var(--mapa); color: var(--tinta);
   background: var(--papel-claro); border: 1.5px solid var(--tinta); border-radius: 2px;
 }
-.dex-busca input::placeholder, .busca input::placeholder { color: var(--tinta-suave); opacity: 1; }
+.dex-busca input::placeholder { color: var(--tinta-suave); opacity: 1; }
 .dex-conta { font-weight: 440; opacity: 0.75; font-variant-numeric: tabular-nums; }
 .ficha-tipo { padding: 6px 10px; font-size: var(--t-menor); }
 .dex-resumo strong { font-weight: 800; font-stretch: 118%; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
@@ -814,7 +812,6 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
 .dex-nome { font-size: var(--t-menor); font-weight: 660; overflow-wrap: anywhere; }
 .gaveta a:hover .dex-nome { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 2px; }
 .dex-tipos { font-size: 0.78rem; color: var(--tinta-suave); }
-.jogo-pokedex .vazio { padding: var(--e4) 0 0; }
 /* a lista abre recolhida: três fileiras no computador, seis no celular */
 .recolhida .gaveta li:nth-child(n + 34) { display: none; }
 .dex-mais { margin-top: var(--e4); }
@@ -826,26 +823,36 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
   .dex-controles .filtro-opcoes { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(var(--margem) * -1); padding: 2px var(--margem) 6px; scrollbar-width: none; }
 }
 
-/* ---------- busca por Pokémon na biblioteca ---------- */
-
-.filtro-busca { align-items: start; }
-.filtro-busca label { padding-top: 12px; }
-.busca { display: grid; gap: 6px; max-width: 24rem; }
-.busca-resultado { font-size: var(--t-pequeno); color: var(--tinta-suave); min-height: 1.4em; }
-.busca-resultado strong { color: var(--tinta); }
-
 /* ---------- regiões ---------- */
 
 .regioes { padding: var(--e3) var(--margem) var(--e7); }
-.regioes-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: var(--e5) var(--e4); }
-.regioes-lista a { display: grid; gap: 4px; text-decoration: none; }
-.regioes-carta { display: block; aspect-ratio: 4 / 3; margin-bottom: var(--e1); border: 1.5px solid var(--tinta); overflow: hidden; }
-.regioes-carta img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--suave); }
-/* Galar é uma carta em pé: na miniatura aparece a faixa do meio, entre Motostoke e Hammerlocke */
-.folha-carta img[src$="galar.svg"], .regioes-carta img[src$="galar.svg"] { object-position: 50% 56%; }
-.regioes-lista a:hover .regioes-carta img { transform: scale(1.05); }
-.regioes-nome { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 820; font-stretch: 125%; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; }
-.regioes-lista a:hover .regioes-nome { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 4px; text-underline-offset: 0.12em; }
+/* Cada caixa tem a forma da própria carta; a grade só alinha as legendas pela base. */
+.regioes-lista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--e5) var(--e4); align-items: end; }
+.regioes-lista > li { display: grid; gap: 4px; justify-items: start; }
+.regioes-lista .carta-caixa { --teto: clamp(220px, 23vw, 330px); width: min(100%, calc(var(--teto) * var(--proporcao))); margin-bottom: var(--e1); }
+.regioes-alta { grid-row: span 2; }
+.regioes-alta .carta-caixa { --teto: clamp(480px, 50vw, 720px); }
+.regioes-nome { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 820; font-stretch: 125%; letter-spacing: 0.02em; text-transform: uppercase; line-height: 1; text-decoration: none; }
+.regioes-nome:hover { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 4px; text-underline-offset: 0.12em; }
+.regioes-chave { align-self: stretch; align-content: center; gap: var(--e2); padding: var(--e3); background: var(--papel); border: 1.5px solid var(--tinta); }
+.regioes-chave h2 { font-size: var(--t-destaque); letter-spacing: 0; }
+.regioes-chave dl { display: grid; gap: 10px; width: 100%; }
+.regioes-chave dl div { display: grid; grid-template-columns: 76px 1fr; gap: var(--e2); align-items: center; }
+.regioes-chave dd { font-size: var(--t-pequeno); font-weight: 560; }
+.regioes-chave svg { width: 44px; height: 14px; overflow: visible; }
+.regioes-chave p { font-size: var(--t-menor); color: var(--tinta-suave); }
+.chave-faixas { display: flex; width: 70px; height: 14px; border: 1px solid var(--tinta); }
+.chave-faixas span { flex: 1; }
+.chave-rota { fill: none; stroke: var(--rota); stroke-width: 2.5; stroke-dasharray: 6 4; stroke-linecap: round; }
+.chave-cidade { fill: var(--papel-claro); stroke: var(--tinta); stroke-width: 2.5; }
+.chave-marco { fill: var(--tinta); }
+@media (max-width: 1000px) { .regioes-lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) {
+  .regioes-lista { grid-template-columns: 1fr; }
+  .regioes-alta { grid-row: auto; }
+  .regioes-lista .carta-caixa { --teto: 62svh; }
+  .regioes-alta .carta-caixa { --teto: 66svh; }
+}
 
 .regiao { padding-bottom: var(--e6); }
 .regiao > section, .regiao > .jogo-passos { margin: var(--e6) var(--margem) 0; }
@@ -855,8 +862,9 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
 .regiao-meta { font-family: var(--caderno); font-style: italic; font-size: 1.4rem; }
 .regiao > .regiao-carta { margin-top: var(--e3); }
 
-.carta-quadro { position: relative; width: 100%; max-width: calc(88svh * var(--proporcao)); margin-inline: auto; border: 1.5px solid var(--tinta); }
-.carta-quadro img { width: 100%; }
+.carta-grande { width: 100%; max-width: calc(88svh * var(--proporcao)); margin-inline: auto; overflow: visible; }
+.carta-grande .t-rotas path { stroke-width: 4px; stroke-dasharray: 12 7; transition: stroke 0.2s, stroke-width 0.2s; }
+.carta-grande .t-rotas path.ativo { stroke: var(--tinta); stroke-width: 7px; stroke-dasharray: none; }
 .carta figcaption { margin: var(--e2) auto 0; max-width: 78ch; font-size: var(--t-menor); color: var(--tinta-suave); text-align: center; }
 .carta-pontos { position: absolute; inset: 0; }
 .ponto { position: absolute; width: 0; height: 0; }
@@ -888,9 +896,6 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
   padding: 1px 5px 2px; font-size: 0.7rem; font-weight: 760; line-height: 1.1; font-variant-numeric: tabular-nums;
   color: #A92F18; background: var(--papel-claro); border: 1.5px solid var(--rota); border-radius: 2px;
 }
-.carta-rotas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.carta-rotas path { fill: none; stroke: transparent; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.2s; }
-.carta-rotas path.ativo { stroke: var(--tinta); }
 .rota-numero, .ponto-marca { cursor: default; transition: transform 0.25s var(--suave), background-color 0.2s, color 0.2s; }
 .rota-numero.ativo { background: var(--rota); color: #fff; transform: translate(-50%, -50%) scale(1.25); z-index: 4; }
 .ponto.ativo { z-index: 5; }
@@ -922,11 +927,10 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
 /* carta mais alta que larga (Galar): carta e lista lado a lado */
 @media (min-width: 900px) {
   .regiao-alta .regiao-carta { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: var(--e5); align-items: start; }
-  .regiao-alta .carta-quadro { max-width: none; }
-  .regiao-alta .carta-legenda { margin-top: 0; position: sticky; top: 100px; }
+  .regiao-alta .carta-grande { max-width: none; }
+  .regiao-alta .carta-legenda { margin-top: 0; }
   .regiao-alta .legenda-lista { columns: 2 11rem; }
   .regiao-alta .rotas-lista { columns: 1; }
-  .regiao-alta .carta-legenda { position: static; }
 }
 /* em tela estreita os nomes saem da carta: ficam os números, e a lista logo abaixo */
 @media (max-width: 900px) {
@@ -935,6 +939,102 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
   .ponto-area { font-size: 0.86rem; letter-spacing: 0.04em; }
   .legenda-lista .ponto-marca { left: 0; top: 8px; width: 22px; height: 22px; font-size: 0.7rem; }
   .regiao-meta { font-size: 1.2rem; }
+}
+
+/* ---------- a carta de uma região (peça comum) ---------- */
+
+/* A caixa tem sempre a proporção da carta: a página dá a largura e a altura acompanha. */
+.carta-caixa { position: relative; display: block; aspect-ratio: var(--proporcao); overflow: hidden; background: var(--mar); border: 1.5px solid var(--tinta); }
+.carta-terreno { position: absolute; inset: 0; width: 100%; height: 100%; }
+.carta-tracos { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* a espessura dos traços é medida na tela, não na carta: fica igual do selo pequeno à carta grande */
+.t-rotas path { fill: none; stroke: var(--rota); stroke-width: 2.4px; stroke-dasharray: 7 4.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.t-revela { fill: none; stroke: #fff; stroke-width: 34; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.t-cidade { fill: var(--papel-claro); stroke: var(--tinta); stroke-width: 1.8px; vector-effect: non-scaling-stroke; }
+.t-marco { fill: var(--tinta); }
+.t-cidade, .t-marco { transform-box: fill-box; transform-origin: center; }
+a.carta-caixa .carta-terreno, a.carta-caixa .carta-tracos { transition: transform 0.9s var(--suave); }
+a.carta-caixa:hover .carta-terreno, a.carta-caixa:hover .carta-tracos { transform: scale(1.035); }
+
+/* A carta se desenha quando entra na tela: as rotas correm pelo traçado e os lugares surgem um a um.
+ * Sem JavaScript, ou com movimento reduzido, ela já aparece pronta. */
+.js .carta-caixa:not(.desenhada) .t-revela { stroke-dashoffset: 1; }
+.js .carta-caixa:not(.desenhada) .t-lugares > * { opacity: 0; transform: scale(0.2); }
+.carta-caixa.desenhada .t-revela { transition: stroke-dashoffset 2.4s cubic-bezier(0.3, 0.1, 0.2, 1) 0.15s; }
+.carta-caixa.desenhada .t-lugares > * { transition: opacity 0.35s ease, transform 0.6s var(--suave); transition-delay: calc(0.5s + var(--i) * 45ms); }
+
+/* ---------- Pokédex: a lista ---------- */
+
+.pokedex-geral { padding: var(--e3) var(--margem) var(--e7); }
+.pokedex-geral .dex-controles { margin-top: 0; }
+.dex-resumo { display: flex; align-items: baseline; gap: var(--e3); }
+.dex-geracao { margin-top: var(--e6); }
+.dex-geracao[hidden] { display: none; }
+.dex-geracao h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px var(--e3); font-size: var(--t-subtitulo); }
+.dex-geracao h2 span { font-size: var(--t-menor); font-weight: 440; font-stretch: 100%; letter-spacing: 0; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
+.dex-geracao .gaveta { margin-top: var(--e3); }
+
+/* ---------- Pokédex: a página de uma espécie ---------- */
+
+.especie { padding: 0 var(--margem) var(--e6); }
+.especie > section + section, .especie > .jogo-passos { margin-top: var(--e6); }
+.especie h2 { margin-bottom: 6px; }
+.especie-topo { display: grid; grid-template-columns: minmax(0, 1fr) min(40vw, 460px); gap: var(--e5); align-items: center; padding-top: clamp(104px, 14vh, 150px); }
+.especie-numero { font-size: var(--t-destaque); font-weight: 640; font-variant-numeric: tabular-nums; color: var(--tinta-suave); }
+.especie-topo h1 { margin-left: -0.04em; font-size: clamp(2.7rem, 8vw, 7rem); font-weight: 820; font-stretch: 122%; letter-spacing: -0.04em; line-height: 0.9; overflow-wrap: anywhere; }
+.especie-categoria { margin-top: var(--e2); font-family: var(--caderno); font-style: italic; font-size: clamp(1.3rem, 2vw, 1.75rem); }
+.especie-tipos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--e3); }
+.especie-tipos .ficha { display: inline-block; text-decoration: none; }
+.especie-prancha .prancha-arte { view-transition-name: especie; }
+.mapa-do-jogo { view-transition-name: ilha; }
+
+.atributos-lista { margin-top: var(--e3); max-width: 54rem; border-top: 1.5px solid currentColor; }
+.atributos-lista li { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr) 3rem; align-items: center; gap: var(--e3); padding: 11px 0; border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent); }
+.atributo-nome { font-weight: 660; }
+.atributo-trilho { height: 15px; }
+.atributo-barra { display: block; height: 100%; min-width: 4px; border: 1px solid var(--tinta); border-left-width: 0; border-radius: 0 4px 4px 0; }
+.faixa-1 { background: var(--altitude-1); }
+.faixa-2 { background: var(--altitude-2); }
+.faixa-3 { background: var(--altitude-3); }
+.faixa-4 { background: var(--altitude-4); }
+.faixa-5 { background: var(--altitude-5); }
+.atributo-valor { text-align: right; font-weight: 800; font-stretch: 118%; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.atributo-total { border-bottom: 0; }
+
+.ficha-larga { grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); justify-content: stretch; margin-top: var(--e3); }
+.especie-ficha .nota-editorial { margin-top: var(--e3); }
+
+.evolucao { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e3) var(--e5); margin-top: var(--e3); }
+.estagio { position: relative; }
+.estagio + .estagio::before { content: ""; position: absolute; left: calc(var(--e5) * -0.5 - 6px); top: 50%; margin-top: -8px; border: 8px solid transparent; border-left: 11px solid var(--tinta); border-right: 0; }
+.estagio ul { display: flex; flex-wrap: wrap; gap: var(--e2) 4px; max-width: 30rem; }
+.evolucao-item { display: grid; justify-items: center; width: 110px; text-align: center; text-decoration: none; line-height: 1.2; }
+.evolucao-item .dex-nome { margin-top: 4px; }
+a.evolucao-item:hover .dex-nome { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 2px; }
+.evolucao-item[aria-current] .dex-nome { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 3px; text-underline-offset: 0.2em; }
+.evolucao-como { font-family: var(--caderno); font-style: italic; font-size: 0.92rem; color: var(--tinta-suave); }
+a.evolucao-item:hover .cor { opacity: 1; }
+a.evolucao-item:hover img:not(.cor) { opacity: 0; }
+
+.especie-curiosidades .lista-marcada { max-width: 54rem; margin-top: var(--e3); font-family: var(--caderno); font-size: 1.2rem; }
+.especie-curiosidades .nota-editorial { margin-top: var(--e2); }
+.entrada { max-width: 46rem; margin-top: var(--e4); padding-left: var(--e3); border-left: 3px solid var(--rota); }
+.entrada blockquote { margin: 0; font-family: var(--caderno); font-style: italic; font-size: 1.4rem; line-height: 1.35; }
+.entrada figcaption { margin-top: 8px; font-size: var(--t-menor); color: var(--tinta-suave); }
+
+.jogos-da-especie { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 0 var(--e4); margin-top: var(--e3); }
+.jogos-da-especie a { display: grid; grid-template-columns: 58px 1fr; align-items: center; gap: 12px; padding: 6px 0; text-decoration: none; border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent); }
+.jogos-da-especie a:hover .ilha-nome { text-decoration: underline; text-decoration-color: var(--rota); text-decoration-thickness: 2px; }
+
+@media (max-width: 860px) {
+  .especie-topo { grid-template-columns: 1fr; gap: var(--e3); padding-top: 92px; }
+  .especie-prancha { order: -1; max-width: 300px; justify-self: center; }
+  .atributos-lista li { grid-template-columns: 6.4rem minmax(0, 1fr) 2.6rem; gap: var(--e2); }
+  .atributo-nome { font-size: var(--t-pequeno); }
+  .ficha-larga { grid-template-columns: 1fr 1fr; }
+  .estagio + .estagio::before { display: none; }
+  .evolucao { gap: var(--e3); }
+  .evolucao-item { width: 100px; }
 }
 
 /* ---------- transições entre páginas ---------- */
@@ -950,9 +1050,8 @@ td.frase { font-family: var(--caderno); font-weight: 400; font-size: 1.1rem; lin
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   @view-transition { navigation: none; }
-  .folha { height: auto; flex: 1 1 460px; max-width: 700px; }
+  .folha { height: auto; }
   .trilho { padding-block: var(--e5); row-gap: var(--e4); padding-right: var(--margem); }
   .trilho::after { display: none; }
   .folha-intro { flex-basis: 100%; }
-  .perfil { height: 140px; }
 }

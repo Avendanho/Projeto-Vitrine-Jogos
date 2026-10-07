@@ -6,9 +6,10 @@
  *                                    em src/arte/pokemon/: <id>.webp (cor) e
  *                                    <id>-tinta.webp (hachura só no canal alfa, que o CSS tinge)
  *   node scripts/arte.mjs 6 25 384   só essas, refeitas
- *   node scripts/arte.mjs --mini     miniaturas de todas as espécies de dados/pokedex.json,
- *                                    em src/arte/mini/: <id>.webp (gravura já em tinta)
- *                                    e <id>-cor.webp
+ *   node scripts/arte.mjs --mini     todas as espécies de dados/pokedex.json, em src/arte/mini/:
+ *                                    <id>.webp (miniatura em gravura, já em tinta) e
+ *                                    <id>-cor.webp (a arte em cor, maior, usada ao apontar
+ *                                    e na página de cada espécie)
  *
  * Os arquivos gerados ficam no repositório; o build não depende deste script.
  */
@@ -25,7 +26,7 @@ const SAIDA_MINI = join(RAIZ, "src", "arte", "mini");
 const LADO_COR = 440;
 const LADO_TINTA = 640;
 const LADO_MINI = 184;
-const LADO_MINI_COR = 144;
+const LADO_MINI_COR = 320;       // a página de cada espécie refaz a gravura a partir desta imagem
 
 async function idsDosDados() {
   const { ESPECIES } = await import("../dados/especies.mjs");
@@ -155,7 +156,7 @@ async function processar(id) {
   const lado = mini ? LADO_MINI_COR : LADO_COR;
   await writeFile(cor, await sharp(png)
     .resize(lado, lado, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .webp({ quality: mini ? 72 : 80, alphaQuality: 90, effort: 6 }).toBuffer());
+    .webp({ quality: mini ? 70 : 80, alphaQuality: 88, effort: 6 }).toBuffer());
   await writeFile(gravura, await (mini ? gravarMini(png) : gravar(png)));
   feitos++;
   if (feitos % 50 === 0) console.log(`  ${feitos} de ${ids.length - pulados}`);

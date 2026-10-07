@@ -6,6 +6,9 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": true,
+  "redirects": [
+    { "source": "/biblioteca/", "destination": "/pokedex/", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/(fontes|arte)/(.*)",

@@ -14,10 +14,10 @@ Creatures ou The Pokémon Company.
 |---|---|---|
 | Início | `/` | A história em seis cenas, guiada pela rolagem |
 | Bússola | `/bussola/` | Oito perguntas; o relevo do visitante se desenha a cada resposta e o resultado explica cada recomendação |
-| Biblioteca | `/biblioteca/` | Os 30 jogos, filtráveis por geração, região, console, estilo e perfil de jogador, e por Pokémon ("em quais jogos está o Lucario?") |
-| Jogo | `/jogos/<nome>/` | Página de cada título: relevo, ficha, para quem é, espécimes, Pokédex completa com busca e filtro por tipo, jogos parecidos |
+| Pokédex | `/pokedex/` e `/pokedex/<nome>/` | As 1.025 espécies em gravura, com busca e filtro por geração e tipo; cada uma tem página própria, com atributos, ficha, linha evolutiva, curiosidades e os jogos em que aparece |
+| Jogo | `/jogos/<nome>/` | Página de cada título: relevo, ficha, para quem é, a carta de onde se passa, espécimes, Pokédex do jogo com busca e filtro por tipo, jogos parecidos |
 | Regiões | `/regioes/` e `/regioes/<nome>/` | A carta de cada região, redesenhada a partir do mapa dos jogos, com cidades, marcos e rotas numeradas; a lista e a carta se destacam uma à outra |
-| Linha do tempo | `/linha-do-tempo/` | De 1996 a 2027, com filtro por categoria |
+| Linha do tempo | `/linha-do-tempo/` | De 1996 a 2027, com filtro por categoria. É também o índice de todos os jogos |
 | Comparar | `/comparar/` | Dois ou três jogos sobrepostos, nota por nota |
 
 ## Rodar na sua máquina
@@ -34,9 +34,9 @@ Os scripts abaixo são opcionais e usam dependências de desenvolvimento
 rodá-los para atualizar os dados.
 
 ```bash
-npm run pokedex    # refaz dados/pokedex.json a partir das tabelas da PokéAPI
+npm run pokedex    # refaz dados/pokedex.json e dados/fichas.json a partir das tabelas da PokéAPI
 npm run arte       # baixa e grava as pranchas grandes (mascotes e iniciais)
-npm run arte:mini  # baixa e grava as miniaturas de todas as espécies da Pokédex
+npm run arte:mini  # baixa a arte de todas as espécies: miniatura em gravura e a versão em cor
 npm run cartas -- --ref <pasta>   # retraça as cartas das regiões (veja abaixo)
 npm run verificar  # fotografa as páginas rolando (precisa do Google Chrome)
 ```
@@ -46,13 +46,20 @@ npm run verificar  # fotografa as páginas rolando (precisa do Google Chrome)
 ```
 dados/            o conteúdo: jogos, regiões e lugares das cartas, perguntas da bússola, espécies
 dados/pokedex.json   nomes, tipos e listas regionais (gerado por scripts/pokedex.mjs)
+dados/fichas.json    a ficha de cada espécie: atributos, medidas, evolução, formas (gerado por scripts/fichas.mjs)
 dados/cartas.json    costa, relevo e rotas de cada região (gerado por scripts/cartas.mjs)
-scripts/          build.mjs (gera o site), paginas.mjs (modelos), cenario.mjs (desenhos), arte.mjs, cartas.mjs, pokedex.mjs, servir.mjs
+scripts/build.mjs            gera o site
+scripts/base.mjs             cores, dados gerados e utilidades de texto, comuns a todos os modelos
+scripts/paginas.mjs          modelos das páginas (início, jogo, regiões, linha do tempo, comparar, bússola)
+scripts/paginas-pokedex.mjs  a Pokédex: a lista, a página de cada espécie e as curiosidades
+scripts/carta.mjs            a carta de uma região como peça de página (rotas, lugares, a caixa)
+scripts/cenario.mjs          desenhos em SVG (terreno das cartas, perfis, bússola, régua de anos)
+scripts/                     e os que geram dados: arte.mjs, cartas.mjs, pokedex.mjs, fichas.mjs
 src/estilo.css    toda a identidade visual
 src/js/relevo.js  o gerador de ilhas, usado pelo build (SVG) e pelo navegador (canvas)
 src/js/           um arquivo por página
 src/arte/pokemon/ pranchas grandes, em cor e em gravura
-src/arte/mini/    miniaturas das 1.025 espécies, em gravura e em cor
+src/arte/mini/    todas as espécies: miniatura em gravura e a arte em cor, da qual a página de cada espécie refaz a gravura grande
 src/fontes/       Archivo e Alegreya
 src/motor/        motor de rolagem da página inicial (não editar)
 ```
@@ -70,13 +77,28 @@ src/motor/        motor de rolagem da página inicial (não editar)
 A ilha, a página do jogo, os filtros, a linha do tempo e os números da página
 inicial se atualizam sozinhos a partir desse arquivo.
 
+## A Pokédex
+
+A lista e as 1.025 páginas de espécie saem de `dados/fichas.json` e
+`dados/pokedex.json`. As **curiosidades** são calculadas em
+`scripts/paginas-pokedex.mjs`, comparando cada espécie com as outras (tipos que
+ninguém mais tem, atributos entre os maiores, tamanho, formas, nome em japonês),
+sempre entre as formas padrão. Nenhuma é escrita à mão. A categoria, as
+habilidades, os itens e a entrada oficial da Pokédex aparecem em inglês, como
+nos jogos: a base pública não os traz em português.
+
 A Pokédex de um jogo é ligada pelo campo `pokedex`, com o nome da lista na
 PokéAPI (por exemplo `[["galar", "Galar"]]`). Jogo sem lista confiável leva
 `semPokedex`, com uma frase explicando o motivo: o atlas não inventa elenco.
 
 ## Cartas das regiões
 
-Cada carta tem duas partes:
+Todas as páginas mostram a carta com a mesma peça (`caixaCarta`, em
+`scripts/carta.mjs`): a caixa tem sempre a proporção da própria carta, então
+ela nunca é cortada; a página só decide a largura. As rotas e os lugares se
+desenham quando a carta entra na tela.
+
+Cada carta tem três partes:
 
 - **O traçado** (`dados/cartas.json`): costa, faixas de altitude e, nos mapas
   antigos, o caminho de cada rota. É extraído por `scripts/cartas.mjs` de uma

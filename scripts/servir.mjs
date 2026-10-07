@@ -7,7 +7,10 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const DIST = join(dirname(fileURLToPath(import.meta.url)), "..", "dist");
+const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
+const DIST = join(RAIZ, "dist");
+// os mesmos redirecionamentos que a Vercel aplica
+const REDIRECIONA = Object.fromEntries((JSON.parse(await readFile(join(RAIZ, "vercel.json"), "utf8")).redirects || []).map((r) => [r.source, r.destination]));
 const porta = Number(process.argv[2]) || 4600;
 
 const TIPOS = {
@@ -29,6 +32,7 @@ async function resolver(caminho) {
 
 http.createServer(async (req, res) => {
   const caminho = decodeURIComponent(new URL(req.url, "http://x").pathname);
+  if (REDIRECIONA[caminho]) { res.writeHead(307, { Location: REDIRECIONA[caminho] }).end(); return; }
   const arquivo = await resolver(caminho);
   try {
     const corpo = await readFile(arquivo ?? join(DIST, "404.html"));

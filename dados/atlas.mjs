@@ -1,4 +1,4 @@
-/* Vocabulário do atlas: regiões, consoles, estilos, perfis e marcos da linha do tempo.
+/* Vocabulário do atlas: regiões, consoles, estilos e marcos da linha do tempo.
  * Só fatos verificáveis. O ano de cada jogo é o do primeiro lançamento em qualquer país. */
 
 export const REGIOES = [
@@ -34,8 +34,6 @@ export const REGIOES = [
     cenario: { semente: 109, altura: 0.6, aspereza: 0.6, marco: "cratera", marcoX: 0.5 } }
 ];
 
-export const OUTRAS_REGIOES = { id: "outras", nome: "Fora do mapa" };
-
 export const CONSOLES = [
   { id: "gb", nome: "Game Boy" },
   { id: "gbc", nome: "Game Boy Color" },
@@ -69,16 +67,6 @@ export const TIPOS = [
   { id: "remake", nome: "Remake" },
   { id: "legends", nome: "Legends" },
   { id: "derivado", nome: "Derivado" }
-];
-
-/* Perfil de jogador: um jogo pertence ao perfil quando a nota do eixo é 4 ou 5. */
-export const PERFIS = [
-  { id: "explorador", nome: "Explorador", eixo: "exploracao" },
-  { id: "livre", nome: "Espírito livre", eixo: "liberdade" },
-  { id: "competidor", nome: "Competidor", eixo: "competitivo" },
-  { id: "desafiante", nome: "Desafiante", eixo: "dificuldade" },
-  { id: "leitor", nome: "Caçador de histórias", eixo: "historia" },
-  { id: "nostalgico", nome: "Nostálgico", eixo: "nostalgia" }
 ];
 
 /* O que cada direção da bússola significa, na voz de quem procura.

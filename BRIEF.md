@@ -51,7 +51,7 @@ tal — nunca como estatística oficial.
 | 2 | A travessia | As regiões passando de lado, de Kanto a Paldea: carta desenhada de cada uma, iniciais como pranchas de naturalista, jogos que se passam ali | Deslumbre, vontade de viajar | "Cada região é uma viagem diferente" | Subindo | Cena fixa com trilho horizontal |
 | 3 | Trinta anos | A linha do tempo de 1996 a 2026, console a console, com os anos contando | Respiro, memória | "Tem muita estrada, preciso de um guia" | Baixa | Números que sobem + revelações |
 | 4 | **A bússola (pico)** | O fundo vira noite; todos os jogos aparecem como cumes no mapa; a agulha gira com a rolagem e, a cada pedido ("quero nostalgia", "quero liberdade", "quero desafio"), os cumes se apagam até sobrar um | Tensão e alívio | "Existe um jogo certo pra mim" | **Máxima** | Cena fixa longa (5 telas), etapas, fundo que viaja |
-| 5 | As ferramentas | Biblioteca em mosaico de relevos e a comparação de dois terrenos reagindo ao ponteiro | Controle, autonomia | "Posso explorar do meu jeito" | Média-baixa | Profundidade (paralaxe e ponteiro) |
+| 5 | As ferramentas | A Pokédex em mosaico de gravuras e a comparação de dois terrenos reagindo ao ponteiro | Controle, autonomia | "Posso explorar do meu jeito" | Média-baixa | Profundidade (paralaxe e ponteiro) |
 | 6 | Trace sua rota | Uma única chamada: abrir a bússola. Rodapé com aviso de projeto de fã | Decisão | "Vou descobrir o meu agora" | Resolvida | Revelação simples |
 
 **Pico único:** cena 4. Ganha a rolagem mais longa e a única virada de fundo
@@ -153,3 +153,23 @@ Pedido: numerar as rotas, com liberdade para outras melhorias.
 - **"Onde se passa" na página de cada jogo**, com a carta da região.
 - **Correções:** Sootopolis voltou a ser ilha em Hoenn; Unova perdeu os falsos
   lagos sob as cidades; a transição entre páginas não é mais interrompida.
+
+## Quarta rodada
+
+Pedido: trocar a aba Biblioteca por uma Pokédex com todas as espécies, cada uma
+com atributos, informações, curiosidades e jogos relacionados; e refazer as
+caixas dos mapas das regiões, que cortavam algumas cartas.
+
+- **Pokédex** no lugar da Biblioteca: a lista das 1.025 espécies e uma página
+  para cada uma. A linha do tempo passa a ser o índice de todos os jogos; os
+  filtros de jogo por console, estilo e perfil saíram com a biblioteca.
+- **Curiosidades calculadas, não escritas:** cada fato sai da comparação entre
+  as espécies. A entrada oficial da Pokédex aparece no original em inglês.
+- **Caixa da carta:** uma peça só para todas as páginas, sempre na proporção da
+  carta. Na página inicial cada região virou uma página dupla (texto de um lado,
+  carta inteira do outro); no índice de regiões, cada caixa tem a forma da sua
+  carta, com uma chave de leitura no fim.
+- **Cartas que se desenham:** as rotas correm pelo traçado e os lugares surgem
+  um a um quando a carta entra na tela.
+- **Na página inicial**, a cena das ferramentas mostra a Pokédex no lugar da
+  biblioteca.

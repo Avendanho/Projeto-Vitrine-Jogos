@@ -1,5 +1,7 @@
 /* Pokédex na página de jogo: abas (quando o jogo tem mais de uma lista),
  * busca por nome ou número, filtro por tipo, e a cor que volta ao apontar. */
+import { colorirAoApontar, semAcento } from "./gaveta.js";
+
 const secao = document.querySelector("[data-pokedex]");
 const gavetas = [...secao.querySelectorAll(".gaveta")];
 const abas = [...secao.querySelectorAll("[data-aba]")];
@@ -10,7 +12,6 @@ const rotulo = secao.querySelector("[data-dex-rotulo]");
 const vazio = secao.querySelector("[data-dex-vazio]");
 const mais = secao.querySelector("[data-dex-mais]");
 
-const semAcento = (t) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 let atual = gavetas[0];
 let tipo = "";
 
@@ -65,18 +66,5 @@ mais.addEventListener("click", () => {
   aplicar();
 });
 
-/* a arte em cor só é pedida quando alguém aponta para a espécie */
-function colorir(evento) {
-  const arte = evento.target.closest?.(".gaveta a")?.querySelector(".dex-arte");
-  if (!arte || arte.querySelector(".cor")) return;
-  const gravura = arte.querySelector("img");
-  const cor = new Image(92, 92);
-  cor.className = "cor";
-  cor.alt = "";
-  cor.src = gravura.dataset.cor;
-  arte.append(cor);
-}
-secao.addEventListener("pointerover", colorir);
-secao.addEventListener("focusin", colorir);
-
+colorirAoApontar(secao);
 aplicar();
