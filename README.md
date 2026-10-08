@@ -1,12 +1,14 @@
 # 🗺️ PokéAtlas
 
+<p align="center"><strong>Português</strong> · <a href="README.en.md">English</a></p>
+
 <p align="center">
   <strong>Um guia visual e cartográfico para descobrir qual jogo de Pokémon combina com você.</strong>
 </p>
 
 <p align="center">
   <a href="https://pokeatlas-eight.vercel.app/" target="_blank">
-    <img src="https://img.shields.io/badge/Acessar%20Pok%C3%A9Atlas-pokeatlas--swart.vercel.app-2ea44f?style=for-the-badge&logo=vercel&logoColor=white" alt="Deploy Vercel" />
+    <img src="https://img.shields.io/badge/Acessar%20Pok%C3%A9Atlas-pokeatlas--eight.vercel.app-2ea44f?style=for-the-badge&logo=vercel&logoColor=white" alt="Deploy Vercel" />
   </a>
 </p>
 
@@ -14,7 +16,7 @@
   <img src="https://img.shields.io/badge/Status-Online-success?style=flat-square" alt="Status" />
   <img src="https://img.shields.io/badge/Node.js-%3E%3D20-informational?style=flat-square&logo=node.js" alt="Node version" />
   <img src="https://img.shields.io/badge/Framework-Zero%20Dependencies%20(Vanilla)-f5a623?style=flat-square" alt="Zero Framework" />
-  <img src="https://img.shields.io/badge/P%C3%A1ginas%20Geradas-1.072%20est%C3%A1ticas-blue?style=flat-square" alt="Páginas" />
+  <img src="https://img.shields.io/badge/P%C3%A1ginas%20Geradas-1.986%20est%C3%A1ticas-blue?style=flat-square" alt="Páginas" />
   <img src="https://img.shields.io/badge/Dados-Pok%C3%A9API-red?style=flat-square" alt="PokéAPI" />
   <img src="https://img.shields.io/badge/Tipo-Projeto%20de%20F%C3%A3%20(N%C3%A3o%20Oficial)-lightgrey?style=flat-square" alt="Não Oficial" />
 </p>
@@ -125,6 +127,12 @@ Jornada contínua dividida em 6 cenas orientadas pelo scroll:
 5. *As ferramentas:* vitrine da Pokédex e comparador.
 6. *O seu perfil:* a tela inteira em amarelo e o convite para abrir a bússola.
 
+### 10. 🔊 Som
+O atlas abre em silêncio. O botão do alto-falante, no cabeçalho, liga o som, e a escolha fica guardada no navegador.
+- **Música de fundo:** uma por edição, composta para o atlas e tocada na hora pelo navegador (Web Audio), sem arquivo de áudio. Na edição Pokémon, uma melodia em ondas quadradas, como num portátil; na edição Cobblemon, notas soltas e longas, com eco. Quem troca de página continua a música mais ou menos de onde ela estava.
+- **Sons das teclas:** bipes de aparelho na edição Pokémon e o estalo de menu em blocos na edição Cobblemon.
+- **Gritos:** a página de cada espécie, nas duas edições, tem o botão **Ouvir o grito**, que toca o grito do Pokémon nos jogos. Esse funciona mesmo com o som do atlas desligado.
+
 ---
 
 ## 🎨 Direção de Arte e Design
@@ -148,6 +156,7 @@ A edição Cobblemon tem direção própria (pergaminho de mapa, painéis de inv
 - **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.986 páginas HTML estáticas prontas em ~1,2 segundos**.
 - **Performance Extrema:** Carregamento instantâneo, First Contentful Paint (FCP) quase imediato e consumo mínimo de recursos no cliente.
 - **3D sem biblioteca:** as maquetes de estruturas e biomas e os modelos de Pokémon giram num visor próprio (`src/js/visor.js`), com WebGL e, onde o navegador não o entrega, um desenhista de software.
+- **Som sem arquivo de música:** a trilha e os efeitos são partituras escritas em texto (`src/js/som-logica.js`) e tocadas com osciladores; só os gritos dos Pokémon são arquivos.
 - **Testes:** as regras de cada ferramenta ficam em módulos puros (`src/js/*-logica.js`) testados com `node:test`; roteiros de navegador em `testes/navegador/` conferem cada página com Playwright.
 - **Validação Rigorosa em Build:** O processo de compilação valida previamente cada rota, nota de 1 a 5, compatibilidade de Pokédex e coerência cartográfica antes de emitir a pasta de distribuição.
 
@@ -175,6 +184,7 @@ Projeto-Vitrine-Jogos/
 │   ├── modelos.mjs              # Desenha os Pokémon do mod e exporta os modelos 3D
 │   ├── maquetes.mjs, itens-arte.mjs   # Maquetes das estruturas e ícones dos itens
 │   ├── pokedex.mjs, fichas.mjs, tipos.mjs, encontros.mjs, arte.mjs, cartas.mjs, malha.mjs   # Dados e arte da edição Pokémon
+│   ├── gritos.mjs               # Baixa o grito de cada espécie (PokeAPI/cries)
 │   ├── servir.mjs               # Servidor HTTP local para desenvolvimento
 │   └── verificar-paginas.mjs    # Auditoria visual: rola cada página e tira fotos
 │
@@ -188,14 +198,16 @@ Projeto-Vitrine-Jogos/
 │   │   ├── rolagem.js           # Animações de rolagem das páginas de abertura
 │   │   ├── visor.js             # Visor 3D: giro, zoom, tela cheia
 │   │   ├── maquete*.js, modelo*.js   # Desenhistas de maquetes e de modelos de Pokémon
-│   │   ├── *-logica.js          # Regras testáveis: time, diário, caçada, busca
+│   │   ├── som.js, som-logica.js   # Música, sons das teclas e gritos; as partituras das duas músicas
+│   │   ├── *-logica.js          # Regras testáveis: time, diário, caçada, busca, som
 │   │   └── ...                  # Um módulo por página (bussola, pokedex, time, diario...)
 │   ├── arte/                    # Gravuras, modelos desenhados, ícones e maquetes paradas
+│   ├── gritos/                  # O grito de cada espécie, em .ogg
 │   ├── maquetes/                # Blocos das estruturas e dos biomas, para o visor
 │   └── modelos3d/               # Modelo e textura de cada Pokémon do Cobblemon, para o visor
 │
 ├── testes/                      # Testes de unidade (node:test) e roteiros de navegador
-├── docs/                        # Plano de implementação dos incrementos
+├── docs/                        # Plano de implementação dos incrementos e texto de divulgação
 ├── BRIEF.md                     # Decisões de direção de arte e de conteúdo, rodada a rodada
 ├── package.json                 # Scripts e ferramentas auxiliares
 └── vercel.json                  # Roteamento e configuração de deploy
@@ -244,12 +256,13 @@ Projeto-Vitrine-Jogos/
 | :--- | :--- |
 | `npm run dev` | Compila o site em `dist/` e inicia o servidor local em `http://localhost:4600`. |
 | `npm run build` | Valida as regras de negócio e compila todas as 1.986 páginas HTML. |
-| `npm test` | Testes de unidade das regras (time, diário, caçada, busca, modelos, dados). |
+| `npm test` | Testes de unidade das regras (time, diário, caçada, busca, modelos, som, dados). |
 | `npm run test:navegador` | Roteiros de navegador de todas as ferramentas (precisa do `npm run dev` rodando). |
 | `npm run verificar` | Auditoria visual: rola cada página em desktop, celular e movimento reduzido e tira fotos. |
 | `npm run pokedex` | *(Dados)* Reconstrói `pokedex.json` e `fichas.json` a partir da PokéAPI. |
 | `npm run tipos` | *(Dados)* Baixa a tabela de efetividade dos 18 tipos. |
 | `npm run encontros` | *(Dados)* Baixa a tabela de encontros por rota de cada jogo. |
+| `npm run gritos` | *(Som)* Baixa o grito de cada espécie para `src/gritos/`. |
 | `npm run arte`, `arte:mini`, `arte:formas` | *(Arte)* Pranchas dos mascotes, gravuras de todas as espécies e arte das formas especiais. |
 | `npm run cartas` | *(Arte)* Recalcula os traçados das cartas das regiões. |
 | `npm run mod -- --minecraft` | *(Cobblemon)* Baixa o mod 1.8.1 e os arquivos do Minecraft para `.mod/`, que fica fora do Git. É o primeiro passo para os quatro comandos abaixo. |
@@ -276,6 +289,7 @@ O projeto é configurado nativamente para publicação contínua na **Vercel** a
 
 - **Pokémon:** Pokémon, nomes dos jogos, criaturas e insígnias são marcas registradas e propriedades intelectuais da **Nintendo**, **Game Freak**, **Creatures Inc.** e **The Pokémon Company**. Este é um projeto de fã, não oficial, de caráter artístico e informativo, sem fins lucrativos e sem qualquer vínculo comercial.
 - **Dados e Sprites:** Nomes, estatísticas e ilustrações oficiais foram obtidos por meio da [PokéAPI](https://pokeapi.co/) e tratados artisticamente em formato de gravura.
+- **Som:** a música e os sons das teclas são originais do projeto, gerados no navegador. Os gritos dos Pokémon são os dos jogos, obtidos do repositório público [PokeAPI/cries](https://github.com/PokeAPI/cries), e pertencem à The Pokémon Company.
 - **Cartografia:** Todas as cartas das regiões são redesenhos originais e interpretações artísticas desenvolvidas especificamente para o atlas.
 - **Minecraft:** os nomes de itens e biomas do jogo base vêm da tradução oficial. As maquetes usam a cor média de cada bloco, e os ingredientes do Minecraft nas receitas aparecem em quatro tons de tinta, redesenhados a partir dos ícones do jogo; as texturas originais não são redistribuídas. Minecraft é marca da Mojang e da Microsoft, e este projeto não tem vínculo com elas.
 - **Tipografia:** Fontes [M PLUS Rounded 1c](https://fonts.google.com/specimen/M+PLUS+Rounded+1c), [DotGothic16](https://fonts.google.com/specimen/DotGothic16), [Archivo](https://fonts.google.com/specimen/Archivo), [Alegreya](https://fonts.google.com/specimen/Alegreya) e [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans), licenciadas sob a *SIL Open Font License*.
@@ -291,5 +305,5 @@ Desenvolvido por **Bernardo Avendanho**
 
 ---
 <p align="center">
-  <sub>PokéAtlas — Traçado com paixão por exploração, cartografia e Pokémon.</sub>
+  <sub>PokéAtlas — Feito com paixão por exploração, cartografia e Pokémon.</sub>
 </p>

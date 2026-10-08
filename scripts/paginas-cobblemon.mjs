@@ -302,6 +302,7 @@ export function paginaCobblemonEspecie(n) {
       <h1>${esc(e.nome)}</h1>
       <ul class="especie-tipos" aria-label="Tipos e classificação">${e.tipos.map((t) => `<li><a class="ficha" href="/cobblemon/pokemon/?tipo=${semAcento(t)}">${t}</a></li>`).join("")}${e.rotulos.map((r) => `<li><span class="ficha ficha-rotulo">${r}</span></li>`).join("")}</ul>
       ${e.desc ? `<p class="cb-descricao">${esc(e.desc)}</p>` : ""}
+      <p class="especie-grito"><button type="button" class="botao botao-contorno botao-pequeno" data-grito="/gritos/${n}.ogg">Ouvir o grito</button> <span class="nota-editorial" data-grito-aviso aria-live="polite"></span></p>
       ${e.spawns.length ? `<p class="cb-cacar"><button type="button" class="botao botao-contorno botao-pequeno" data-cacar="${n}" hidden>Pôr na caçada</button> <a class="ligacao" href="/cobblemon/cacada/" data-cacada-link hidden>Ver o plano de caçada</a></p>` : ""}
     </div>
     ${MODELOS.has(n)

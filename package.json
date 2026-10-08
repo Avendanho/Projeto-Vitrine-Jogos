@@ -18,6 +18,7 @@
     "cartas": "node scripts/cartas.mjs",
     "tipos": "node scripts/tipos.mjs",
     "encontros": "node scripts/encontros.mjs",
+    "gritos": "node scripts/gritos.mjs",
     "verificar": "node scripts/verificar-paginas.mjs",
     "mod": "node scripts/baixar-mod.mjs",
     "test": "node --test testes/*.test.mjs",

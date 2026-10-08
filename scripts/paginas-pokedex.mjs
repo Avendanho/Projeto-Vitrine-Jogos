@@ -244,6 +244,7 @@ export function paginaEspecie(id) {
       <h1>${esc(f.nome)}</h1>
       <p class="especie-categoria">${esc(f.categoria)}</p>
       <ul class="especie-tipos" aria-label="Tipos">${ts.map((t) => `<li><a class="tipo" data-tipo="${semAcento(t)}" href="/pokedex/?tipo=${semAcento(t)}">${t}</a></li>`).join("")}</ul>
+      <p class="especie-grito"><button type="button" class="botao botao-contorno botao-pequeno" data-grito="/gritos/${id}.ogg">Ouvir o grito</button> <span class="nota-editorial" data-grito-aviso aria-live="polite"></span></p>
     </div>
     <figure class="prancha especie-prancha" tabindex="0">
       <span class="prancha-arte">

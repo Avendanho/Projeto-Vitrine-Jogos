@@ -427,3 +427,29 @@ Pokédex com tampas que se abrem), pico (hexágono que muda de forma e anel de
 perfis), assinatura (hexágono no lugar da ilha) e paleta (vermelho, amarelo e
 azul sobre tela clara). A estrutura das cenas é parecida com a da primeira
 construção.
+
+---
+
+## Rodada 10: som
+
+Pedido: pôr áudio no site (música ambiente, barulhos de Pokémon ou coisas do
+tipo), um README e um texto de divulgação para o LinkedIn, em português e em
+inglês, e deixar tudo pronto para subir no GitHub.
+
+- **Começa em silêncio.** Som que toca sozinho espanta visita, e os navegadores
+  barram. Quem liga é o botão do alto-falante, no cabeçalho das duas edições (no
+  celular ele fica dentro do menu), e a escolha fica guardada no navegador.
+- **Música do próprio atlas.** Música dos jogos não pode ser usada. As duas
+  trilhas foram compostas para o atlas e são tocadas na hora, com osciladores:
+  ondas quadradas de portátil na edição Pokémon, notas soltas com eco na edição
+  Cobblemon. As partituras estão escritas em texto em `src/js/som-logica.js`.
+- **Sons das teclas**, também gerados: bipes de aparelho numa edição, estalo de
+  menu em blocos na outra.
+- **Gritos de verdade.** A página de cada espécie, nas duas edições, toca o
+  grito do Pokémon nos jogos, do repositório público PokeAPI/cries (os mesmos
+  arquivos que a PokéAPI aponta). São 1.025 arquivos, 15 MB, pedidos só quando
+  alguém aperta o botão, e tocam mesmo com o som do atlas desligado.
+- O que não deu para conferir por máquina: como a música soa. Os testes
+  garantem que ela toca e que as partituras estão inteiras e no tom; o ouvido
+  fica com quem visitar.
+

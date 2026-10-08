@@ -302,8 +302,15 @@ a.tipo:hover { transform: translateY(-2px); }
 
 .topo-busca, .topo-menu { padding: 6px 13px 7px; font: inherit; font-size: var(--t-pequeno); font-weight: 700; line-height: 1.2; color: inherit; background: transparent; border: 2px solid #fff; border-radius: 999px; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
 .topo-busca:hover, .topo-menu:hover { background: #fff; color: var(--vermelho-fundo); }
-html:not(.js) .topo-busca { display: none; }
-.topo-nav-busca { display: none; }
+html:not(.js) :is(.topo-busca, .topo-som, .especie-grito) { display: none; }
+.topo-nav-busca, .topo-nav-som { display: none; }
+/* o botão de som: um alto-falante redondo, que acende quando o som está ligado */
+.topo-som { flex: none; width: 36px; height: 36px; display: grid; place-items: center; padding: 0; color: #fff; background: transparent; border: 2px solid #fff; border-radius: 50%; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+.topo-som:hover { background: rgb(255 255 255 / 0.2); }
+.topo-som[aria-pressed="true"] { background: var(--amarelo); color: var(--tinta); border-color: var(--tinta); }
+.topo-som svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.topo-som .som-caixa { fill: currentColor; }
+[aria-pressed="true"] .som-mudo, [aria-pressed="false"] .som-ondas { display: none; }
 
 /* Em telas médias a chamada principal sai do alto (continua no rodapé e nas páginas);
  * abaixo de 1280px as abas vão para o botão Menu, e em telas estreitas as luzes somem. */
@@ -336,7 +343,11 @@ html:not(.js) .topo-busca { display: none; }
   .topo .marca::after { display: none; }
   .edicoes a { padding: 4px 8px 5px; font-size: 0.8rem; }
   .topo-busca { display: none; }
-  .js .topo-nav-busca { display: block; width: 100%; margin-bottom: 6px; padding: 12px; font: inherit; font-size: var(--t-destaque); font-weight: 700; color: inherit; background: transparent; border: 2px solid #fff; border-radius: 12px; cursor: pointer; }
+  .topo-som { display: none; }
+  .js :is(.topo-nav-busca, .topo-nav-som) { display: block; width: 100%; margin-bottom: 6px; padding: 12px; font: inherit; font-size: var(--t-destaque); font-weight: 700; color: inherit; background: transparent; border: 2px solid #fff; border-radius: 12px; cursor: pointer; }
+  .js .topo-nav-som::after { content: " desligados"; font-weight: 500; }
+  .js .topo-nav-som[aria-pressed="true"] { background: var(--amarelo); color: var(--tinta); border-color: var(--tinta); }
+  .js .topo-nav-som[aria-pressed="true"]::after { content: " ligados"; }
 }
 @media (max-width: 380px) { .topo .marca { font-size: 0; gap: 0; } }
 
@@ -1142,6 +1153,9 @@ a.carta-caixa:hover .carta-terreno, a.carta-caixa:hover .carta-tracos { transfor
 .especie-categoria { margin-top: var(--e2); font-size: clamp(1.2rem, 1.9vw, 1.6rem); font-weight: 700; }
 .especie-tipos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--e3); }
 .especie-tipos .tipo { padding: 5px 18px 6px; font-size: var(--t-texto); border-width: var(--traco); }
+.especie-grito { display: flex; flex-wrap: wrap; align-items: center; gap: 8px var(--e2); margin-top: var(--e3); }
+/* enquanto o grito toca, a tecla fica afundada e acesa */
+[data-grito].tocando { background: var(--amarelo); transform: translateY(3px); box-shadow: 0 0 0 var(--tinta); }
 .especie-prancha .prancha-arte { view-transition-name: especie; }
 /* A prancha da espécie: o desenho em uma cor é impresso na chegada, seguindo o ângulo da trama; depois o
  * espécime flutua devagar sobre a sua base, como em campo, e se inclina para o ponteiro. */

@@ -61,6 +61,9 @@ function itemHex(j, opc = {}) {
  *   registra uma promessa rejeitada. Esse aviso, e só ele, é silenciado. */
 const ANTES_DE_APARECER = `document.documentElement.classList.add("js");addEventListener("unhandledrejection",(e)=>{if(e.reason&&e.reason.name==="AbortError"&&/Transition was skipped/.test(e.reason.message))e.preventDefault()})`;
 
+/* O alto-falante do botão de som: com ondas quando ligado, com um xis quando desligado (o CSS escolhe). */
+const ICONE_DO_SOM = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path class="som-caixa" d="M3.5 9.5h3.8L12 5.6v12.8l-4.7-3.9H3.5z"/><path class="som-ondas" d="M15.2 9a4.2 4.2 0 0 1 0 6M17.8 6.4a8 8 0 0 1 0 11.2"/><path class="som-mudo" d="M15.6 9.4l5 5.2M20.6 9.4l-5 5.2"/></svg>';
+
 /* O atlas tem duas edições, cada uma com as suas abas, a sua chamada principal e a sua folha de estilo:
  * a edição Pokémon é um aparelho de Pokédex (src/pokedex.css); a do Cobblemon, um mapa em blocos (src/estilo.css). */
 export const EDICOES = {
@@ -79,7 +82,7 @@ export const EDICOES = {
     ],
     avisos: [
       "Projeto de fã, sem fins lucrativos e sem vínculo com Nintendo, Game Freak, Creatures ou The Pokémon Company. Pokémon e os nomes dos jogos pertencem aos seus donos.",
-      "As notas de cada jogo são leitura editorial do atlas, não dado oficial. A arte dos Pokémon é a oficial, obtida do repositório público PokeAPI/sprites e reimpressa em gravura; as listas de Pokédex vêm da PokéAPI. As cartas das regiões são redesenhos do atlas sobre os mapas dos jogos. Fontes: M PLUS Rounded 1c e DotGothic16."
+      "As notas de cada jogo são leitura editorial do atlas, não dado oficial. A arte dos Pokémon é a oficial, obtida do repositório público PokeAPI/sprites e reimpressa em gravura; as listas de Pokédex vêm da PokéAPI. As cartas das regiões são redesenhos do atlas sobre os mapas dos jogos. A música e os sons das teclas são do próprio atlas, feitos no navegador; os gritos são os dos jogos, do repositório público PokeAPI/cries. Fontes: M PLUS Rounded 1c e DotGothic16."
     ]
   },
   cobblemon: {
@@ -97,7 +100,7 @@ export const EDICOES = {
     ],
     avisos: [
       "Projeto de fã, sem fins lucrativos. Cobblemon é um mod de código aberto feito pela equipe Cobblemon; este site não tem vínculo com ela, nem com a Mojang, a Microsoft, a Nintendo ou a The Pokémon Company.",
-      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. Os Pokémon são desenhados a partir dos modelos e das texturas do próprio mod, feitos pela equipe do Cobblemon. Os ícones dos itens são as texturas do mod, e as maquetes das estruturas são montadas com as peças dele, em blocos de uma cor só. Nas receitas, os ingredientes do Minecraft são redesenhos em tinta a partir dos ícones do jogo, que pertence à Mojang e à Microsoft. Fontes: Pixelify Sans, Archivo e Alegreya."
+      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. Os Pokémon são desenhados a partir dos modelos e das texturas do próprio mod, feitos pela equipe do Cobblemon. Os ícones dos itens são as texturas do mod, e as maquetes das estruturas são montadas com as peças dele, em blocos de uma cor só. Nas receitas, os ingredientes do Minecraft são redesenhos em tinta a partir dos ícones do jogo, que pertence à Mojang e à Microsoft. A música e os sons dos menus são do próprio atlas, feitos no navegador; os gritos são os dos jogos de Pokémon, do repositório público PokeAPI/cries. Fontes: Pixelify Sans, Archivo e Alegreya."
     ]
   }
 };
@@ -135,9 +138,11 @@ ${ed.fontes.map((f) => `<link rel="preload" href="/fontes/${f}.woff2" as="font" 
   <a class="marca" href="${ed.inicio}"${caminho === ed.inicio ? ' aria-current="page"' : ""}>PokéAtlas</a>
   <div class="edicoes" role="group" aria-label="Edição do atlas">${seletor}</div>
   <button type="button" class="topo-busca" data-busca-abrir aria-haspopup="dialog" aria-keyshortcuts="/ Control+K">Buscar</button>
+  <button type="button" class="topo-som" data-som aria-pressed="false" aria-label="Som" title="Música e sons do atlas">${ICONE_DO_SOM}</button>
   <button type="button" class="topo-menu" aria-expanded="false" aria-controls="menu">Menu</button>
   <nav class="topo-nav" id="menu" aria-label="Seções">
     <button type="button" class="topo-nav-busca" data-busca-abrir aria-haspopup="dialog">Buscar no atlas</button>
+    <button type="button" class="topo-nav-som" data-som aria-pressed="false">Música e sons</button>
     ${ed.nav.map(link).join("\n    ")}
     <a class="botao botao-pequeno" href="${ed.acao.href}"${caminho === ed.acao.href ? ' aria-current="page"' : ""}>${ed.acao.texto}</a>
   </nav>

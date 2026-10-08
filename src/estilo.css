@@ -861,10 +861,25 @@ a.slot:hover { background: #B4B4D8; }
 .topo-busca { padding: 7px 12px; font: inherit; font-size: var(--t-pequeno); font-weight: 600; line-height: 1.2; color: inherit; background: transparent; border: 1.5px solid currentColor; border-radius: 2px; cursor: pointer; }
 .topo-busca:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
 html:not(.js) .topo-busca { display: none; }
+/* o botão de som: um alto-falante em bloco, verde quando o som está ligado */
+html:not(.js) :is(.topo-som, .especie-grito) { display: none; }
+.topo-som { flex: none; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; color: var(--preto); background: var(--papel); border: 2px solid var(--preto); box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--sombra); cursor: pointer; }
+.topo-som[aria-pressed="true"] { background: var(--rota); color: #fff; box-shadow: inset 2px 2px 0 rgb(255 255 255 / 0.35), inset -2px -2px 0 rgb(0 0 0 / 0.3); }
+.topo-som svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; }
+.topo-som .som-caixa { fill: currentColor; }
+[aria-pressed="true"] .som-mudo, [aria-pressed="false"] .som-ondas { display: none; }
+.topo-nav-som { display: none; }
+.especie-grito { display: flex; flex-wrap: wrap; align-items: center; gap: 8px var(--e2); margin-top: var(--e3); }
+[data-grito].tocando { background: var(--rota); color: #fff; }
 /* em tela estreita não cabem logotipo, seletor, busca e menu na mesma linha: a busca vai para dentro do menu */
 .topo-nav-busca { display: none; }
 @media (max-width: 600px) {
   .topo-busca { display: none; }
+  .topo-som { display: none; }
+  .js .topo-nav-som { display: block; width: 100%; margin: 0 0 4px; padding: 13px; font-family: var(--pixel); font-size: var(--t-destaque); font-weight: 500; color: inherit; background: var(--papel); border: 2px solid var(--preto); border-radius: 0; cursor: pointer; }
+  .js .topo-nav-som::after { content: " desligados"; }
+  .js .topo-nav-som[aria-pressed="true"] { background: var(--rota); color: #fff; }
+  .js .topo-nav-som[aria-pressed="true"]::after { content: " ligados"; }
   .js .topo-nav-busca { display: block; width: 100%; margin: var(--e2) 0 4px; padding: 13px; font: inherit; font-size: var(--t-destaque); font-weight: 600; color: inherit; background: transparent; border: 1.5px solid currentColor; border-radius: 2px; cursor: pointer; }
   .edicao-cobblemon.js .topo-nav-busca, .js .edicao-cobblemon .topo-nav-busca { font-family: var(--pixel); border: 2px solid var(--preto); border-radius: 0; background: var(--papel); }
 }

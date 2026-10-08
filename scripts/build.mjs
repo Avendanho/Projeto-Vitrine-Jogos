@@ -110,6 +110,7 @@ await Promise.all([
   cp(join(SRC, "fontes"), join(DIST, "fontes"), { recursive: true }),
   cp(join(SRC, "arte"), join(DIST, "arte"), { recursive: true }),
   cp(join(SRC, "maquetes"), join(DIST, "maquetes"), { recursive: true }),
+  cp(join(SRC, "gritos"), join(DIST, "gritos"), { recursive: true }),
   cp(join(SRC, "modelos3d"), join(DIST, "modelos3d"), { recursive: true })
 ]);
 

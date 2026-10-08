@@ -1,6 +1,9 @@
 /* Comportamentos comuns a todas as páginas.
  * (A classe "js" já foi posta em <html> por um script no cabeçalho, antes de a página aparecer.) */
 
+/* O som (música, teclas e gritos) vem à parte: se o módulo não carregar, o resto da página segue igual. */
+import("./som.js").catch(() => {});
+
 /* menu em telas estreitas */
 const botaoMenu = document.querySelector(".topo-menu");
 const menu = document.getElementById("menu");
