@@ -9,6 +9,8 @@ import { REGIOES, CONSOLES, ESTILOS, PEDIDOS, MAPAS, ROTAS } from "../dados/atla
 import { terrenoSVG } from "./cenario.mjs";
 import { POKEDEX, FICHAS, CARTAS, COBBLEMON, SITE, VERMELHO } from "./base.mjs";
 import { FAVICON } from "./icone.mjs";
+import { PERGUNTAS } from "../dados/quiz.mjs";
+import { EIXOS_EN, JOGOS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN } from "../dados/en.mjs";
 import { paginaPokedex, paginaEspecie, TODAS_AS_ESPECIES } from "./paginas-pokedex.mjs";
 import {
   paginaCobblemonInicio, paginaCobblemonPokemon, paginaCobblemonEspecie, paginaCobblemonItens,
@@ -80,6 +82,18 @@ function conferir() {
     const maximo = Math.max(...JOGOS.map((x) => x.atributos[eixo]));
     if (j.atributos[eixo] !== maximo) erros.push(`pedido ${eixo}: ${p.eleito} não tem a nota máxima do eixo`);
   }
+  // a versão em inglês acompanha o original: nenhum jogo, nota, região, pedido ou pergunta fica sem tradução
+  for (const e of EIXOS) if (!EIXOS_EN[e.id]) erros.push(`inglês: falta o nome do eixo ${e.id}`);
+  for (const j of JOGOS) {
+    const en = JOGOS_EN[j.slug];
+    if (!en?.chamada) { erros.push(`inglês: falta a chamada de ${j.slug}`); continue; }
+    const pt = Object.keys(j.notas || {}).sort().join(), ing = Object.keys(en.notas || {}).sort().join();
+    if (pt !== ing) erros.push(`inglês: as notas de ${j.slug} não batem com o original (${pt} / ${ing})`);
+  }
+  for (const r of REGIOES) if (!REGIOES_EN[r.id]?.texto || !REGIOES_EN[r.id]?.inspiracao) erros.push(`inglês: falta o texto da região ${r.id}`);
+  for (const id of Object.keys(PEDIDOS)) for (const campo of ["frase", "alto", "baixo"]) if (!PEDIDOS_EN[id]?.[campo]) erros.push(`inglês: falta "${campo}" do pedido ${id}`);
+  if (PERGUNTAS_EN.length !== PERGUNTAS.length) erros.push("inglês: o número de perguntas da bússola não bate");
+  PERGUNTAS.forEach((p, q) => { if (PERGUNTAS_EN[q]?.opcoes.length !== p.opcoes.length) erros.push(`inglês: a pergunta ${q + 1} da bússola tem outro número de opções`); });
   if (erros.length) {
     console.error("Dados inconsistentes:\n  " + erros.join("\n  "));
     process.exit(1);
@@ -131,10 +145,12 @@ await escrever("hex/demo-b.svg", svgHexagono(valoresDe(demoB.atributos), "#DC0A2
 for (const r of REGIOES) await escrever(`cartas/${r.id}.svg`, terrenoSVG(CARTAS[r.id]));
 
 await escrever("js/dados.js", dadosDoNavegador());
+await escrever("js/dados-en.js", dadosDoNavegador("en"));
 await escrever("regioes/index.html", paginaRegioes());
 for (const r of REGIOES) await escrever(`regioes/${r.id}/index.html`, paginaRegiao(r));
 await escrever("favicon.svg", FAVICON);
 await escrever("index.html", paginaInicio());
+await escrever("en/index.html", paginaInicio("en"));
 await escrever("pokedex/index.html", paginaPokedex());
 for (const id of TODAS_AS_ESPECIES) await escrever(`pokedex/${FICHAS[id].slug}/index.html`, paginaEspecie(id));
 await escrever("linha-do-tempo/index.html", paginaLinha());
@@ -146,6 +162,7 @@ await escrever("diario/index.html", paginaDiario());
 await escrever("js/dados/tipos.js", moduloTipos());
 await escrever("js/dados/jogos.js", moduloJogos());
 await escrever("bussola/index.html", paginaBussola());
+await escrever("en/compass/index.html", paginaBussola("en"));
 await escrever("404.html", pagina404());
 for (const j of JOGOS) await escrever(`jogos/${j.slug}/index.html`, paginaJogo(j));
 

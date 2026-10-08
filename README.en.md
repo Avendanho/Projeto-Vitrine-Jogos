@@ -16,13 +16,13 @@
   <img src="https://img.shields.io/badge/Status-Online-success?style=flat-square" alt="Status" />
   <img src="https://img.shields.io/badge/Node.js-%3E%3D20-informational?style=flat-square&logo=node.js" alt="Node version" />
   <img src="https://img.shields.io/badge/Framework-Zero%20Dependencies%20(Vanilla)-f5a623?style=flat-square" alt="No framework" />
-  <img src="https://img.shields.io/badge/Generated%20Pages-1%2C986%20static-blue?style=flat-square" alt="Pages" />
+  <img src="https://img.shields.io/badge/Generated%20Pages-1%2C988%20static-blue?style=flat-square" alt="Pages" />
   <img src="https://img.shields.io/badge/Data-Pok%C3%A9API-red?style=flat-square" alt="PokéAPI" />
   <img src="https://img.shields.io/badge/Kind-Fan%20Project%20(Unofficial)-lightgrey?style=flat-square" alt="Unofficial" />
   <img src="https://img.shields.io/badge/License-MIT%20(code)-green?style=flat-square" alt="MIT License" />
 </p>
 
-> The site itself is written in Brazilian Portuguese. This file explains the project in English.
+> The home page and the compass are available in English at [`/en/`](https://pokeatlas-eight.vercel.app/en/). The rest of the site is in Brazilian Portuguese.
 
 <p align="center">
   <img src="docs/imagens/inicio.webp" alt="The home page: a game's entry, with the attribute hexagon and the blue profile keypad" width="49%" />
@@ -147,10 +147,18 @@ A continuous journey in 6 scenes:
 6. *Your profile:* the whole screen in yellow and the invitation to open the compass.
 
 ### 10. 🔊 Sound
-The atlas opens silent. The speaker button in the header turns sound on, and the choice is stored in the browser.
+The atlas opens silent. The speaker button in the header opens a small panel with the switch that turns sound on and one volume for the music and another for the key sounds; the choices are stored in the browser.
 - **Background music:** one tune per edition, composed for the atlas and played live by the browser (Web Audio), with no audio file. Square waves like a handheld in the Pokémon edition; long, loose notes with echo in the Cobblemon edition.
 - **Key sounds:** device beeps in the Pokémon edition and a block-menu click in the Cobblemon edition.
 - **Cries:** each species page, in both editions, has a **Ouvir o grito** ("hear the cry") button that plays the Pokémon's cry from the games. This one works even with the atlas sound off.
+
+### 11. 🌍 English version (`/en/` and `/en/compass/`)
+The home page and the compass also exist in English, with the axis names, each game's tagline and notes, the region blurbs and the eight questions translated. The other sections are in Portuguese only, and the English pages say so on the links that lead to them.
+
+### 12. 📲 Install and share
+- **Install on a phone:** the atlas has a manifest and icons and can be added to the home screen like an app.
+- **Link preview:** every page carries the image shown when its address is pasted into a social network or a chat.
+- **Sitemap:** `sitemap.xml` and `robots.txt` are generated at build time, with every page.
 
 ---
 
@@ -172,10 +180,11 @@ The Cobblemon edition has its own direction (map parchment, inventory panels, **
 ## ⚡ Architecture and Engineering
 
 - **Zero production dependencies:** no React, Vue, Next.js or Tailwind. The whole site runs on semantic HTML, modern CSS and vanilla JavaScript (ES modules).
-- **Custom static site generator:** `scripts/build.mjs` validates the data model and writes **1,986 static HTML pages in about one second**.
+- **Custom static site generator:** `scripts/build.mjs` validates the data model and writes **1,988 static HTML pages in about one second**.
 - **3D without a library:** structure and biome models and Pokémon models rotate in the project's own viewer (`src/js/visor.js`), with WebGL and, where the browser does not provide it, a software renderer.
 - **Music without audio files:** the soundtrack and effects are scores written as text (`src/js/som-logica.js`) and played with oscillators; only the Pokémon cries are files.
 - **Own scroll engine:** entrances, pinned scenes and horizontal rails are driven by `src/js/rolagem.js`, and everything falls back to plain sections under reduced motion.
+- **Two languages without duplicating pages:** the page frame, the home and the compass take the language as a parameter; the phrases live in `scripts/textos.mjs` and the content translations in `dados/en.mjs`, and the build fails if a translation falls behind.
 - **Tests:** the rules of each tool live in pure modules (`src/js/*-logica.js`) tested with `node:test`; browser scripts in `testes/navegador/` check each page with Playwright.
 - **Strict build validation:** the build checks every route, score, Pokédex reference and map before writing the output folder.
 
@@ -197,7 +206,8 @@ Projeto-Vitrine-Jogos/
 │   ├── maquetes/   # Block data for the 3D structure and biome models
 │   └── modelos3d/  # Model and texture of each Cobblemon Pokémon
 ├── testes/         # Unit tests (node:test) and browser scripts
-├── docs/           # Implementation plan and outreach text
+├── docs/           # Implementation plan, outreach text and screenshots
+├── LICENSE         # MIT for the code, with a note on third-party material
 ├── BRIEF.md        # Art direction and content decisions, round by round (Portuguese)
 └── vercel.json     # Routing and deploy configuration
 ```
@@ -228,12 +238,13 @@ npm run test:navegador    # with `npm run dev` running in another terminal
 | Command | What it does |
 | :--- | :--- |
 | `npm run dev` | Builds the site into `dist/` and serves it at `http://localhost:4600`. |
-| `npm run build` | Validates the data and writes all 1,986 pages. |
+| `npm run build` | Validates the data and writes all 1,988 pages. |
 | `npm test` | Unit tests of the rules (team, journal, hunt, search, models, sound, data). |
 | `npm run test:navegador` | Browser scripts for every tool (needs `npm run dev` running). |
 | `npm run verificar` | Visual audit: scrolls each page on desktop, phone and reduced motion and takes screenshots. |
 | `npm run pokedex`, `tipos`, `encontros` | *(Data)* Rebuild species, type chart and route encounters from PokéAPI. |
 | `npm run gritos` | *(Sound)* Downloads each species' cry into `src/gritos/`. |
+| `npm run vitrine` | *(Outreach)* Rebuilds the install icons, the link preview images and the README screenshots (needs `npm run dev` running). |
 | `npm run arte`, `arte:mini`, `arte:formas`, `cartas` | *(Art)* Engravings and region maps. |
 | `npm run mod`, `cobblemon`, `modelos`, `itens`, `maquetes` | *(Cobblemon)* Download the mod and rebuild its data, drawn models, item icons and 3D models. Arguments are described in the Portuguese README. |
 

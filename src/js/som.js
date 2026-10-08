@@ -14,6 +14,10 @@ const edicao = document.body.classList.contains("edicao-cobblemon") ? "cobblemon
 const musica = MUSICAS[edicao], folha = partitura(musica);
 const botoes = [...document.querySelectorAll("[data-som]")];
 const Contexto = window.AudioContext || window.webkitAudioContext;
+/* O que o painel de som diz. As páginas em inglês (o início e a bússola) trazem o painel na língua delas. */
+const T = document.documentElement.lang === "en"
+  ? { som: "Sound", estado: (l) => `Sound: ${l ? "on" : "off"}`, ligar: "Turn sound on", desligar: "Turn sound off", musica: "Music", teclas: "Key sounds", gritos: "Each Pokémon's cry plays when you ask for it, whether the sound is on or not.", fechar: "Close", semGrito: "Could not play the cry in this browser." }
+  : { som: "Som", estado: (l) => `Som: ${l ? "ligado" : "desligado"}`, ligar: "Ligar o som", desligar: "Desligar o som", musica: "Música", teclas: "Sons das teclas", gritos: "O grito de cada Pokémon toca quando você pede, com o som ligado ou não.", fechar: "Fechar", semGrito: "Não deu para tocar o grito neste navegador." };
 
 let ctx = null, barraMusica = null, nivelMusica = null, barraEfeitos = null, chiado = null, painel = null;
 let ligado = false, tocando = false, relogio = 0, passo = 0, proximo = 0;
@@ -31,10 +35,10 @@ function mostrar() {
   document.documentElement.dataset.som = ligado ? "ligado" : "desligado";
   for (const b of botoes) {
     b.dataset.ligado = String(ligado);
-    if (b.hasAttribute("aria-label")) b.setAttribute("aria-label", `Som: ${ligado ? "ligado" : "desligado"}`);
+    if (b.hasAttribute("aria-label")) b.setAttribute("aria-label", T.estado(ligado));
   }
   const chave = painel?.querySelector("[data-som-chave]");
-  if (chave) chave.textContent = ligado ? "Desligar o som" : "Ligar o som";
+  if (chave) chave.textContent = ligado ? T.desligar : T.ligar;
 }
 
 function preparar() {
@@ -178,12 +182,12 @@ function abrirPainel() {
     painel = document.createElement("dialog");
     painel.className = "som-painel";
     painel.setAttribute("aria-labelledby", "som-titulo");
-    painel.innerHTML = `<h2 id="som-titulo">Som</h2>
+    painel.innerHTML = `<h2 id="som-titulo">${T.som}</h2>
       <button type="button" class="botao" data-som-chave></button>
-      <label class="som-volume"><span>Música</span><input type="range" min="0" max="100" step="5" value="${volumes.musica}" data-volume="musica"></label>
-      <label class="som-volume"><span>Sons das teclas</span><input type="range" min="0" max="100" step="5" value="${volumes.teclas}" data-volume="teclas"></label>
-      <p class="nota-editorial">O grito de cada Pokémon toca quando você pede, com o som ligado ou não.</p>
-      <button type="button" class="ligacao" data-som-fechar>Fechar</button>`;
+      <label class="som-volume"><span>${T.musica}</span><input type="range" min="0" max="100" step="5" value="${volumes.musica}" data-volume="musica"></label>
+      <label class="som-volume"><span>${T.teclas}</span><input type="range" min="0" max="100" step="5" value="${volumes.teclas}" data-volume="teclas"></label>
+      <p class="nota-editorial">${T.gritos}</p>
+      <button type="button" class="ligacao" data-som-fechar>${T.fechar}</button>`;
     document.body.append(painel);
     painel.querySelector("[data-som-chave]").addEventListener("click", alternar);
     painel.querySelector("[data-som-fechar]").addEventListener("click", () => painel.close());
@@ -215,7 +219,7 @@ document.addEventListener("click", (e) => {
   grito.addEventListener("ended", fim);
   grito.addEventListener("pause", fim);
   botao.classList.add("tocando");
-  grito.play().catch(() => { fim(); if (aviso) aviso.textContent = "Não deu para tocar o grito neste navegador."; });
+  grito.play().catch(() => { fim(); if (aviso) aviso.textContent = T.semGrito; });
 });
 
 ligado = guardado() && Boolean(Contexto);

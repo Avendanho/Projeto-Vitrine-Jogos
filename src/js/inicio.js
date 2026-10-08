@@ -1,7 +1,8 @@
 /* Página inicial: o aparelho que liga mostrando um perfil, e a cena em que o hexágono responde a cada pedido. */
 import { EIXOS } from "./hexagono.js";
 import { hexVivo, REDUZIDO } from "./hex-vivo.js";
-import { JOGOS, PEDIDOS, DESTAQUES } from "./dados.js";
+/* A página inicial existe em português e em inglês: os nomes e os consoles vêm na língua dela. */
+const { JOGOS, PEDIDOS, DESTAQUES } = await import(document.documentElement.lang === "en" ? "./dados-en.js" : "./dados.js");
 
 const limitar = (v, a, b) => Math.min(b, Math.max(a, v));
 const doisDigitos = (n) => String(n).padStart(2, "0");

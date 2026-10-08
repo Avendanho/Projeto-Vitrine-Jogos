@@ -1,10 +1,14 @@
 /* Bússola: cada resposta puxa um vértice do perfil do visitante; no fim, os três jogos
  * do catálogo com o perfil mais parecido, e o porquê de cada um. */
-import { EIXOS, encaixe } from "./hexagono.js";
-import { JOGOS, PEDIDOS, PERGUNTAS } from "./dados.js";
+import { EIXOS as EIXOS_BASE, encaixe } from "./hexagono.js";
 import { hexVivo } from "./hex-vivo.js";
+import { textosDaPagina } from "./bussola-textos.js";
 
-const ORDEM = ["Primeiro da lista", "Segundo", "Terceiro"];
+/* A página existe em português e em inglês: os textos e os dados vêm na língua dela. */
+const T = textosDaPagina();
+const { JOGOS, PEDIDOS, PERGUNTAS, NOMES_DOS_EIXOS } = await import(T.dados);
+const EIXOS = EIXOS_BASE.map((e) => ({ ...e, nome: NOMES_DOS_EIXOS[e.id] }));
+const emPortugues = document.documentElement.lang === "pt-BR" ? "" : ' hreflang="pt-BR"';
 
 const secao = document.querySelector(".bussola");
 const passo = secao.querySelector("[data-passo]");
@@ -18,7 +22,7 @@ const meuPerfil = hexVivo(caixa.querySelector("canvas"), { pulso: true });
 caixa.classList.add("vivo");
 
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const lista = (itens) => itens.length <= 1 ? itens.join("") : `${itens.slice(0, -1).join(", ")} e ${itens[itens.length - 1]}`;
+const lista = (itens) => itens.length <= 1 ? itens.join("") : `${itens.slice(0, -1).join(", ")} ${T.e} ${itens[itens.length - 1]}`;
 
 /* teto de cada eixo: a soma da melhor opção de cada pergunta */
 const TETO = EIXOS.map((e) => PERGUNTAS.reduce((soma, p) => soma + Math.max(0, ...p.opcoes.map((o) => o.pesos?.[e.id] || 0)), 0));
@@ -40,7 +44,7 @@ function mostrarPerfil() {
 
 function mostrarPergunta(foco = true) {
   const p = PERGUNTAS[atual];
-  passo.textContent = `Pergunta ${atual + 1} de ${PERGUNTAS.length}`;
+  passo.textContent = T.passo(atual + 1, PERGUNTAS.length);
   voltar.hidden = atual === 0;
   quadro.innerHTML = `<h2 tabindex="-1">${esc(p.pergunta)}</h2>
     <div class="opcoes">${p.opcoes.map((o, i) => `<button type="button" class="opcao" data-opcao="${i}" aria-pressed="${respostas[atual] === i}">${esc(o.texto)}</button>`).join("")}</div>`;
@@ -59,8 +63,8 @@ function responder(indice) {
   const subiram = EIXOS.filter((_, i) => depois[i] - antes[i] > 0.01);
   for (const d of direcoes) d.classList.toggle("ativo", subiram.some((e) => e.id === d.dataset.eixo));
   legenda.textContent = PERGUNTAS[atual].filtro
-    ? "Essa resposta não mexe no perfil: ela escolhe entre quais jogos procurar."
-    : subiram.length ? `O perfil esticou em ${lista(subiram.map((e) => e.nome.toLowerCase()))}.` : "Nada mudou desta vez. O seu perfil segue como estava.";
+    ? T.filtro
+    : subiram.length ? T.esticou(lista(subiram.map((e) => e.nome.toLowerCase()))) : T.nada;
 
   quadro.classList.remove("entrando");
   quadro.classList.add("saindo");
@@ -84,15 +88,15 @@ function candidatos() {
 
 function explicar(jogo, u) {
   const eixos = EIXOS.map((e, i) => ({ e, i, seu: u[i], dele: jogo.valores[i] }));
-  const frase = (x) => jogo.notas[x.e.id] ?? `Este jogo ${PEDIDOS[x.e.id].alto}.`;
+  const frase = (x) => jogo.notas[x.e.id] ?? T.esteJogo(PEDIDOS[x.e.id].alto);
   let comuns = eixos.filter((x) => x.seu >= 2.5 && x.dele >= 4).sort((a, b) => b.seu + b.dele - a.seu - a.dele).slice(0, 2);
   if (!comuns.length) comuns = eixos.filter((x) => x.dele >= 3).sort((a, b) => Math.min(b.seu, b.dele) - Math.min(a.seu, a.dele)).slice(0, 1);
   const porque = comuns.map((x) => `<li><strong>${x.e.nome}.</strong> ${esc(frase(x))}</li>`).join("");
 
   const maior = eixos.map((x) => ({ ...x, d: x.dele - x.seu })).sort((a, b) => Math.abs(b.d) - Math.abs(a.d))[0];
   let atencao = "";
-  if (maior.d >= 2 && maior.dele >= 4) atencao = `${maior.e.nome} pesa mais aqui do que você pediu. ${frase(maior)}`;
-  else if (maior.d <= -2.5) atencao = `Você puxou para ${maior.e.nome.toLowerCase()}, e aqui ${PEDIDOS[maior.e.id].baixo}.`;
+  if (maior.d >= 2 && maior.dele >= 4) atencao = T.pesa(maior.e.nome, frase(maior));
+  else if (maior.d <= -2.5) atencao = T.puxou(maior.e.nome.toLowerCase(), PEDIDOS[maior.e.id].baixo);
   return { porque, atencao };
 }
 
@@ -102,16 +106,15 @@ function concluir(rolar) {
   const fortes = EIXOS.map((e, i) => ({ e, v: u[i] })).sort((a, b) => b.v - a.v).filter((x) => x.v > 0).slice(0, 2);
 
   secao.dataset.estado = "resultado";
-  passo.textContent = "Perfil completo";
+  passo.textContent = T.completo;
   voltar.hidden = false;
   for (const d of direcoes) d.classList.remove("ativo");
-  legenda.textContent = "Este é o seu perfil.";
+  legenda.textContent = T.legendaFinal;
   quadro.classList.remove("saindo");
-  quadro.innerHTML = `<h2 tabindex="-1">O seu perfil está pronto.</h2><p class="prosa">${fortes.length ? `Ele puxa mais para ${lista(fortes.map((x) => x.e.nome.toLowerCase()))}.` : "Ele ficou curto em todas as direções: você não puxou forte para lado nenhum."} Logo abaixo estão os jogos do atlas com o perfil mais parecido.</p>`;
+  quadro.innerHTML = `<h2 tabindex="-1">${T.pronto}</h2><p class="prosa">${fortes.length ? T.puxa(lista(fortes.map((x) => x.e.nome.toLowerCase()))) : T.curto} ${T.abaixo}</p>`;
 
   const n = escolhidos.length;
-  resultado.querySelector("[data-resumo]").textContent =
-    `Entre os jogos que cabem nas suas duas últimas respostas, ${n === 1 ? "este é o que mais se parece" : `estes ${n === 2 ? "dois" : "três"} são os que mais se parecem`} com o perfil que você desenhou. A linha vermelha sobre cada hexágono é o seu.`;
+  resultado.querySelector("[data-resumo]").textContent = T.resumo(n);
   resultado.querySelector("[data-lista]").innerHTML = escolhidos.map((j, k) => {
     const { porque, atencao } = explicar(j, u);
     const outro = escolhidos[k === 0 ? 1 : 0];
@@ -119,17 +122,17 @@ function concluir(rolar) {
       <figure>
         <div class="hex-vivo vivo" data-sobre="${j.slug}">
           <img class="hex" src="/hex/${j.slug}.svg" alt="" width="480" height="480">
-          <canvas role="img" aria-label="O seu perfil, em linha vermelha, sobre o de ${esc(j.curto)}"></canvas>
+          <canvas role="img" aria-label="${esc(T.sobre(j.curto))}"></canvas>
         </div>
-        <figcaption class="resultado-chave"><span class="serie"></span>o seu perfil</figcaption>
+        <figcaption class="resultado-chave"><span class="serie"></span>${T.chave}</figcaption>
       </figure>
       <div>
-        <p class="resultado-ordem">${ORDEM[k]}</p>
-        <h3><a href="/jogos/${j.slug}/">${esc(j.titulo)}</a></h3>
+        <p class="resultado-ordem">${T.ordem[k]}</p>
+        <h3><a href="/jogos/${j.slug}/"${emPortugues}>${esc(j.titulo)}</a></h3>
         <p class="resultado-chamada">${esc(j.chamada)}</p>
-        <div class="resultado-porque"><h4>Por que combina com você</h4><ul class="lista-marcada">${porque}</ul></div>
-        ${atencao ? `<p class="resultado-atencao"><strong>Fique de olho.</strong> ${esc(atencao)}</p>` : ""}
-        <p class="resultado-ligacoes"><a class="botao botao-contorno" href="/jogos/${j.slug}/">Abrir a ficha de ${esc(j.curto)}</a>${outro ? `<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${outro.slug}">Comparar com ${esc(outro.curto)}</a>` : ""}</p>
+        <div class="resultado-porque"><h4>${T.porque}</h4><ul class="lista-marcada">${porque}</ul></div>
+        ${atencao ? `<p class="resultado-atencao"><strong>${T.atencao}</strong> ${esc(atencao)}</p>` : ""}
+        <p class="resultado-ligacoes"><a class="botao botao-contorno" href="/jogos/${j.slug}/"${emPortugues}>${esc(T.ficha(j.curto))}</a>${outro ? `<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${outro.slug}"${emPortugues}>${esc(T.comparar(outro.curto))}</a>` : ""}</p>
       </div>
     </li>`;
   }).join("");
@@ -170,17 +173,17 @@ voltar.addEventListener("click", () => {
 });
 resultado.querySelector("[data-refazer]").addEventListener("click", () => {
   recomecar(0);
-  legenda.textContent = "O seu perfil ainda está em branco. Cada resposta puxa um vértice.";
+  legenda.textContent = T.emBranco;
   secao.scrollIntoView({ block: "start" });
 });
 resultado.querySelector("[data-copiar]").addEventListener("click", async () => {
   const aviso = resultado.querySelector("[data-copiado]");
   try {
     await navigator.clipboard.writeText(location.href);
-    aviso.textContent = "Link copiado.";
-    resultado.querySelector("[data-copiar]").textContent = "Link copiado";
+    aviso.textContent = T.copiado;
+    resultado.querySelector("[data-copiar]").textContent = T.copiadoBotao;
   } catch {
-    aviso.textContent = "Não foi possível copiar. O link está na barra de endereço.";
+    aviso.textContent = T.naoCopiou;
   }
 });
 

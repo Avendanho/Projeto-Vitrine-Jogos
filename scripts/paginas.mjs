@@ -8,6 +8,7 @@ import { EIXOS, valoresDe, encaixe } from "../src/js/hexagono.js";
 import { perfilRegiao, posicoesDosEixos, reguaDeAnos } from "./cenario.mjs";
 import { SITE, MAR, TINTA, NOITE, PAPEL, VERMELHO, AMARELO, POKEDEX, FICHAS, CARTAS, ORDEM_TIPOS, esc, semAcento, maiuscula, extenso, numero, enderecoEspecie, selo } from "./base.mjs";
 import { rotasDaCarta, lugaresDaCarta, tracosDaCarta, caixaCarta } from "./carta.mjs";
+import { LINGUAS, PERGUNTAS_EN } from "./textos.mjs";
 
 /* ---------- utilidades ---------- */
 
@@ -33,14 +34,14 @@ export function hex(j, opc = {}) {
   return `<img class="hex ${classe}" src="/hex/${j.slug}${noite ? "-noite" : ""}.svg" alt="${esc(alt)}" width="480" height="480"${preguica ? ' loading="lazy" decoding="async"' : ""}>`;
 }
 
-function prancha(id) {
+function prancha(id, L = LINGUAS["pt-BR"]) {
   const n = String(id).padStart(3, "0");
   return `<figure class="prancha" tabindex="0">
   <span class="prancha-arte">
     <span class="prancha-tinta" style="--arte:url(/arte/pokemon/${id}-tinta.webp)"></span>
-    <img class="prancha-cor" src="/arte/pokemon/${id}.webp" alt="Arte oficial de ${esc(ESPECIES[id])}" width="440" height="440" loading="lazy" decoding="async">
+    <img class="prancha-cor" src="/arte/pokemon/${id}.webp" alt="${esc(L.prancha.arte(ESPECIES[id]))}" width="440" height="440" loading="lazy" decoding="async">
   </span>
-  <figcaption><span class="prancha-numero">Nº ${n}</span> ${esc(ESPECIES[id])}</figcaption>
+  <figcaption><span class="prancha-numero">${L.prancha.numero} ${n}</span> ${esc(ESPECIES[id])}</figcaption>
 </figure>`;
 }
 
@@ -107,17 +108,23 @@ export const EDICOES = {
 
 /* edicao   "pokemon" ou "cobblemon"
  * espelho  endereço da página equivalente na outra edição (sem ele, o seletor leva ao início dela) */
-export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, extra = null, rolagem = false, edicao = "pokemon", espelho = null }) {
-  const ed = EDICOES[edicao];
+export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, extra = null, rolagem = false, edicao = "pokemon", espelho = null, lingua = "pt-BR", versoes = null }) {
+  const L = LINGUAS[lingua], C = L.cromo;
+  const ed = { ...EDICOES[edicao], ...(L.edicao ?? {}) };   // em inglês a moldura tem as suas próprias abas e avisos
   const existe = caminho.endsWith("/");               // a página de "não encontrado" não tem endereço próprio
   const tituloCompleto = caminho === ed.inicio ? titulo : `${titulo} — ${ed.sufixo}`;
+  // o que leva de uma página em inglês a uma seção que só existe em português é marcado como tal
+  const emPortugues = (href) => (lingua !== "pt-BR" && !href.startsWith(L.inicio) ? ' hreflang="pt-BR"' : "");
   // dentro de uma seção (a página de uma espécie, de uma região), a aba da seção continua marcada
-  const link = (n) => `<a href="${n.href}"${caminho.startsWith(n.href) ? ' aria-current="page"' : ""}>${n.texto}</a>`;
+  const link = (n) => `<a href="${n.href}"${caminho.startsWith(n.href) ? ' aria-current="page"' : ""}${emPortugues(n.href)}>${n.texto}</a>`;
   const seletor = Object.entries(EDICOES).map(([id, e]) => (id === edicao
-    ? `<a href="${e.inicio}" aria-current="true"><span>${e.nome}</span></a>`
-    : `<a href="${espelho ?? e.inicio}"><span>${e.nome}</span></a>`)).join("");
+    ? `<a href="${ed.inicio}" aria-current="true"><span>${e.nome}</span></a>`
+    : `<a href="${espelho ?? e.inicio}"${emPortugues(e.inicio)}><span>${e.nome}</span></a>`)).join("");
+  // a mesma página na outra língua, quando existe (por enquanto, o início e a bússola)
+  const outra = versoes && Object.entries(versoes).find(([l]) => l !== lingua);
+  const NOMES = { "pt-BR": "Português", en: "English" };
   return `<!doctype html>
-<html lang="pt-BR">
+<html lang="${L.codigo}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -127,13 +134,13 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
 <meta property="og:title" content="${esc(tituloCompleto)}">
 <meta property="og:description" content="${esc(descricao)}">
 <meta property="og:type" content="website">
-<meta property="og:locale" content="pt_BR">
+<meta property="og:locale" content="${L.og}">
 <meta property="og:site_name" content="PokéAtlas">
 <meta property="og:image" content="${SITE}/arte/cartao-${edicao}.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-${existe ? `<meta property="og:url" content="${SITE}${caminho}">\n<link rel="canonical" href="${SITE}${caminho}">` : '<meta name="robots" content="noindex">'}
+${existe ? `<meta property="og:url" content="${SITE}${caminho}">\n<link rel="canonical" href="${SITE}${caminho}">` : '<meta name="robots" content="noindex">'}${versoes ? "\n" + Object.entries(versoes).map(([l, href]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${href}">`).join("\n") : ""}
 <script>${ANTES_DE_APARECER}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/arte/icone-180.png">
@@ -142,17 +149,17 @@ ${ed.fontes.map((f) => `<link rel="preload" href="/fontes/${f}.woff2" as="font" 
 <link rel="stylesheet" href="/${ed.estilo}.css">
 </head>
 <body class="edicao-${edicao} ${classe}">
-<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<a class="pular" href="#conteudo">${C.pular}</a>
 <header class="topo">
   <a class="marca" href="${ed.inicio}"${caminho === ed.inicio ? ' aria-current="page"' : ""}>PokéAtlas</a>
-  <div class="edicoes" role="group" aria-label="Edição do atlas">${seletor}</div>
-  <button type="button" class="topo-busca" data-busca-abrir aria-haspopup="dialog" aria-keyshortcuts="/ Control+K">Buscar</button>
-  <button type="button" class="topo-som" data-som data-ligado="false" aria-haspopup="dialog" aria-label="Som: desligado" title="Música e sons do atlas">${ICONE_DO_SOM}</button>
-  <button type="button" class="topo-menu" aria-expanded="false" aria-controls="menu">Menu</button>
-  <nav class="topo-nav" id="menu" aria-label="Seções">
-    <button type="button" class="topo-nav-busca" data-busca-abrir aria-haspopup="dialog">Buscar no atlas</button>
-    <button type="button" class="topo-nav-som" data-som data-ligado="false" aria-haspopup="dialog">Música e sons</button>
-    ${ed.nav.map(link).join("\n    ")}
+  <div class="edicoes" role="group" aria-label="${C.edicoes}">${seletor}</div>
+  ${lingua === "pt-BR" ? `<button type="button" class="topo-busca" data-busca-abrir aria-haspopup="dialog" aria-keyshortcuts="/ Control+K">${C.buscar}</button>` : ""}
+  <button type="button" class="topo-som" data-som data-ligado="false" aria-haspopup="dialog" aria-label="${C.som}" title="${C.somTitulo}">${ICONE_DO_SOM}</button>
+  <button type="button" class="topo-menu" aria-expanded="false" aria-controls="menu">${C.menu}</button>
+  <nav class="topo-nav" id="menu" aria-label="${C.secoes}">
+    ${lingua === "pt-BR" ? `<button type="button" class="topo-nav-busca" data-busca-abrir aria-haspopup="dialog">${C.buscarNoAtlas}</button>` : ""}
+    <button type="button" class="topo-nav-som" data-som data-ligado="false" aria-haspopup="dialog">${C.musicaESons}</button>
+    ${ed.nav.map(link).join("\n    ")}${outra ? `\n    <a class="topo-lingua" href="${outra[1]}" hreflang="${outra[0]}" lang="${outra[0]}">${NOMES[outra[0]]}</a>` : ""}
     <a class="botao botao-pequeno" href="${ed.acao.href}"${caminho === ed.acao.href ? ' aria-current="page"' : ""}>${ed.acao.texto}</a>
   </nav>
 </header>
@@ -165,8 +172,8 @@ ${corpo}
       <p class="marca">PokéAtlas</p>
       <p>${ed.lema}</p>
     </div>
-    <nav aria-label="Rodapé">
-      ${[ed.acao, ...ed.nav].map((n) => `<a href="${n.href.split("#")[0]}">${n.texto}</a>`).join("\n      ")}
+    <nav aria-label="${C.rodape}">
+      ${[ed.acao, ...ed.nav].map((n) => `<a href="${n.href.split("#")[0]}"${emPortugues(n.href)}>${n.texto}</a>`).join("\n      ")}${outra ? `\n      <a href="${outra[1]}" hreflang="${outra[0]}" lang="${outra[0]}">${NOMES[outra[0]]}</a>` : ""}
     </nav>
     <div class="rodape-avisos">
       ${ed.avisos.map((t) => `<p>${t}</p>`).join("\n      ")}
@@ -187,36 +194,40 @@ export const DEMO_COMPARAR = ["red-blue-yellow", "scarlet-violet"];
 /* Espécies do mosaico da página inicial, com o tamanho e a força do paralaxe de cada uma. */
 const FAVORITOS = [[6, 0.1], [448, 0.22], [25, 0.06], [94, 0.26], [143, 0.12], [700, 0.18], [248, 0.08], [133, 0.2], [384, 0.14]];
 
-function folhaRegiao(r) {
-  const jogos = ORDENADOS.filter((j) => j.regiao === r.id);
+function folhaRegiao(regiao, L) {
+  const r = L.regiao(regiao), T = L.inicio_, pt = L.codigo === "pt-BR" ? "" : ' hreflang="pt-BR"';
+  const jogos = ORDENADOS.filter((j) => j.regiao === r.id).map(L.jogo);
   return `<article class="folha${CARTAS[r.id].proporcao < 0.7 ? " folha-alta" : ""}">
   <div class="folha-texto-coluna">
     <header class="folha-topo">
-      <p class="folha-geracao">Geração ${ROMANOS[r.geracao]}</p>
-      <h3 class="folha-nome"><a href="/regioes/${r.id}/">${r.nome}</a></h3>
+      <p class="folha-geracao">${T.geracao} ${ROMANOS[r.geracao]}</p>
+      <h3 class="folha-nome"><a href="/regioes/${r.id}/"${pt}>${r.nome}</a></h3>
       <p class="folha-inspiracao">${esc(r.inspiracao)}</p>
     </header>
     <p class="folha-texto">${esc(r.texto)}</p>
-    <div class="folha-iniciais">${r.iniciais.map(prancha).join("")}</div>
+    <div class="folha-iniciais">${r.iniciais.map((id) => prancha(id, L)).join("")}</div>
     <ul class="folha-jogos">
-      ${jogos.map((j) => `<li><a href="/jogos/${j.slug}/">${hex(j)}<span><span class="hex-nome">${esc(j.curto)}</span><span class="hex-meta">${j.ano}</span></span></a></li>`).join("\n      ")}
+      ${jogos.map((j) => `<li><a href="/jogos/${j.slug}/"${pt}>${hex(j)}<span><span class="hex-nome">${esc(j.curto)}</span><span class="hex-meta">${j.ano}</span></span></a></li>`).join("\n      ")}
     </ul>
   </div>
-  ${caixaCarta(r.id, { ligacao: `/regioes/${r.id}/`, rotulo: `Abrir a carta de ${r.nome}` })}
+  ${caixaCarta(r.id, { ligacao: `/regioes/${r.id}/`, rotulo: T.abrirCarta(r.nome) })}
 </article>`;
 }
 
 /* Os nomes dos seis eixos em volta de um hexágono, cada um no seu vértice. */
-const eixosEmVolta = (raio = 50) => posicoesDosEixos(raio).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("");
+const eixosEmVolta = (L, raio = 50) => posicoesDosEixos(raio).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${L.eixo(e)}</span>`).join("");
 
-export function paginaInicio() {
-  const primeiro = porSlug[DESTAQUES_ABERTURA[0]];
-  const [da, db] = DEMO_COMPARAR.map((s) => porSlug[s]);
+export function paginaInicio(lingua = "pt-BR") {
+  const L = LINGUAS[lingua], T = L.inicio_, pt = lingua === "pt-BR" ? "" : ' hreflang="pt-BR"';
+  const jogoDe = (slug) => L.jogo(porSlug[slug]);
+  const primeiro = jogoDe(DESTAQUES_ABERTURA[0]);
+  const [da, db] = DEMO_COMPARAR.map(jogoDe);
+  const anos = ANO_ATUAL - ORDENADOS[0].ano, geracoes = Math.max(...REGIOES.map((r) => r.geracao));
   const pedidos = EIXOS.map((e) => {
-    const p = PEDIDOS[e.id], j = porSlug[p.eleito];
+    const p = L.pedido(PEDIDOS[e.id], e.id), j = jogoDe(p.eleito);
     return `<li data-eixo="${e.id}" data-eleito="${j.slug}">
         <p class="pico-frase">“${esc(p.frase)}”</p>
-        <p class="pico-resposta">O vértice mais distante em ${e.nome.toLowerCase()} é o de <a href="/jogos/${j.slug}/">${esc(j.curto)}</a>.</p>
+        <p class="pico-resposta">${T.picoResposta(L.eixo(e), `<a href="/jogos/${j.slug}/"${pt}>${esc(j.curto)}</a>`)}</p>
       </li>`;
   }).join("\n      ");
 
@@ -225,19 +236,19 @@ export function paginaInicio() {
   <div class="abertura-visor">
     <div class="hex-vivo abertura-hex">
       <canvas aria-hidden="true"></canvas>
-      ${eixosEmVolta(50)}
+      ${eixosEmVolta(L)}
     </div>
-    <p class="abertura-leitura" aria-hidden="true"><span data-leitura-numero>01</span><span>de ${String(DESTAQUES_ABERTURA.length).padStart(2, "0")}</span><span data-leitura-nota></span></p>
+    <p class="abertura-leitura" aria-hidden="true"><span data-leitura-numero>01</span><span>${T.de} ${String(DESTAQUES_ABERTURA.length).padStart(2, "0")}</span><span data-leitura-nota></span></p>
   </div>
   <div class="abertura-texto">
     <h1 class="marca-gigante" id="t-abertura">PokéAtlas</h1>
-    <p class="abertura-lema" data-entra="palavras" data-ritmo="1200">Todo jogo de Pokémon tem um perfil. Um deles é o seu.</p>
+    <p class="abertura-lema" data-entra="palavras" data-ritmo="1200">${T.lema}</p>
     <div class="abertura-legenda">
-      <p>Na tela agora, <a href="/jogos/${primeiro.slug}/" data-perfil-atual>${esc(primeiro.curto)}</a>.</p>
-      <p>Seis vértices, seis qualidades. Quanto mais longe do centro, mais alta a nota.</p>
+      <p>${T.naTela(`<a href="/jogos/${primeiro.slug}/"${pt} data-perfil-atual>${esc(primeiro.curto)}</a>`)}</p>
+      <p>${T.vertices}</p>
     </div>
-    <div class="abertura-teclas" role="group" aria-label="Pôr outro perfil na tela">
-      ${DESTAQUES_ABERTURA.map((slug, i) => `<button type="button" data-perfil="${slug}" aria-pressed="${i === 0}">${esc(porSlug[slug].curto)}</button>`).join("\n      ")}
+    <div class="abertura-teclas" role="group" aria-label="${T.teclas}">
+      ${DESTAQUES_ABERTURA.map((slug, i) => `<button type="button" data-perfil="${slug}" aria-pressed="${i === 0}">${esc(jogoDe(slug).curto)}</button>`).join("\n      ")}
     </div>
   </div>
 </section>
@@ -246,10 +257,10 @@ export function paginaInicio() {
   <div class="palco">
     <div class="trilho" data-trilho>
       <header class="folha-intro">
-        <h2 id="t-travessia">${maiuscula(extenso(REGIOES.length))} cartas, de Kanto a Paldea</h2>
-        <p class="prosa">Cada região tem a sua carta, três primeiros companheiros e os jogos que se passam nela. Toque numa carta para abri-la com os nomes e as rotas.</p>
+        <h2 id="t-travessia">${T.cartas(maiuscula(L.extenso(REGIOES.length)))}</h2>
+        <p class="prosa">${T.cartasTexto}</p>
       </header>
-      ${REGIOES.map(folhaRegiao).join("\n      ")}
+      ${REGIOES.map((r) => folhaRegiao(r, L)).join("\n      ")}
     </div>
   </div>
 </section>
@@ -257,20 +268,17 @@ export function paginaInicio() {
 <section class="tempo" ${DIA} aria-labelledby="t-tempo">
   <div class="tempo-grade">
     <div class="tempo-texto">
-      <h2 id="t-tempo">${maiuscula(extenso(ANO_ATUAL - ORDENADOS[0].ano))} anos de estrada</h2>
-      <p class="prosa">De um cartucho cinza de 1996 a mundos abertos para quatro pessoas. Cada ponto da régua é um jogo deste atlas, e nenhum se joga do mesmo jeito.</p>
-      <a class="botao botao-contorno" href="/linha-do-tempo/">Ver a linha do tempo</a>
+      <h2 id="t-tempo">${T.anos(maiuscula(L.extenso(anos)))}</h2>
+      <p class="prosa">${T.anosTexto}</p>
+      <a class="botao botao-contorno" href="/linha-do-tempo/"${pt}>${T.verLinha}</a>
     </div>
     <dl class="numeros">
-      <div><dd data-entra="contar" data-ate="${ANO_ATUAL - ORDENADOS[0].ano}">${ANO_ATUAL - ORDENADOS[0].ano}</dd><dt>anos desde Red e Green</dt></div>
-      <div><dd data-entra="contar" data-ate="${Math.max(...REGIOES.map((r) => r.geracao))}">${Math.max(...REGIOES.map((r) => r.geracao))}</dd><dt>gerações lançadas</dt></div>
-      <div><dd data-entra="contar" data-ate="${REGIOES.length}">${REGIOES.length}</dd><dt>regiões mapeadas</dt></div>
-      <div><dd data-entra="contar" data-ate="${JOGOS.length}">${JOGOS.length}</dd><dt>jogos neste atlas</dt></div>
+      ${[anos, geracoes, REGIOES.length, JOGOS.length].map((n, i) => `<div><dd data-entra="contar" data-ate="${n}">${n}</dd><dt>${T.contas[i]}</dt></div>`).join("\n      ")}
     </dl>
   </div>
   <div class="tempo-regua" data-entra="surgir">
     ${reguaDeAnos(ORDENADOS, HORIZONTE.ano)}
-    <p class="regua-chave"><span class="chave chave-cheia"></span>Série principal, remakes e Legends <span class="chave chave-vazada"></span>Derivados</p>
+    <p class="regua-chave"><span class="chave chave-cheia"></span>${T.chaveCheia} <span class="chave chave-vazada"></span>${T.chaveVazada}</p>
   </div>
 </section>
 
@@ -279,7 +287,7 @@ export function paginaInicio() {
     <div class="pico-visor" aria-hidden="true">
       <div class="hex-vivo pico-hex">
         <canvas></canvas>
-        ${eixosEmVolta(50)}
+        ${eixosEmVolta(L)}
       </div>
       <ul class="pico-jogos">
         ${ORDENADOS.map((j, i) => {
@@ -287,20 +295,20 @@ export function paginaInicio() {
           // o nome de cada um abre para dentro do anel
           const a = (i / ORDENADOS.length) * Math.PI * 2 - Math.PI / 2, x = Math.cos(a), y = Math.sin(a);
           const lado = [x < -0.4 ? "nome-esquerda" : x > 0.4 ? "nome-direita" : "", y > 0.3 ? "nome-acima" : ""].filter(Boolean).join(" ");
-          return `<li data-slug="${j.slug}"${lado ? ` class="${lado}"` : ""} style="left:${(50 + x * 45.5).toFixed(2)}%;top:${(50 + y * 45.5).toFixed(2)}%"><img src="/hex/${j.slug}-noite.svg" alt="" width="96" height="96" loading="lazy" decoding="async"><span>${esc(j.curto)}</span></li>`;
+          return `<li data-slug="${j.slug}"${lado ? ` class="${lado}"` : ""} style="left:${(50 + x * 45.5).toFixed(2)}%;top:${(50 + y * 45.5).toFixed(2)}%"><img src="/hex/${j.slug}-noite.svg" alt="" width="96" height="96" loading="lazy" decoding="async"><span>${esc(L.jogo(j).curto)}</span></li>`;
         }).join("")}
       </ul>
     </div>
     <div class="pico-texto">
-      <h2 id="t-pico">${maiuscula(extenso(JOGOS.length))} jogos, um hexágono</h2>
+      <h2 id="t-pico">${T.pico(maiuscula(L.extenso(JOGOS.length)))}</h2>
       <div class="pico-roteiro">
-        <p class="pico-abre">Cada pedido puxa um vértice. Acendem os jogos que vão longe naquela direção, e o hexágono mostra o que o atlas escolheria.</p>
+        <p class="pico-abre">${T.picoAbre}</p>
         <ol class="pico-pedidos">
       ${pedidos}
         </ol>
         <div class="pico-final">
-          <p>E você, o que procura?</p>
-          <a class="botao" href="/bussola/">Abrir a bússola</a>
+          <p>${T.picoFinal}</p>
+          <a class="botao" href="${L.bussola}">${T.abrirBussola}</a>
         </div>
       </div>
     </div>
@@ -309,26 +317,26 @@ export function paginaInicio() {
 
 <section class="ferramentas" ${DIA}>
   <div class="ferramenta ferramenta-pokedex">
-    <ul class="mosaico mosaico-especies" aria-label="Algumas espécies da Pokédex">
-      ${FAVORITOS.map(([e, forca]) => `<li class="mosaico-item" data-deriva="${forca}"><a href="${enderecoEspecie(e)}" aria-label="${esc(FICHAS[e].nome)}"><img src="/arte/mini/${e}.webp" alt="" width="184" height="184" loading="lazy" decoding="async"></a></li>`).join("\n      ")}
+    <ul class="mosaico mosaico-especies" aria-label="${T.mosaico}">
+      ${FAVORITOS.map(([e, forca]) => `<li class="mosaico-item" data-deriva="${forca}"><a href="${enderecoEspecie(e)}"${pt} aria-label="${esc(FICHAS[e].nome)}"><img src="/arte/mini/${e}.webp" alt="" width="184" height="184" loading="lazy" decoding="async"></a></li>`).join("\n      ")}
     </ul>
     <div class="ferramenta-texto">
-      <h2>A Pokédex inteira, em gravura</h2>
-      <p class="prosa">São ${numero(Object.keys(FICHAS).length)} espécies. Cada uma tem a sua página, com atributos, linha evolutiva, curiosidades e os jogos em que aparece.</p>
+      <h2>${T.pokedex}</h2>
+      <p class="prosa">${T.pokedexTexto(L.numero(Object.keys(FICHAS).length))}</p>
       <form class="busca-inicio" action="/pokedex/" method="get" role="search">
-        <label for="pokemon-inicio">Procurar um Pokémon</label>
+        <label for="pokemon-inicio">${T.procurar}</label>
         <div class="busca-inicio-linha">
           <input id="pokemon-inicio" name="q" type="search" placeholder="Lucario" autocomplete="off" spellcheck="false">
-          <button class="botao" type="submit">Abrir a Pokédex</button>
+          <button class="botao" type="submit">${T.abrirPokedex}</button>
         </div>
       </form>
     </div>
   </div>
   <div class="ferramenta ferramenta-comparar">
     <div class="ferramenta-texto">
-      <h2>Na dúvida entre dois, sobreponha</h2>
-      <p class="prosa">Dois perfis, duas cores. Onde os contornos coincidem, os jogos se parecem. Onde um avança sozinho, está a diferença.</p>
-      <a class="botao botao-contorno" href="/comparar/?a=${da.slug}&amp;b=${db.slug}">Comparar dois jogos</a>
+      <h2>${T.sobrepor}</h2>
+      <p class="prosa">${T.sobreporTexto}</p>
+      <a class="botao botao-contorno" href="/comparar/?a=${da.slug}&amp;b=${db.slug}"${pt}>${T.comparar}</a>
     </div>
     <figure class="sobreposicao">
       <div class="sobreposicao-hex" aria-hidden="true">
@@ -342,15 +350,14 @@ export function paginaInicio() {
 </section>
 
 <section class="fechamento" data-fundo="${AMARELO}" data-tinta="${TINTA}" aria-labelledby="t-fechamento">
-  <h2 id="t-fechamento" data-entra="palavras" data-ritmo="1400">Um destes ${extenso(JOGOS.length)} jogos tem o seu perfil.</h2>
-  <p class="prosa">${maiuscula(extenso(PERGUNTAS.length))} perguntas. O hexágono se desenha enquanto você responde.</p>
-  <a class="botao botao-grande" href="/bussola/">Abrir a bússola</a>
+  <h2 id="t-fechamento" data-entra="palavras" data-ritmo="1400">${T.fecho(L.extenso(JOGOS.length))}</h2>
+  <p class="prosa">${T.fechoTexto(maiuscula(L.extenso(PERGUNTAS.length)))}</p>
+  <a class="botao botao-grande" href="${L.bussola}">${T.abrirBussola}</a>
 </section>`;
 
   return moldura({
-    titulo: "PokéAtlas — descubra qual jogo de Pokémon combina com você",
-    descricao: "Um atlas visual dos jogos de Pokémon. Explore as regiões e a Pokédex, compare títulos e use a bússola para encontrar o jogo que tem o seu perfil.",
-    caminho: "/", classe: "pagina-inicio", corpo, modulo: "inicio", rolagem: true
+    titulo: T.titulo, descricao: T.descricao, lingua, versoes: { "pt-BR": "/", en: "/en/" },
+    caminho: L.inicio, classe: "pagina-inicio", corpo, modulo: "inicio", rolagem: true
   });
 }
 
@@ -437,7 +444,7 @@ export function paginaJogo(j) {
 
   <section class="jogo-especimes" aria-labelledby="t-especimes">
     <h2 id="t-especimes">Espécimes deste jogo</h2>
-    <div class="pranchas">${j.mascotes.map(prancha).join("")}</div>
+    <div class="pranchas">${j.mascotes.map((id) => prancha(id)).join("")}</div>
   </section>
 
   ${secaoPokedex(j)}
@@ -564,43 +571,44 @@ export function paginaComparar() {
 
 /* ---------- bússola ---------- */
 
-export function paginaBussola() {
+export function paginaBussola(lingua = "pt-BR") {
+  const L = LINGUAS[lingua], T = L.bussola_;
   const corpo = `
 <section class="bussola" data-estado="perguntas">
   <div class="bussola-coluna">
     <header class="bussola-topo">
-      <h1>Bússola</h1>
-      <p class="bussola-passo" data-passo aria-live="polite">Pergunta 1 de ${PERGUNTAS.length}</p>
+      <h1>${T.h1}</h1>
+      <p class="bussola-passo" data-passo aria-live="polite">${T.passo(PERGUNTAS.length)}</p>
     </header>
     <div class="bussola-pergunta" data-pergunta>
-      <noscript><p class="prosa">A bússola precisa de JavaScript para desenhar o seu perfil. Enquanto isso, a <a href="/linha-do-tempo/">linha do tempo</a> mostra todos os jogos.</p></noscript>
+      <noscript><p class="prosa">${T.semJs}</p></noscript>
     </div>
     <div class="bussola-acoes">
-      <button type="button" class="ligacao" data-voltar hidden>Voltar uma pergunta</button>
+      <button type="button" class="ligacao" data-voltar hidden>${T.voltar}</button>
     </div>
   </div>
   <figure class="bussola-hex">
     <div class="hex-vivo">
-      <canvas role="img" aria-label="O seu perfil, que cresce a cada resposta"></canvas>
-      ${posicoesDosEixos(50).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
+      <canvas role="img" aria-label="${T.perfil}"></canvas>
+      ${eixosEmVolta(L)}
     </div>
-    <figcaption data-legenda>O seu perfil ainda está em branco. Cada resposta puxa um vértice.</figcaption>
+    <figcaption data-legenda>${T.legenda}</figcaption>
   </figure>
 </section>
 <section class="resultado" data-resultado hidden aria-labelledby="t-resultado">
-  <h2 id="t-resultado" tabindex="-1">Os jogos com o seu perfil</h2>
+  <h2 id="t-resultado" tabindex="-1">${T.resultado}</h2>
   <p class="prosa" data-resumo></p>
   <ol class="resultado-lista" data-lista></ol>
   <div class="resultado-acoes">
-    <button type="button" class="botao botao-contorno" data-refazer>Refazer a bússola</button>
-    <button type="button" class="ligacao" data-copiar>Copiar o link deste resultado</button>
+    <button type="button" class="botao botao-contorno" data-refazer>${T.refazer}</button>
+    <button type="button" class="ligacao" data-copiar>${T.copiar}</button>
     <span class="so-leitor" aria-live="polite" data-copiado></span>
   </div>
 </section>`;
 
   return moldura({
-    titulo: "Bússola", caminho: "/bussola/", classe: "pagina-bussola", corpo, modulo: "bussola",
-    descricao: `${maiuscula(extenso(PERGUNTAS.length))} perguntas para descobrir qual jogo de Pokémon combina com você, com a explicação de cada recomendação.`
+    titulo: T.titulo, caminho: L.bussola, classe: "pagina-bussola", corpo, modulo: "bussola", lingua, versoes: { "pt-BR": "/bussola/", en: "/en/compass/" },
+    descricao: T.descricao(maiuscula(L.extenso(PERGUNTAS.length)))
   });
 }
 
@@ -716,7 +724,7 @@ export function paginaRegiao(r) {
 
   <section class="regiao-iniciais" aria-labelledby="t-iniciais">
     <h2 id="t-iniciais">Primeiros companheiros</h2>
-    <div class="pranchas">${r.iniciais.map(prancha).join("")}</div>
+    <div class="pranchas">${r.iniciais.map((id) => prancha(id)).join("")}</div>
   </section>
 
   <section class="regiao-jogos" aria-labelledby="t-jogos">
@@ -779,18 +787,22 @@ export function paginaRegioes() {
 
 /* ---------- dados enviados ao navegador ---------- */
 
-export function dadosDoNavegador() {
-  const jogos = ORDENADOS.map((j) => ({
+export function dadosDoNavegador(lingua = "pt-BR") {
+  const L = LINGUAS[lingua], ingles = lingua === "en";
+  const jogos = ORDENADOS.map(L.jogo).map((j) => ({
     slug: j.slug, titulo: j.titulo, curto: j.curto, ano: j.ano, tipo: j.tipo,
-    plataformas: j.plataformas, consoles: consolesDe(j), estilo: nome(ESTILOS, j.estilo),
-    categoria: nome(TIPOS, j.tipo), lugar: lugarDe(j), geracao: j.geracao ? ROMANOS[j.geracao] : null,
-    valores: valoresDe(j.atributos), chamada: j.chamada, notas: j.notas,
-    paraQuem: j.paraQuem[0]
+    plataformas: j.plataformas, consoles: j.plataformas.map((p) => L.console(CONSOLES.find((c) => c.id === p))).join(` ${L.e} `),
+    // estilo, categoria e lugar só aparecem nas páginas em português (comparar e ficha do jogo)
+    ...(ingles ? {} : { estilo: nome(ESTILOS, j.estilo), categoria: nome(TIPOS, j.tipo), lugar: lugarDe(j), geracao: j.geracao ? ROMANOS[j.geracao] : null, paraQuem: j.paraQuem[0] }),
+    valores: valoresDe(j.atributos), chamada: j.chamada, notas: j.notas
   }));
+  const pedidos = Object.fromEntries(Object.entries(PEDIDOS).map(([id, p]) => [id, L.pedido(p, id)]));
+  const perguntas = ingles ? PERGUNTAS.map((p, q) => ({ ...p, pergunta: PERGUNTAS_EN[q].pergunta, opcoes: p.opcoes.map((o, i) => ({ ...o, texto: PERGUNTAS_EN[q].opcoes[i] })) })) : PERGUNTAS;
   return `/* Gerado por scripts/build.mjs a partir de dados/. Não edite à mão. */
 export const JOGOS = ${JSON.stringify(jogos)};
-export const PEDIDOS = ${JSON.stringify(PEDIDOS)};
-export const PERGUNTAS = ${JSON.stringify(PERGUNTAS)};
+export const PEDIDOS = ${JSON.stringify(pedidos)};
+export const PERGUNTAS = ${JSON.stringify(perguntas)};
 export const DESTAQUES = ${JSON.stringify(DESTAQUES_ABERTURA)};
+export const NOMES_DOS_EIXOS = ${JSON.stringify(Object.fromEntries(EIXOS.map((e) => [e.id, L.eixo(e)])))};
 `;
 }
