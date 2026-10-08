@@ -595,6 +595,19 @@ for (const lista of Object.values(outras)) for (const e of lista) { e.estacao = 
 
 if (etiquetasSemItem.size) console.warn(`Etiquetas de receita sem item conhecido (a casa ficou vazia): ${[...etiquetasSemItem].join(", ")}`);
 
+/* Bagas: quais dão em pés que o mundo gera e quais nascem da mutação entre duas outras. No arquivo de cada
+ * baga, "mutations" diz o parceiro e o fruto; o par vale nos dois sentidos, então é guardado uma vez só. */
+const cruzas = {}, silvestres = new Set();
+for (const caminho of await arquivos(join(DADOS, "berries"))) {
+  const b = await json(caminho), id = basename(caminho, ".json");
+  if ((b.spawnConditions || []).length) silvestres.add(id);
+  for (const [parceiro, fruto] of Object.entries(b.mutations || {})) {
+    const par = [id, parceiro.split(":").pop()].sort(), lista = (cruzas[fruto.split(":").pop()] ??= []);
+    if (!lista.some((p) => p[0] === par[0] && p[1] === par[1])) lista.push(par);
+  }
+}
+for (const lista of Object.values(cruzas)) lista.sort((a, b) => a.join().localeCompare(b.join()));
+
 const itens = [];
 const idsDeItem = new Set([...Object.keys(EN).filter((k) => /^item\.cobblemon\.[a-z0-9_]+$/.test(k)).map((k) => `cobblemon:${k.split(".")[2]}`),
   ...Object.keys(grupoDe).filter((id) => id.startsWith("cobblemon:") && grupoDe[id] === "maquinas")]);
@@ -603,7 +616,8 @@ for (const id of idsDeItem) {
   const nome = texto(`item.cobblemon.${curto}`) ?? texto(`block.cobblemon.${curto}`);
   if (!nome || nome.includes("%")) continue;      // nomes com lacuna são montados pelo jogo na hora
   const dica = ["tooltip", "tooltip_1", "tooltip1"].map((t) => texto(`item.cobblemon.${curto}.${t}`) ?? texto(`block.cobblemon.${curto}.${t}`)).find(Boolean) ?? null;
-  itens.push({ id: curto, nome, dica, grupo: grupoDe[id] ?? "outros", receita: receitas[id] ?? null, ...(outras[id]?.length ? { outras: outras[id] } : {}) });
+  itens.push({ id: curto, nome, dica, grupo: grupoDe[id] ?? "outros", receita: receitas[id] ?? null, ...(outras[id]?.length ? { outras: outras[id] } : {}),
+    ...(cruzas[curto] ? { cruzas: cruzas[curto] } : {}), ...(silvestres.has(curto) ? { silvestre: true } : {}) });
 }
 itens.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 // o mesmo nome no mesmo grupo (as seis cores de Pokédex, por exemplo) aparece uma vez só

@@ -28,6 +28,8 @@ Executado em 08/10/2026: as doze tarefas (0 a 11) estão concluídas e commitada
 - **Tarefa 9:** foi feita junto com a 8: a textura shiny sai na mesma exportação.
 - **Tarefa 10:** o cabeçalho precisou de novo ponto de quebra (1200px) e, em telas médias, perdeu a chamada principal, que continua no rodapé.
 
+Depois do plano, três acréscimos aceitos pelo dono do projeto: encontros por rota no diário (`scripts/encontros.mjs`), receitas das outras estações e mutações de bagas (as duas em `scripts/cobblemon.mjs`). Cada um tem teste de unidade e conferência nos roteiros de navegador.
+
 ## Restrições que valem para todas as tarefas
 
 - O build do Vercel roda sem instalar dependências: `scripts/build.mjs` e o que ele importa não podem usar `sharp` nem `playwright-core`.

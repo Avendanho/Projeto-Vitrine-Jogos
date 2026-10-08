@@ -22,6 +22,12 @@ conferir("nenhuma casa preenchida ficou sem figura", figuras === 0, String(figur
 conferir("o texto da receita continua para leitor de tela e busca", (await pagina.locator(`.cb-itens-lista li:has(strong:text-is("${nomeDe("pc")}")) .cb-receita`).first().textContent()).includes("Lingote de Ferro"), nomeDe("pc"));
 if (fotos) { await bola.scrollIntoViewIfNeeded(); await pagina.screenshot({ path: `${fotos}/t7.png` }); }
 if (fotos) { await maxPP.scrollIntoViewIfNeeded(); await pagina.screenshot({ path: `${fotos}/t7-estacoes.png` }); }
+// bagas: de onde vem cada uma
+const lum = pagina.locator("#item-lum_berry");
+conferir("a Baga Lum mostra os pares de bagas que a geram", await lum.locator(".cb-par").count() === COBBLEMON.itens.find((i) => i.id === "lum_berry").cruzas.length && (await lum.locator(".cb-par").first().getAttribute("title")).includes(" com "));
+await pagina.fill("#item-procurar", "silvestre");
+conferir("buscar \"silvestre\" acha as bagas que o mundo gera", await pagina.locator("#g-bagas li:not([hidden])").count() === COBBLEMON.itens.filter((i) => i.silvestre).length);
+await pagina.fill("#item-procurar", "");
 const cel = await abrir({ celular: true });
 await cel.pagina.goto(`${BASE}/cobblemon/itens/`, { waitUntil: "networkidle" });
 conferir("no celular a página não estoura para os lados", await cel.pagina.evaluate(() => document.documentElement.scrollWidth) === 390);

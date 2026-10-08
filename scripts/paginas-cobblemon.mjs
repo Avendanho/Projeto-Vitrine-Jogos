@@ -67,6 +67,18 @@ function estacoes(item) {
     </span>`;
   }).join("");
 }
+/* De onde vem uma baga: de pés que o mundo gera, da mutação entre duas outras, ou das duas coisas. */
+const itemPorId = Object.fromEntries(C.itens.map((i) => [i.id, i]));
+function origemDaBaga(item) {
+  if (!item.cruzas && !item.silvestre) return "";
+  const pares = item.cruzas ?? [], MOSTRA = 6, nome = (id) => itemPorId[id]?.nome ?? id;
+  const par = ([a, b]) => `<span class="cb-par" title="${esc(nome(a))} com ${esc(nome(b))}">${casaDaBancada([`cobblemon:${a}`, nome(a)])}<span aria-hidden="true">+</span>${casaDaBancada([`cobblemon:${b}`, nome(b)])}</span>`;
+  return `${item.silvestre ? '<span class="cb-receita">Dá em pés silvestres, que o mundo gera.</span>' : ""}${pares.length ? `<span class="cb-cruza">
+      <span class="cb-deixado-rotulo">Nasce da mutação entre ${pares.length === 1 ? "um par" : `${pares.length} pares`} de bagas</span>
+      <span class="cb-pares">${pares.slice(0, MOSTRA).map(par).join("")}${pares.length > MOSTRA ? `<span class="fileira-resto">e mais ${pares.length - MOSTRA}</span>` : ""}</span>
+      <span class="so-leitor">${esc(pares.map(([a, b]) => `${nome(a)} com ${nome(b)}`).join("; "))}</span>
+    </span>` : ""}`;
+}
 /* Uma maquete de blocos: a imagem parada e o botão que a troca pelo modelo que gira (src/js/maquete.js). */
 function maquete(info, legenda, { auto = false, preguica = true } = {}) {
   return `<figure class="maquete"${auto ? " data-maquete-auto" : ""} data-maquete="/maquetes/${info.nome}.json">
@@ -346,7 +358,7 @@ export function paginaCobblemonItens() {
   const NOTAS = {
     bolas: "A dica de cada bola é a do próprio jogo: o multiplicador de captura e quando ele vale. As receitas são as de bancada.",
     varas: `O mod tem ${C.contagens.varas} Pokévaras, uma para cada tipo de Poké Bola; a tradução só dá nome próprio à primeira.`,
-    bagas: `São ${C.contagens.bagas} bagas, cada uma com o seu tempo de crescimento.`
+    bagas: `São ${C.contagens.bagas} bagas. ${C.itens.filter((i) => i.silvestre).length} dão em pés silvestres e ${C.itens.filter((i) => i.cruzas).length} nascem de mutação. A conquista do próprio mod explica como: "Plante diferentes Árvores de Bagas próximas umas das outras e observe a Mutação em ação". Cada baga mostra os pares que a geram.`
   };
   const grupos = C.grupos.map((g) => ({ ...g, itens: C.itens.filter((i) => i.grupo === g.id) })).filter((g) => g.itens.length);
   const deixam = quemDeixa(), doMod = new Set(C.itens.map((i) => i.nome));
@@ -371,7 +383,7 @@ export function paginaCobblemonItens() {
     <h2 id="t-${g.id}">${esc(g.nome)}</h2>
     ${NOTAS[g.id] ? `<p class="nota-editorial">${NOTAS[g.id]}</p>` : ""}
     <ul class="cb-itens-lista">
-      ${g.itens.map((i) => `<li id="item-${i.id}" data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""} ${(i.outras ?? []).map((o) => o.estacao).join(" ")}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>${bancada(i)}` : ""}${estacoes(i)}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
+      ${g.itens.map((i) => `<li id="item-${i.id}" data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""} ${(i.outras ?? []).map((o) => o.estacao).join(" ")} ${i.cruzas ? `mutacao ${[...new Set(i.cruzas.flat())].map((id) => itemPorId[id]?.nome ?? "").join(" ")}` : ""}${i.silvestre ? " silvestre" : ""}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>${bancada(i)}` : ""}${estacoes(i)}${origemDaBaga(i)}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
     </ul>
   </section>`).join("\n  ")}
   <section class="cb-grupo cb-grupo-jogo" id="g-minecraft" aria-labelledby="t-minecraft">

@@ -98,13 +98,13 @@ Uma régua cronológica abrangendo de **1996 a 2027**, separada por plataformas/
 
 ### 6. 🎲 Desafios (`/desafios/` e `/desafios/<desafio>/`)
 - **Dez maneiras alternativas de jogar**, uma para cada região, cada uma com sinopse, regras, condição de vitória e de derrota (a primeira é "Os Super Woopers").
-- **Diário de desafio** (`/diario/`): acompanha uma campanha (Nuzlocke, um desafio do atlas ou regras suas), com capturas por rota, time, caixa, quem caiu e insígnias. Fica guardado no navegador e exporta para arquivo. Cada desafio e a roleta abrem o diário já com as regras anotadas.
+- **Diário de desafio** (`/diario/`): acompanha uma campanha (Nuzlocke, um desafio do atlas ou regras suas), com capturas por rota, time, caixa, quem caiu e insígnias. Em 12 jogos mostra o que aparece em cada rota, com a tabela de encontros da PokéAPI. Fica guardado no navegador e exporta para arquivo. Cada desafio e a roleta abrem o diário já com as regras anotadas.
 - **Roleta de desafios:** sorteia um jogo, uma regra para o time, complicações e uma condição de vitória. As espécies e os tipos sorteados existem na Pokédex do jogo sorteado, e cada sorteio tem link próprio (`?roleta=...`), que reproduz o mesmo desafio.
 
 ### 7. ⛏️ Edição Cobblemon (`/cobblemon/`)
 Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) para Minecraft, escolhida no seletor do topo. Tem tema próprio (pergaminho de mapa, painéis de inventário, letra de pixel) e os Pokémon desenhados a partir dos modelos do próprio mod: nas listas eles ficam em tinta de mapa e ganham a cor do jogo quando você aponta; os que você abre ficam revelados de vez. Os itens têm o ícone do mod e giram ao apontar; as estruturas e os biomas aparecem em maquetes de blocos que giram em 3D (WebGL, sem biblioteca).
 - **Pokémon** (`/cobblemon/pokemon/`): as 888 espécies já implementadas, com os biomas em que nascem, raridade, condições, o que deixam cair, montaria e como evoluem dentro do mod. Na página de cada uma, **Girar em 3D** troca o retrato pelo modelo do mod (com zoom e tela cheia) e **Shiny** troca a textura.
-- **Itens** (`/cobblemon/itens/`): 490 itens e blocos em português, com ícone, a receita desenhada como na bancada do jogo e os Pokémon que deixam cair cada um.
+- **Itens** (`/cobblemon/itens/`): 490 itens e blocos em português, com ícone, as receitas desenhadas como no jogo (bancada, panela de fogueira, suporte de poções, fornalha, ferraria), os Pokémon que deixam cair cada um e, nas bagas, os pares que geram cada uma por mutação.
 - **Estruturas** (`/cobblemon/estruturas/`): as 65 estruturas que o mod gera, em maquetes 3D com zoom, com o bioma de cada uma e os Pokémon que nascem ali.
 - **Biomas** (`/cobblemon/biomas/`): os 11 ambientes em maquetes 3D que giram, com as espécies e as estruturas de cada um, e as informações gerais do mod (como ele decide o que nasce, fósseis, versões e curiosidades calculadas dos dados).
 - **Caçada** (`/cobblemon/cacada/`): você marca os Pokémon que quer e o atlas diz em que bioma dá para achar mais deles de uma vez, com raridade e condições.
@@ -159,7 +159,7 @@ Projeto-Vitrine-Jogos/
 │   ├── atlas.mjs                # Regiões, cidades, rotas e consoles
 │   ├── jogos.mjs                # Títulos, atributos (1 a 5), mascotes e plataformas
 │   ├── desafios.mjs             # Desafios escritos e peças da roleta
-│   ├── pokedex.json, fichas.json, tipos.json   # Espécies, fichas e tabela de tipos (PokéAPI)
+│   ├── pokedex.json, fichas.json, tipos.json, encontros.json   # Espécies, fichas, tipos e encontros por rota (PokéAPI)
 │   ├── cartas.json              # Coordenadas vetoriais das cartas das regiões
 │   ├── cobblemon.json           # Espécies, spawns, itens, receitas e estruturas (extraído do mod)
 │   └── modelos*.json, maquetes.json, itens-arte.json   # Índices da arte gerada
@@ -172,7 +172,7 @@ Projeto-Vitrine-Jogos/
 │   ├── cobblemon.mjs            # Extrator dos dados do mod
 │   ├── modelos.mjs              # Desenha os Pokémon do mod e exporta os modelos 3D
 │   ├── maquetes.mjs, itens-arte.mjs   # Maquetes das estruturas e ícones dos itens
-│   ├── pokedex.mjs, fichas.mjs, tipos.mjs, arte.mjs, cartas.mjs   # Dados e arte da edição Pokémon
+│   ├── pokedex.mjs, fichas.mjs, tipos.mjs, encontros.mjs, arte.mjs, cartas.mjs   # Dados e arte da edição Pokémon
 │   ├── servir.mjs               # Servidor HTTP local para desenvolvimento
 │   └── verificar-paginas.mjs    # Auditoria visual: rola cada página e tira fotos
 │
@@ -245,6 +245,7 @@ Projeto-Vitrine-Jogos/
 | `npm run verificar` | Auditoria visual: rola cada página em desktop, celular e movimento reduzido e tira fotos. |
 | `npm run pokedex` | *(Dados)* Reconstrói `pokedex.json` e `fichas.json` a partir da PokéAPI. |
 | `npm run tipos` | *(Dados)* Baixa a tabela de efetividade dos 18 tipos. |
+| `npm run encontros` | *(Dados)* Baixa a tabela de encontros por rota de cada jogo. |
 | `npm run arte`, `arte:mini`, `arte:formas` | *(Arte)* Pranchas dos mascotes, gravuras de todas as espécies e arte das formas especiais. |
 | `npm run cartas` | *(Arte)* Recalcula os traçados das cartas das regiões. |
 | `npm run mod -- --minecraft` | *(Cobblemon)* Baixa o mod 1.8.1 e os arquivos do Minecraft para `.mod/`, que fica fora do Git. É o primeiro passo para os quatro comandos abaixo. |

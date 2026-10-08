@@ -324,3 +324,16 @@ Decisões tomadas no caminho:
 - Arrumação: saíram os sprites em pixel, que nenhuma página usava mais; entraram
   testes de unidade e roteiros de navegador para cada ferramenta.
 
+Três acréscimos que surgiram durante a rodada e foram aceitos depois:
+
+- **Encontros por rota no diário.** Para os 12 jogos em que a PokéAPI tem a
+  tabela, a rota escolhida lista o que aparece nela (andando, na água,
+  pescando, de outros jeitos). Os outros jogos continuam como antes, e a página
+  diz quais são.
+- **Receitas das outras estações.** Panela de fogueira, suporte de poções,
+  fornalha e parentes, ferraria e cortador: 108 itens ganharam receita, e os
+  que seguem sem nenhuma são os que só se acham.
+- **Mutações de bagas.** Cada baga diz se dá em pé silvestre ou de que pares
+  nasce (77 pares). A explicação de como a mutação acontece é a frase da
+  conquista do próprio mod, citada entre aspas.
+

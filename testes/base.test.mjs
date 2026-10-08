@@ -62,3 +62,19 @@ test("as receitas das outras estações também têm nome e figura em toda casa"
   const semNada = COBBLEMON.itens.filter((i) => !i.receita && !i.outras).length;
   assert.ok(semNada < 200, `${semNada} itens continuam sem receita: são os que só se acham, não se fabricam`);
 });
+
+test("toda baga vem de pé silvestre ou de mutação, e os pares citam bagas que existem", () => {
+  const bagas = COBBLEMON.itens.filter((i) => i.grupo === "bagas"), ids = new Set(bagas.map((b) => b.id));
+  assert.equal(bagas.length, 70);
+  for (const b of bagas) {
+    assert.ok(b.silvestre || b.cruzas?.length, `${b.id} sem origem`);
+    for (const par of b.cruzas ?? []) {
+      assert.equal(par.length, 2);
+      assert.ok(ids.has(par[0]) && ids.has(par[1]) && par[0] !== par[1] && !par.includes(b.id), `${b.id}: par ${par}`);
+    }
+    assert.equal(new Set((b.cruzas ?? []).map((p) => p.join("+"))).size, (b.cruzas ?? []).length, `${b.id}: par repetido`);
+  }
+  const lum = bagas.find((b) => b.id === "lum_berry");
+  assert.ok(lum.cruzas.some((p) => p.join("+") === "cheri_berry+oran_berry"), "Cheri com Oran dá Lum");
+  assert.equal(bagas.reduce((n, b) => n + (b.cruzas?.length ?? 0), 0), 77);
+});
