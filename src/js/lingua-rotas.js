@@ -12,7 +12,9 @@ export const ROTAS = [
   ["/bussola/", "/en/compass/"],
   ["/time/", "/en/team/"],
   ["/tipos/", "/en/types/"],
-  ["/desenhar/", "/en/draw/"]
+  ["/desenhar/", "/en/draw/"],
+  ["/desafios/", "/en/challenges/"],
+  ["/diario/", "/en/journal/"]
 ];
 
 /* O endereço em inglês de uma página (ou o mesmo endereço, se a página só existe em português ou é um arquivo). */

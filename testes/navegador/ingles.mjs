@@ -32,7 +32,7 @@ conferir("o texto do início está em inglês", inicio.includes("Every Pokémon 
 conferir("os nomes dos eixos, os jogos e a leitura da tela também", (await pagina.textContent('.abertura-hex [data-eixo="exploracao"]')) === "Exploration" && (await pagina.textContent(".abertura-teclas button")) === "HeartGold and SoulSilver" && (await pagina.textContent("[data-leitura-nota]")) === "2009, Nintendo DS");
 await pagina.click(".abertura-teclas button:nth-child(6)");
 conferir("as teclas trocam o perfil, com o nome em inglês", (await pagina.textContent("[data-perfil-atual]")) === "Red, Blue and Yellow");
-conferir("as abas e os links do início em inglês ficam no inglês", (await pagina.$$eval(".topo-nav a:not(.topo-lingua)", (as) => as.every((a) => a.getAttribute("href").startsWith("/en/") || a.getAttribute("href").startsWith("/desafios/")))) && (await pagina.getAttribute(".pico-final a", "href")) === "/en/compass/" && (await pagina.getAttribute(".topo-lingua", "href")) === "/");
+conferir("as abas e os links do início em inglês ficam no inglês", (await pagina.$$eval(".topo-nav a:not(.topo-lingua)", (as) => as.every((a) => a.getAttribute("href").startsWith("/en/")))) && (await pagina.getAttribute(".pico-final a", "href")) === "/en/compass/" && (await pagina.getAttribute(".topo-lingua", "href")) === "/");
 await pagina.click(".topo-som");
 conferir("o painel de som vem em inglês", (await pagina.textContent("[data-som-chave]")) === "Turn sound on" && (await pagina.innerText(".som-painel")).includes("Key sounds"));
 await pagina.keyboard.press("Escape");
@@ -115,6 +115,29 @@ await pagina.keyboard.press("End");
 conferir("desenhar o perfil em inglês", (await pagina.getAttribute('.hex-pega[data-eixo="competitivo"]', "aria-label")) === "Competitive" && (await pagina.getAttribute('.hex-pega[data-eixo="competitivo"]', "aria-valuetext")) === "5 out of 5" && (await pagina.getAttribute("[data-lista] li a", "href")).startsWith("/en/games/"));
 await semPortugues("desenhar");
 
+// desafios, roleta e diário
+await pagina.goto(`${BASE}/en/challenges/?roleta=abc123`, { waitUntil: "networkidle" });
+const roleta = (await pagina.innerText("[data-resultado]")).replace(/\s+/g, " ");
+conferir("os desafios e a roleta saem em inglês", (await pagina.textContent("h1")) === "Challenges" && roleta.includes("The rule") && roleta.includes("Win") && await pagina.locator(".desafio-cartao h3").filter({ hasText: "The Super Woopers" }).count() === 1, roleta.slice(0, 140));
+conferir("o mesmo sorteio dá o mesmo jogo nas duas línguas", (await pagina.getAttribute("[data-resultado] a", "href")).startsWith("/en/games/"));
+await semPortugues("desafios");
+const jogoSorteado = (await pagina.getAttribute("[data-resultado] a", "href")).replace("/en/games/", "/jogos/");
+await pagina.goto(`${BASE}/desafios/?roleta=abc123`, { waitUntil: "networkidle" });
+conferir("em português, a mesma semente sorteia o mesmo jogo", (await pagina.getAttribute("[data-resultado] a", "href")) === jogoSorteado, jogoSorteado);
+await pagina.goto(`${BASE}/en/challenges/os-super-woopers/`, { waitUntil: "networkidle" });
+conferir("a página de um desafio em inglês", (await pagina.textContent("h1")) === "The Super Woopers" && (await texto()).includes("Conquer Johto using only your family of Woopers.") && (await pagina.getAttribute(".desafio-outro .botao", "href")).startsWith("/en/journal/?nome=The+Super+Woopers"));
+await semPortugues("desafio");
+await pagina.click(".desafio-outro .botao");
+await pagina.waitForSelector("[data-criar]");
+conferir("o diário em inglês abre com o desafio anotado", (await pagina.inputValue('[data-criar] input[name="nome"]')) === "The Super Woopers" && (await pagina.textContent("[data-criar] h2")) === "Start a run");
+await pagina.click('[data-criar] button[type="submit"]');
+await pagina.fill("#diario-especie", "Wooper");
+await pagina.click('[data-capturar] button[type="submit"]');
+const diario = (await texto()).replace(/\s+/g, " ");
+conferir("registrar uma captura no diário em inglês", diario.includes("Record a catch") && diario.includes("Box 1") && diario.includes("Route ") && diario.includes("of 8 badges or trials"), diario.slice(0, 160));
+await semPortugues("diário");
+await pagina.evaluate(() => { localStorage.removeItem("pokeatlas.diario"); localStorage.removeItem("pokeatlas.diario.ativa"); });
+
 // a busca e o número digitado, em inglês
 await pagina.click(".topo-busca");
 await pagina.fill(".busca input", "red");
@@ -127,7 +150,7 @@ await pagina.waitForURL(/\/en\/pokedex\/pikachu\/$/, { timeout: 4000 });
 conferir("o número digitado abre a espécie em inglês", pagina.url().endsWith("/en/pokedex/pikachu/"));
 
 const cel = await abrir({ celular: true });
-for (const caminho of ["/en/games/scarlet-violet/", "/en/", "/en/compass/", "/en/pokedex/charizard/", "/en/team/", "/en/types/", "/en/regions/galar/"]) {
+for (const caminho of ["/en/games/scarlet-violet/", "/en/", "/en/compass/", "/en/pokedex/charizard/", "/en/team/", "/en/types/", "/en/regions/galar/", "/en/challenges/", "/en/journal/"]) {
   await cel.pagina.goto(BASE + caminho, { waitUntil: "networkidle" });
   conferir(`${caminho} cabe na largura do celular`, await cel.pagina.evaluate(() => document.documentElement.scrollWidth) === 390);
 }

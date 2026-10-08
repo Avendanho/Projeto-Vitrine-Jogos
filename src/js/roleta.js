@@ -1,14 +1,15 @@
 /* A roleta de desafios. Sorteia, a partir de uma semente, um desafio montado com
  * as peças de dados/desafios.mjs e com dados do atlas. A semente vai no endereço:
  * o mesmo link sempre dá o mesmo desafio. */
+import { b, rota, INGLES, nomeDoTipo, enumerar as lista } from "./lingua.js";
+
 const secao = document.querySelector("[data-roleta]");
-const { EDICAO, PECAS, MUNDO, ESCRITOS } = await import(`./roleta-${secao.dataset.roleta}.js`);
+const { EDICAO, PECAS, MUNDO, ESCRITOS } = await import(`./roleta-${secao.dataset.roleta}${INGLES ? "-en" : ""}.js`);
 const resultado = secao.querySelector("[data-resultado]");
 const copiar = secao.querySelector("[data-copiar]");
 const aviso = secao.querySelector("[data-copiado]");
 
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const lista = (itens) => (itens.length <= 1 ? itens.join("") : `${itens.slice(0, -1).join(", ")} e ${itens[itens.length - 1]}`);
 
 /* Gerador de números a partir de um texto: mesma semente, mesma sequência. */
 function gerador(semente) {
@@ -35,12 +36,13 @@ function sortear(semente) {
     const comuns = jogo.especies.filter((id) => !MUNDO.especies[id][3]);
     const contar = (chave) => { const m = new Map(); for (const id of comuns) for (const k of [].concat(chave(id))) m.set(k, (m.get(k) || 0) + 1); return [...m].filter(([, n]) => n >= 8).map(([k]) => k); };
     v.regiao = jogo.regiao;
-    v.tipo = um(contar((id) => MUNDO.especies[id][1]));
-    v.cor = um(contar((id) => MUNDO.especies[id][2])).toLowerCase();
+    v.tipo = nomeDoTipo(um(contar((id) => MUNDO.especies[id][1])));
+    const cor = um(contar((id) => MUNDO.especies[id][2]));
+    v.cor = (MUNDO.cores?.[cor] ?? cor).toLowerCase();
     v.letra = um(contar((id) => nome(id)[0]));
     v.especie = nome(um(comuns));
     v.seis = lista(varios(comuns, 6).map(nome));
-    cenario = [["Jogo", `<a href="/jogos/${jogo.slug}/">${esc(jogo.nome)}</a>`], ["Região", esc(jogo.regiao)]];
+    cenario = [[b("Jogo", "Game"), `<a href="${rota(`/jogos/${jogo.slug}/`)}">${esc(jogo.nome)}</a>`], [b("Região", "Region"), esc(jogo.regiao)]];
     v.jogoSlug = jogo.slug;
   } else {
     const ambiente = um(MUNDO.ambientes.filter((a) => a.especies.length >= 8));
@@ -51,8 +53,8 @@ function sortear(semente) {
     v.quantos = ambiente.especies.length;
     v.exemplos = lista(varios(ambiente.especies, 3).map(nome));
     v.especie = nome(um(ambiente.especies));
-    v.tipo = um([...tipos].filter(([, n]) => n >= 12).map(([t]) => t));
-    v.onde = [["Onde", esc(ambiente.em.replace(/^(n[oa]s?) /, (m) => m[0].toUpperCase() + m.slice(1)))]];
+    v.tipo = nomeDoTipo(um([...tipos].filter(([, n]) => n >= 12).map(([t]) => t)));
+    v.onde = [[b("Onde", "Where"), esc(ambiente.em.replace(/^(n[oa]s?) /, (m) => m[0].toUpperCase() + m.slice(1)))]];
   }
 
   const preencher = (texto) => texto.replace(/\{(\w+)\}/g, (_, chave) => v[chave] ?? "");
@@ -73,31 +75,31 @@ function sortear(semente) {
 }
 
 function medida(rotulo, valor) {
-  return `<span class="medida"><span class="medida-rotulo">${rotulo}</span><span class="estratos" role="img" aria-label="${rotulo}: ${valor} de 5">${[1, 2, 3, 4, 5].map((n) => `<span class="estrato${n <= valor ? ` estrato-${n}` : ""}"></span>`).join("")}</span></span>`;
+  return `<span class="medida"><span class="medida-rotulo">${rotulo}</span><span class="estratos" role="img" aria-label="${rotulo}: ${valor} ${b("de", "out of")} 5">${[1, 2, 3, 4, 5].map((n) => `<span class="estrato${n <= valor ? ` estrato-${n}` : ""}"></span>`).join("")}</span></span>`;
 }
 
 function mostrar(semente, gravar) {
   const d = sortear(semente);
   resultado.innerHTML = `
     <h3>${esc(d.titulo)}</h3>
-    <p class="desafio-medidas">${medida("Dificuldade", d.dificuldade)}${medida("Caos", d.caos)}</p>
+    <p class="desafio-medidas">${medida(b("Dificuldade", "Difficulty"), d.dificuldade)}${medida(b("Caos", "Chaos"), d.caos)}</p>
     <dl class="roleta-pecas">
       ${d.cenario.map(([t, valor]) => `<div><dt>${t}</dt><dd>${valor}</dd></div>`).join("")}
-      <div><dt>A regra</dt><dd>${esc(d.regra)}</dd></div>
-      <div><dt>${d.complicacoes.length > 1 ? "As complicações" : "A complicação"}</dt><dd>${d.complicacoes.map(esc).join("<br>")}</dd></div>
-      <div><dt>Vitória</dt><dd>${esc(d.vitoria)}</dd></div>
-      <div><dt>Derrota</dt><dd>${esc(d.derrota)}</dd></div>
+      <div><dt>${b("A regra", "The rule")}</dt><dd>${esc(d.regra)}</dd></div>
+      <div><dt>${d.complicacoes.length > 1 ? b("As complicações", "The complications") : b("A complicação", "The complication")}</dt><dd>${d.complicacoes.map(esc).join("<br>")}</dd></div>
+      <div><dt>${b("Vitória", "Win")}</dt><dd>${esc(d.vitoria)}</dd></div>
+      <div><dt>${b("Derrota", "Loss")}</dt><dd>${esc(d.derrota)}</dd></div>
     </dl>`;
   resultado.classList.remove("girou");
   void resultado.offsetWidth;                      // reinicia a animação de entrada
   resultado.classList.add("girou");
   copiar.hidden = false;
-  copiar.textContent = "Copiar o link deste desafio";
+  copiar.textContent = b("Copiar o link deste desafio", "Copy the link to this challenge");
   // o diário abre com este desafio já anotado: nome, jogo e regras vão no endereço
   const diario = secao.querySelector("[data-diario-link]");
   if (diario) {
-    diario.href = `/diario/?${new URLSearchParams({ nome: d.titulo, ...(d.jogo ? { jogo: d.jogo } : {}), regras: [d.regra, ...d.complicacoes, `Vitória: ${d.vitoria}`, `Derrota: ${d.derrota}`].join("\n") })}`;
-    diario.textContent = "Acompanhar este desafio no diário";
+    diario.href = `${rota("/diario/")}?${new URLSearchParams({ nome: d.titulo, ...(d.jogo ? { jogo: d.jogo } : {}), regras: [d.regra, ...d.complicacoes, `${b("Vitória", "Win")}: ${d.vitoria}`, `${b("Derrota", "Loss")}: ${d.derrota}`].join("\n") })}`;
+    diario.textContent = b("Acompanhar este desafio no diário", "Track this challenge in the journal");
   }
   if (gravar) history.replaceState(null, "", `?roleta=${semente}#roleta`);
 }
@@ -105,15 +107,15 @@ function mostrar(semente, gravar) {
 const novaSemente = () => Math.random().toString(36).slice(2, 8);
 secao.querySelector("[data-girar]").addEventListener("click", (e) => {
   mostrar(novaSemente(), true);
-  e.currentTarget.textContent = "Girar de novo";
+  e.currentTarget.textContent = b("Girar de novo", "Spin again");
 });
 copiar.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(location.href);
-    copiar.textContent = "Link copiado";
-    aviso.textContent = "Link copiado.";
+    copiar.textContent = b("Link copiado", "Link copied");
+    aviso.textContent = b("Link copiado.", "Link copied.");
   } catch {
-    aviso.textContent = "Não foi possível copiar. O link está na barra de endereço.";
+    aviso.textContent = b("Não foi possível copiar. O link está na barra de endereço.", "Could not copy. The link is in the address bar.");
   }
 });
 
@@ -121,7 +123,7 @@ copiar.addEventListener("click", async () => {
 const guardada = new URLSearchParams(location.search).get("roleta");
 if (guardada && /^[a-z0-9]{1,12}$/.test(guardada)) {
   mostrar(guardada, false);
-  secao.querySelector("[data-girar]").textContent = "Girar de novo";
+  secao.querySelector("[data-girar]").textContent = b("Girar de novo", "Spin again");
 }
 
 /* os desafios escritos mudam de ordem a cada visita, e um botão escolhe um por você */
@@ -135,5 +137,5 @@ if (escritos) {
   escritos.append(...cartoes);
 }
 document.querySelector("[data-sortear-escrito]")?.addEventListener("click", () => {
-  location.href = ESCRITOS[Math.floor(Math.random() * ESCRITOS.length)];
+  location.href = rota(ESCRITOS[Math.floor(Math.random() * ESCRITOS.length)]);
 });

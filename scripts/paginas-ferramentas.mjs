@@ -89,20 +89,21 @@ export function enderecoDoDiario({ nome, jogo, regras }) {
 }
 
 export function paginaDiario() {
+  const comTabela = enumerar(JOGOS.filter((j) => ENCONTROS[j.slug]).map((j) => aqui(j).curto));
   const corpo = `
 <section class="cabecalho">
-  <p class="migalha"><a href="/desafios/">Desafios</a></p>
-  <h1>Diário de desafio</h1>
-  <p class="prosa">Acompanhe uma campanha do começo ao fim: o que foi capturado em cada lugar, quem está no time, quem ficou na caixa e quem caiu pelo caminho. Serve para um Nuzlocke, para um desafio do atlas ou para as regras que você inventar.</p>
-  <p class="nota-editorial">O diário fica guardado neste navegador. Exporte de vez em quando: se os dados do navegador forem limpos, ele some. Em ${enumerar(JOGOS.filter((j) => ENCONTROS[j.slug]).map((j) => j.curto))}, o diário mostra o que aparece em cada rota, com os dados da PokéAPI. Nos outros jogos ela não tem essa tabela, e a espécie capturada é você quem informa.</p>
+  <p class="migalha"><a href="/desafios/">${b("Desafios", "Challenges")}</a></p>
+  <h1>${b("Diário de desafio", "Challenge journal")}</h1>
+  <p class="prosa">${b("Acompanhe uma campanha do começo ao fim: o que foi capturado em cada lugar, quem está no time, quem ficou na caixa e quem caiu pelo caminho. Serve para um Nuzlocke, para um desafio do atlas ou para as regras que você inventar.", "Track a run from start to finish: what was caught in each place, who is in the team, who stayed in the box and who fell along the way. It works for a Nuzlocke, for one of the atlas's challenges or for rules you make up.")}</p>
+  <p class="nota-editorial">${b(`O diário fica guardado neste navegador. Exporte de vez em quando: se os dados do navegador forem limpos, ele some. Em ${comTabela}, o diário mostra o que aparece em cada rota, com os dados da PokéAPI. Nos outros jogos ela não tem essa tabela, e a espécie capturada é você quem informa.`, `The journal is stored in this browser. Export it now and then: if the browser's data is cleared, it is gone. In ${comTabela}, the journal shows what appears on each route, with PokéAPI's data. For the other games it has no such table, and you enter the species you caught.`)}</p>
 </section>
 <section class="diario" data-diario>
-  ${semJs('O diário precisa de JavaScript. Os <a href="/desafios/">desafios</a> podem ser lidos sem ele.')}
+  ${semJs(b('O diário precisa de JavaScript. Os <a href="/desafios/">desafios</a> podem ser lidos sem ele.', 'The journal needs JavaScript. The <a href="/desafios/">challenges</a> can be read without it.'))}
   <div data-palco></div>
 </section>`;
   return moldura({
-    titulo: "Diário de desafio", caminho: "/diario/", classe: "pagina-diario", corpo, modulo: "diario",
-    descricao: "Acompanhe um Nuzlocke ou um desafio de Pokémon: capturas por rota, time, caixa, quem caiu e insígnias, guardados no seu navegador."
+    titulo: b("Diário de desafio", "Challenge journal"), caminho: "/diario/", classe: "pagina-diario", corpo, modulo: "diario",
+    descricao: b("Acompanhe um Nuzlocke ou um desafio de Pokémon: capturas por rota, time, caixa, quem caiu e insígnias, guardados no seu navegador.", "Track a Nuzlocke or a Pokémon challenge: catches per route, team, box, who fell and badges, stored in your browser.")
   });
 }
 

@@ -10,6 +10,8 @@ import { terrenoSVG } from "./cenario.mjs";
 import { POKEDEX, FICHAS, CARTAS, COBBLEMON, SITE, VERMELHO } from "./base.mjs";
 import { FAVICON } from "./icone.mjs";
 import { emLingua } from "./lingua.mjs";
+import { DESAFIOS_EN, ROLETA_EN } from "../dados/en-desafios.mjs";
+import { ROLETA } from "../dados/desafios.mjs";
 import { rotaEmIngles } from "../src/js/lingua-rotas.js";
 import { PERGUNTAS } from "../dados/quiz.mjs";
 import { FICHA_EN, evolucaoEmIngles, EIXOS_EN, JOGOS_EN, FICHAS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN, ESTILOS_EN, CATEGORIAS_EN, TIPOS_EN } from "../dados/en.mjs";
@@ -103,6 +105,16 @@ function conferir() {
     for (const o of f.ovos) if (!FICHA_EN.ovos[o]) erros.push(`inglês: falta o grupo de ovos "${o}"`);
     if (f.como && /[áàâãéêíóôõúç]|\b(com|no|na|de|do|da|por|em|só|nível|segurando|sabendo|subindo|troca)\b/i.test(evolucaoEmIngles(f.como))) erros.push(`inglês: a evolução de ${f.nome} ficou com português: "${evolucaoEmIngles(f.como)}"`);
   }
+  for (const d of TODOS_OS_DESAFIOS) {
+    const en = DESAFIOS_EN[d.slug];
+    if (!en) { erros.push(`inglês: falta o desafio ${d.slug}`); continue; }
+    for (const campo of ["nome", "tema", "objetivo", "vitoria", "derrota"]) if (!en[campo]) erros.push(`inglês: falta "${campo}" do desafio ${d.slug}`);
+    if (Boolean(d.variacao) !== Boolean(en.variacao) || en.sinopse?.length !== d.sinopse.length || en.blocos?.length !== d.blocos.length) erros.push(`inglês: o desafio ${d.slug} não tem a forma do original`);
+    d.blocos.forEach((bloco, k) => { if ((bloco.itens?.length ?? -1) !== (en.blocos?.[k]?.itens?.length ?? -1) || Boolean(bloco.texto) !== Boolean(en.blocos?.[k]?.texto)) erros.push(`inglês: o bloco ${k + 1} do desafio ${d.slug} não bate com o original`); });
+  }
+  for (const edicao of Object.keys(ROLETA)) for (const lista of ["regras", "complicacoes", "temas", "vitorias", "derrotas"]) {
+    if (ROLETA_EN[edicao]?.[lista]?.length !== ROLETA[edicao][lista].length) erros.push(`inglês: a roleta de ${edicao} tem outro número de ${lista}`);
+  }
   for (const e of ESTILOS) if (!ESTILOS_EN[e.id]) erros.push(`inglês: falta o estilo ${e.id}`);
   for (const c of CATEGORIAS) if (!CATEGORIAS_EN[c.id]) erros.push(`inglês: falta a categoria ${c.id}`);
   for (const tipo of ORDEM_TIPOS) if (!TIPOS_EN[tipo]) erros.push(`inglês: falta o tipo ${tipo}`);
@@ -182,7 +194,7 @@ await nasDuas("/time/", () => paginaTime());
 await nasDuas("/tipos/", () => paginaTipos());
 await nasDuas("/desenhar/", () => paginaDesenhar());
 await escrever("js/dados/numeros.js", moduloNumeros());
-await escrever("diario/index.html", paginaDiario());
+await nasDuas("/diario/", () => paginaDiario());
 await escrever("js/dados/tipos.js", moduloTipos());
 await escrever("js/dados/jogos.js", moduloJogos());
 await nasDuas("/bussola/", () => paginaBussola());
@@ -203,10 +215,15 @@ await escrever("js/dados/busca-en.js", emLingua("en", () => moduloBusca()));
 
 // desafios, nas duas edições
 for (const edicao of ["pokemon", "cobblemon"]) {
-  await escrever(`${edicao === "cobblemon" ? "cobblemon/" : ""}desafios/index.html`, paginaDesafios(edicao));
+  // por enquanto só a edição Pokémon tem as duas línguas
+  if (edicao === "pokemon") { await nasDuas("/desafios/", () => paginaDesafios(edicao)); await escrever(`js/roleta-${edicao}-en.js`, emLingua("en", () => dadosDaRoleta(edicao))); }
+  else await escrever("cobblemon/desafios/index.html", paginaDesafios(edicao));
   await escrever(`js/roleta-${edicao}.js`, dadosDaRoleta(edicao));
 }
-for (const d of TODOS_OS_DESAFIOS) await escrever(`${enderecoDoDesafio(d).slice(1)}index.html`, paginaDesafio(d));
+for (const d of TODOS_OS_DESAFIOS) {
+  if (d.edicao === "pokemon") await nasDuas(enderecoDoDesafio(d), () => paginaDesafio(d));
+  else await escrever(`${enderecoDoDesafio(d).slice(1)}index.html`, paginaDesafio(d));
+}
 
 /* O mapa do site e o aviso aos buscadores de onde ele está. */
 await escrever("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${enderecos.sort().map((e) => `<url><loc>${SITE}${e}</loc></url>`).join("\n")}\n</urlset>\n`);
