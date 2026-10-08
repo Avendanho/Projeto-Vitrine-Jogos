@@ -1,6 +1,6 @@
 /* Comparar dois Pokémon: os atributos de base frente a frente. O par escolhido fica no endereço. */
 import { ESPECIES } from "./dados/especies.js";
-import { especie, porSlug, porNome, procurarEspecie } from "./especies-logica.js";
+import { especie, porSlug, porNome, procurarEspecie, selo } from "./especies-logica.js";
 import { colorirAoApontar } from "./gaveta.js";
 
 const ROMANOS = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
@@ -21,7 +21,7 @@ function lado(l) {
   if (!l) return '<p class="duelo-vazio">Escolha um Pokémon no campo acima.</p>';
   const e = especie(l);
   return `<a href="/pokedex/${e.slug}/"><span class="dex-arte"><img src="/arte/mini/${e.id}.webp" data-cor="/arte/mini/${e.id}-cor.webp" alt="" width="184" height="184"></span><span class="dex-numero">Nº ${String(e.id).padStart(4, "0")}</span><h2>${e.nome}</h2></a>
-    <p class="duelo-tipos">${e.tipos.join(", ")}</p>
+    <p class="duelo-tipos">${e.tipos.map((t) => selo(t)).join(" ")}</p>
     <dl class="duelo-ficha"><div><dt>Altura</dt><dd>${numero(e.altura, 1)} m</dd></div><div><dt>Peso</dt><dd>${numero(e.peso, 1)} kg</dd></div><div><dt>Geração</dt><dd>${ROMANOS[e.geracao]}</dd></div></dl>`;
 }
 

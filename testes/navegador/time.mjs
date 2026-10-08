@@ -7,10 +7,11 @@ const { navegador, pagina, erros } = await abrir();
 const por = async (nome) => { await pagina.fill("#time-campo", nome); await pagina.click('.time-controles button[type="submit"]'); };
 const nomes = () => pagina.$$eval(".time-vaga .dex-nome", (els) => els.map((e) => e.textContent));
 await pagina.goto(`${BASE}/time/`, { waitUntil: "networkidle" });
-conferir("abre vazio, com seis vagas e sem tabela", await pagina.locator(".time-vaga-vazia").count() === 6 && await pagina.locator("[data-tabela]").isHidden());
+conferir("abre vazio, com seis vagas e sem leitura do time", await pagina.locator(".time-vaga-vazia").count() === 6 && await pagina.locator(".time-grupo").count() === 0);
 await por("Charizard"); await por("Moltres");
 conferir("dois de Fogo e Voador abrem buraco para Pedra", (await pagina.textContent("[data-resumo]")).includes("Pedra"));
-conferir("a casa de Pedra contra Charizard mostra 4", (await pagina.$$eval(".time-tabela tbody tr:first-child td", (tds) => tds[12].textContent)) === "4");
+conferir("a vaga do Charizard mostra Pedra em quádruplo e Terrestre como imunidade", (await pagina.textContent('.time-vaga:first-child [data-fator="4"] dd')).trim() === "Pedra" && (await pagina.textContent('.time-vaga:first-child [data-fator="0"] dd')).trim() === "Terrestre");
+conferir("a leitura do time conta quantos apanham de cada tipo", (await pagina.textContent(".time-grupo:nth-child(3)")).replace(/\s+/g, " ").includes("Pedra, 2 do time"));
 await por("Charizard");
 conferir("repetido é recusado", (await pagina.textContent("[data-aviso]")).includes("já está") && (await nomes()).length === 2);
 await por("Blastoise"); await por("Venusaur"); await por("Pikachu"); await por("Snorlax"); await por("Mew");
@@ -36,7 +37,7 @@ conferir("endereço com lixo fica só com o que existe", (await nomes()).join() 
 
 const cel = await abrir({ celular: true });
 await cel.pagina.goto(`${BASE}/time/?t=charizard,blastoise,venusaur,pikachu,snorlax,mew`, { waitUntil: "networkidle" });
-conferir("no celular a tabela rola dentro da caixa, não a página", await cel.pagina.evaluate(() => document.documentElement.scrollWidth) === 390);
+conferir("no celular as vagas e os selos cabem na largura da tela", await cel.pagina.evaluate(() => document.documentElement.scrollWidth) === 390);
 if (fotos) await cel.pagina.screenshot({ path: `${fotos}/t4-cel.png` });
 await cel.navegador.close();
 await fechar(navegador, erros);

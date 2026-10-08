@@ -24,7 +24,7 @@
 ## 📌 Sumário
 
 - [Sobre o Projeto](#-sobre-o-projeto)
-- [A Assinatura: O Relevo Vivo](#-a-assinatura-o-relevo-vivo)
+- [A Assinatura: O Hexágono Vivo](#-a-assinatura-o-hexágono-vivo)
 - [Funcionalidades Principais](#-funcionalidades-principais)
 - [Direção de Arte e Design](#-direção-de-arte-e-design)
 - [Arquitetura e Engenharia](#-arquitetura-e-engenharia)
@@ -44,13 +44,13 @@ O **PokéAtlas** é uma experiência interativa e editorial criada para acolher 
 2. **O iniciante** curioso que não sabe por onde começar entre dezenas de títulos;
 3. **O fã veterano** em busca de uma perspectiva visual inovadora sobre os jogos.
 
-Em vez de uma wiki enciclopédica tradicional ou uma vitrine de e-commerce, o PokéAtlas adota o conceito de um **caderno de campo naturalista e atlas de expedição náutica**. Cada jogo ganha uma identidade topográfica própria que traduz sua proposta de experiência em relevo, curvas de nível e altitude.
+Em vez de uma wiki enciclopédica tradicional ou uma vitrine de e-commerce, o PokéAtlas adota o conceito de um **aparelho de Pokédex**: o corpo vermelho, a lente azul, as três luzes, a tela onde tudo acontece e as teclas. Cada jogo ganha um perfil próprio, um hexágono de seis atributos como o das telas de resumo dos jogos, que traduz a sua proposta de experiência numa forma.
 
 🔗 **Acesse o site em produção:** [https://pokeatlas-eight.vercel.app/](https://pokeatlas-eight.vercel.app/)
 
 ---
 
-## 🏔️ A Assinatura: O Relevo Vivo
+## 🔶 A Assinatura: O Hexágono Vivo
 
 Cada título é modelado através de seis atributos de gameplay fundamentais:
 
@@ -63,22 +63,22 @@ Cada título é modelado através de seis atributos de gameplay fundamentais:
 | **Competitivo** | Complexidade mecânica de pós-jogo, breeding, EVs/IVs e profundidade tática. |
 | **Nostalgia** | Memória afetiva, fidelidade estética de época e peso histórico. |
 
-### Como a Ilha é Gerada
-Cada atributo ocupa uma direção na rosa dos ventos. As notas (de 1 a 5) elevam montanhas correspondentes:
-- Quanto mais alta a nota, maior o cume montanhoso e mais distante a costa se projeta.
-- O terreno acima do nível do mar consolida o contorno de uma **ilha única**.
-- Renderizado proceduralmente tanto em **SVG durante o build estático** quanto em **Canvas interativo em tempo real** no navegador.
+### Como o Hexágono é Desenhado
+Cada atributo é um vértice, numa direção fixa. As notas (de 1 a 5) puxam o vértice:
+- Quanto mais alta a nota, mais longe do centro o vértice vai.
+- A forma que sobra é o **perfil do jogo**: dois jogos parecidos têm contornos que coincidem.
+- Desenhado tanto em **SVG durante o build estático** quanto em **Canvas ao vivo** no navegador, onde o perfil se estica de uma forma para a outra em vez de pular.
 
 ---
 
 ## 🗺️ Funcionalidades Principais
 
-### 1. 🧭 Bússola Náutica (Quiz de Recomendação) (`/bussola/`)
-Um sistema de recomendação dinâmico com 8 perguntas de perfil. À medida que o visitante responde, o relevo do seu perfil vai sendo esculpido ao vivo em tela. No final, o algoritmo compara a geometria do relevo gerado com todas as ilhas do catálogo e recomenda os títulos de maior afinidade, explicando quais morros coincidiram.
+### 1. 🧭 Bússola (Quiz de Recomendação) (`/bussola/`)
+Um sistema de recomendação dinâmico com 8 perguntas de perfil. À medida que o visitante responde, o hexágono do seu perfil vai se desenhando ao vivo na tela. No final, o algoritmo compara a forma do perfil com a de todos os jogos do catálogo e recomenda os títulos de maior afinidade, explicando em quais vértices eles coincidiram.
 
-### 2. 📖 Pokédex em Gravura Naturalista (`/pokedex/` e `/pokedex/<especie>/`)
+### 2. 📖 Pokédex em Gravura (`/pokedex/` e `/pokedex/<especie>/`)
 - **1.025 espécies de Pokémon** catalogadas.
-- Apresentação visual em **gravura botânica monocromática (tinta sobre papel)** que recupera suas cores oficiais em hover/foco.
+- Apresentação visual em **gravura monocromática**, como numa tela de uma cor só, que recupera suas cores oficiais em hover/foco; os tipos aparecem em selos nas cores que os jogos usam.
 - Busca instantânea e filtros por geração e tipo elemental.
 - Páginas individuais com atributos base, dimensões, linha evolutiva completa, formas regionais e lista de jogos em que a espécie pode ser encontrada.
 - **Formas especiais:** megaevoluções, Gigantamax, formas regionais e outras formas que mudam tipos ou atributos, cada uma com arte, tipos e atributos próprios; e a indicação de quais espécies podem usar Dynamax.
@@ -90,8 +90,8 @@ Um sistema de recomendação dinâmico com 8 perguntas de perfil. À medida que 
 - Rotas oficiais interligadas com **destaque bidirecional**: passar o cursor na rota da lista ilumina o mapa e vice-versa.
 - Cartas que se desenham suavemente via SVG quando entram na janela de visualização.
 
-### 4. ⚖️ Comparador de Terrenos (`/comparar/`)
-Permite selecionar até 3 jogos simultâneos e sobrepor suas ilhas em tintas duotone contrastantes, facilitando a análise ponto a ponto das diferenças de ritmo e estilo de cada jogo.
+### 4. ⚖️ Comparador de Perfis (`/comparar/`)
+Permite selecionar até 3 jogos simultâneos e sobrepor seus hexágonos em três cores (as dos primeiros companheiros: água, fogo e planta), facilitando a análise ponto a ponto das diferenças de ritmo e estilo de cada jogo.
 
 ### 5. ⏳ Linha do Tempo da Franquia (`/linha-do-tempo/`)
 Uma régua cronológica abrangendo de **1996 a 2027**, separada por plataformas/consoles (do Game Boy original ao Nintendo Switch), servindo também como índice canônico completo dos jogos analisados.
@@ -112,18 +112,18 @@ Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) p
 - Todos os dados são extraídos dos arquivos da versão **1.8.1** do mod por `scripts/cobblemon.mjs`.
 
 ### 8. 🧰 Ferramentas do Treinador
-- **Montar um time** (`/time/`): até seis Pokémon, com a tabela do que cada um recebe de cada tipo, os buracos do time e os tipos sem resposta. Filtra pela Pokédex de cada jogo, e o time vai no endereço.
+- **Montar um time** (`/time/`): até seis Pokémon, no formato da tela de equipe dos jogos. Cada vaga mostra os tipos do Pokémon e o que ele recebe em quádruplo ou em dobro, a que resiste e do que é imune; embaixo, a leitura do time em selos de tipo (os buracos, os tipos sem resposta, de que o time apanha e o que ele segura). Filtra pela Pokédex de cada jogo, e o time vai no endereço.
 - **Comparar Pokémon** (`/comparar/pokemon/`): atributos de base de dois Pokémon frente a frente.
 - **Busca global:** o botão **Buscar** e os atalhos `/` e `Ctrl+K` acham jogos, regiões, Pokémon, desafios, itens, estruturas e biomas de qualquer página.
 
 ### 9. 🎬 Prólogo Cinematográfico da Home (`/`)
 Jornada contínua dividida em 6 cenas orientadas pelo scroll:
-1. *O atlas se abre:* introdução tátil e o relevo procedural ao vivo.
-2. *A travessia:* carrossel panorâmico das 10 regiões com pranchas dos iniciais.
-3. *Trinta anos:* métricas temporais e evolução por consoles.
-4. *A bússola (o clímax):* transição do fundo de papel náutico para a noite profunda, simulando a busca na abóbada celeste.
+1. *O aparelho liga:* as tampas da tela se abrem e o hexágono de um jogo aparece, como a ficha de uma Pokédex; o teclado azul troca o perfil mostrado.
+2. *As regiões:* carrossel panorâmico das 10 regiões, cada uma num cartão com a sua carta e os iniciais.
+3. *Trinta anos:* métricas temporais em letra de pontos e a régua de anos.
+4. *O hexágono responde (o clímax):* a tela apaga; cada pedido puxa um vértice, o hexágono toma a forma do jogo escolhido e, em volta, acendem os perfis dos jogos que vão longe naquela direção.
 5. *As ferramentas:* vitrine da Pokédex e comparador.
-6. *Trace sua rota:* convite para a descoberta do jogo ideal.
+6. *O seu perfil:* a tela inteira em amarelo e o convite para abrir a bússola.
 
 ---
 
@@ -131,11 +131,14 @@ Jornada contínua dividida em 6 cenas orientadas pelo scroll:
 
 | Elemento | Implementação | Inspiração |
 | :--- | :--- | :--- |
-| **Fundo Marítimo** | `#D2E1DF` (mar náutico) e `#0C2733` (noite de observação) | Cartas hidrográficas de expedições |
-| **Papel do Caderno** | `#F1E8CF` (papel de algodão envelhecido) | Cadernos de anotações de naturalistas |
-| **Tinta Principal** | `#0F2A3A` (azul-petróleo escuro) | Gravações em bico de pena e água-forte |
-| **Acento de Navegação** | `#C4391F` (carmim de rotas) | Marcações cartográficas de expedições |
-| **Tipografia** | **Archivo** (rótulos e dados) + **Alegreya** (narrativa editorial) | Cartografia técnica e literatura clássica |
+| **Corpo do Aparelho** | `#DC0A2D` (vermelho de Pokédex), no fundo da página, no alto e no rodapé | A Pokédex dos jogos e do desenho |
+| **Tela** | `#F1F5EA` (tela acesa, com trama de pontos) e `#171A21` (tela apagada) | Telas de cristal líquido dos portáteis |
+| **Tinta Principal** | `#20232B` (grafite), em texto, bordas e sombras duras | Caixas de texto e menus dos jogos |
+| **Acentos** | `#FFCB05` (amarelo das teclas e do hexágono) e `#29AAFD` (a lente) | O logotipo e a lente do aparelho |
+| **Notas e Tipos** | Barra de vida do vermelho ao verde para as notas; as 18 cores dos tipos nos selos | Barras de PS e selos de tipo dos jogos |
+| **Tipografia** | **M PLUS Rounded 1c** (títulos e texto) + **DotGothic16** (números e leituras da tela) | Letreiros arredondados e letra de pontos dos portáteis |
+
+A edição Cobblemon tem direção própria (pergaminho de mapa, painéis de inventário, **Pixelify Sans**, **Archivo** e **Alegreya**), em `src/estilo.css`.
 
 ---
 
@@ -171,15 +174,17 @@ Projeto-Vitrine-Jogos/
 │   ├── cobblemon.mjs            # Extrator dos dados do mod
 │   ├── modelos.mjs              # Desenha os Pokémon do mod e exporta os modelos 3D
 │   ├── maquetes.mjs, itens-arte.mjs   # Maquetes das estruturas e ícones dos itens
-│   ├── pokedex.mjs, fichas.mjs, tipos.mjs, encontros.mjs, arte.mjs, cartas.mjs   # Dados e arte da edição Pokémon
+│   ├── pokedex.mjs, fichas.mjs, tipos.mjs, encontros.mjs, arte.mjs, cartas.mjs, malha.mjs   # Dados e arte da edição Pokémon
 │   ├── servir.mjs               # Servidor HTTP local para desenvolvimento
 │   └── verificar-paginas.mjs    # Auditoria visual: rola cada página e tira fotos
 │
 ├── src/                         # Código-fonte da interface
-│   ├── estilo.css               # Design system e folhas de estilo globais
-│   ├── fontes/                  # Tipografias Archivo, Alegreya e Pixelify Sans (SIL OFL)
+│   ├── pokedex.css              # Folha de estilo da edição Pokémon (o aparelho de Pokédex)
+│   ├── estilo.css               # Folha de estilo da edição Cobblemon (o mapa em blocos)
+│   ├── fontes/                  # M PLUS Rounded 1c, DotGothic16, Pixelify Sans, Archivo e Alegreya (SIL OFL)
 │   ├── js/                      # Lógica client-side modularizada
-│   │   ├── relevo.js            # Algoritmo de geração da ilha procedural
+│   │   ├── hexagono.js          # O hexágono de atributos: vértices, SVG e semelhança entre perfis
+│   │   ├── hex-vivo.js          # O hexágono desenhado ao vivo, que se estica de um perfil a outro
 │   │   ├── rolagem.js           # Animações de rolagem das páginas de abertura
 │   │   ├── visor.js             # Visor 3D: giro, zoom, tela cheia
 │   │   ├── maquete*.js, modelo*.js   # Desenhistas de maquetes e de modelos de Pokémon
@@ -273,7 +278,7 @@ O projeto é configurado nativamente para publicação contínua na **Vercel** a
 - **Dados e Sprites:** Nomes, estatísticas e ilustrações oficiais foram obtidos por meio da [PokéAPI](https://pokeapi.co/) e tratados artisticamente em formato de gravura.
 - **Cartografia:** Todas as cartas das regiões são redesenhos originais e interpretações artísticas desenvolvidas especificamente para o atlas.
 - **Minecraft:** os nomes de itens e biomas do jogo base vêm da tradução oficial. As maquetes usam a cor média de cada bloco, e os ingredientes do Minecraft nas receitas aparecem em quatro tons de tinta, redesenhados a partir dos ícones do jogo; as texturas originais não são redistribuídas. Minecraft é marca da Mojang e da Microsoft, e este projeto não tem vínculo com elas.
-- **Tipografia:** Fontes [Archivo](https://fonts.google.com/specimen/Archivo), [Alegreya](https://fonts.google.com/specimen/Alegreya) e [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans), licenciadas sob a *SIL Open Font License*.
+- **Tipografia:** Fontes [M PLUS Rounded 1c](https://fonts.google.com/specimen/M+PLUS+Rounded+1c), [DotGothic16](https://fonts.google.com/specimen/DotGothic16), [Archivo](https://fonts.google.com/specimen/Archivo), [Alegreya](https://fonts.google.com/specimen/Alegreya) e [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans), licenciadas sob a *SIL Open Font License*.
 - **Cobblemon:** mod de código aberto da equipe Cobblemon, sob a licença *MPL 2.0*. `dados/cobblemon.json` é derivado dos arquivos de dados e da tradução em português do mod. Os modelos, texturas e poses dos Pokémon (`src/arte/modelo/` e `src/modelos3d/`), os ícones dos itens (`src/arte/itens.png`, `src/arte/item/`) e as peças de estrutura usadas nas maquetes (`src/maquetes/`) são obra da equipe do Cobblemon, desenhados ou exportados pelos scripts deste repositório. Este projeto não tem vínculo com ela.
 
 ---

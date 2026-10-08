@@ -1,8 +1,12 @@
-/* Cenários desenhados pelo próprio atlas: perfis de elevação das regiões,
- * a rosa da bússola e a régua de anos. Tudo gerado em SVG na hora do build. */
-import { ruido, EIXOS, TINTAS } from "../src/js/relevo.js";
+/* Cenários desenhados pelo próprio atlas: perfis de elevação das regiões, o terreno das cartas
+ * e a régua de anos. Tudo gerado em SVG na hora do build. */
+import { ruido } from "../src/js/ruido.js";
+import { EIXOS } from "../src/js/hexagono.js";
 
-const TINTA = "#0F2A3A";
+/* As cores das cartas: o mapa da região como ele aparece nos jogos, com mar azul e a terra subindo do verde
+ * ao marrom. São as mesmas de --terra-1 a --terra-5 em src/pokedex.css (a legenda da página de regiões). */
+const TINTA = "#20232B";
+const CARTA = { raso: "#D5EEFB", terra: ["#A8D98A", "#CDE39A", "#F0E29C", "#E3B873", "#C08A5C"], curva: "rgba(74, 52, 30, 0.4)", costa: TINTA, neve: "#FFFFFF" };
 
 function ondas(x, semente, aspereza) {
   return 0.55 * ruido(x * 2.2, 0.5, semente) +
@@ -67,7 +71,7 @@ function construcoes(c, L, A, chao) {
 /* Perfil de elevação de uma região: três cordilheiras sobrepostas e o mar. */
 export function perfilRegiao(c) {
   const L = 1000, A = 200, chao = 214, passos = 125;
-  const cores = [TINTAS.dia.terra[2], TINTAS.dia.terra[1], TINTAS.dia.terra[0]];
+  const cores = [CARTA.terra[2], CARTA.terra[1], CARTA.terra[0]];
   let svg = "";
   for (let camada = 0; camada < 3; camada++) {
     // o traçado começa e termina fora do quadro, para o contorno não riscar as laterais
@@ -81,34 +85,14 @@ export function perfilRegiao(c) {
     svg += `<path d="${d}" fill="${cores[camada]}" stroke="${TINTA}" stroke-width="${frente ? 1.6 : 1}" stroke-opacity="${frente ? 1 : 0.55}" stroke-linejoin="round"/>`;
     if (c.neve && camada === 0) {
       svg += `<clipPath id="neve-${c.semente}"><rect x="0" y="0" width="${L}" height="${Math.round(chao - A * 0.56 * c.altura)}"/></clipPath>`;
-      svg += `<path d="${d}" fill="#F8F2E2" stroke="${TINTA}" stroke-opacity="0.55" clip-path="url(#neve-${c.semente})"/>`;
+      svg += `<path d="${d}" fill="${CARTA.neve}" stroke="${TINTA}" stroke-opacity="0.55" clip-path="url(#neve-${c.semente})"/>`;
     }
     if (camada === 1) svg += construcoes(c, L, A, chao - terreno(c.marcoX, c, 2) * A + 4);
   }
-  svg += `<rect x="0" y="${chao}" width="${L}" height="26" fill="${TINTAS.dia.raso}"/>`;
+  svg += `<rect x="0" y="${chao}" width="${L}" height="26" fill="${CARTA.raso}"/>`;
   svg += `<path d="M0 ${chao}H${L}" stroke="${TINTA}" stroke-width="1.6"/>`;
   svg += `<path d="M0 ${chao + 9}H${L}M0 ${chao + 17}H${L}" stroke="${TINTA}" stroke-opacity="0.2" stroke-dasharray="26 14"/>`;
   return `<svg class="perfil" viewBox="0 0 ${L} 240" preserveAspectRatio="none" aria-hidden="true" focusable="false">${svg}</svg>`;
-}
-
-/* A rosa da bússola: aro com marcas e uma agulha que a página gira. */
-export function rosaDosVentos() {
-  let marcas = "";
-  for (let g = 0; g < 360; g += 5) {
-    const forte = g % 30 === 0;
-    marcas += `<path d="M0 -188V${forte ? -168 : -180}" transform="rotate(${g})" stroke-width="${forte ? 2.4 : 1}"/>`;
-  }
-  const direcoes = EIXOS.map((e) => `<path d="M0 -150V-162" transform="rotate(${e.ang + 90})" stroke-width="5"/>`).join("");
-  return `<svg class="rosa" viewBox="-200 -200 400 400" aria-hidden="true" focusable="false">
-  <g fill="none" stroke="currentColor">
-    <circle r="196" stroke-width="1"/><circle r="164" stroke-width="1"/><circle r="6" stroke-width="2"/>
-    ${marcas}${direcoes}
-  </g>
-  <g class="rosa-agulha">
-    <path d="M0 -150L13 0H-13Z" fill="#C4391F"/>
-    <path d="M0 150L13 0H-13Z" fill="none" stroke="currentColor" stroke-width="2"/>
-  </g>
-</svg>`;
 }
 
 /* Posição (em %) de cada rótulo de eixo em volta de um quadrado. */
@@ -145,7 +129,7 @@ export function reguaDeAnos(jogos, anoFinal) {
 /* O terreno de uma carta: o traçado de dados/cartas.json nas cores do atlas.
  * Rotas e lugares não entram aqui; quem os desenha é scripts/carta.mjs, por cima. */
 export function terrenoSVG(carta) {
-  const A = carta.altura, T = TINTAS.dia;
+  const A = carta.altura, T = CARTA;
   // cada caminho é escrito uma vez e reaproveitado para preencher e para contornar
   const defs = carta.niveis.map((d, i) => `<path id="n${i}" d="${d}"/>`).join("");
   let svg = `<use href="#n0" fill="none" stroke="${T.raso}" stroke-width="30" stroke-linejoin="round"/>`;

@@ -1,7 +1,7 @@
 /* As ferramentas da edição Pokémon: comparar dois Pokémon, o montador de time e o diário
  * de desafio. Aqui só nasce a moldura de cada página; quem a faz funcionar é o módulo de mesmo nome em src/js/. */
 import { moldura } from "./paginas.mjs";
-import { esc, enumerar, TIPOS_E_FATORES, ENCONTROS } from "./base.mjs";
+import { esc, enumerar, ENCONTROS } from "./base.mjs";
 import { JOGOS } from "../dados/jogos.mjs";
 import { jogosParaONavegador } from "./dados-navegador.mjs";
 
@@ -61,16 +61,8 @@ export function paginaTime() {
     <datalist id="lista-time"></datalist>
   </form>
   <ol class="time-vagas" data-vagas aria-label="O time"></ol>
-  <div class="time-resumo" data-resumo aria-live="polite"></div>
-  <div class="time-tabela-caixa">
-    <table class="time-tabela" data-tabela hidden>
-      <caption class="so-leitor">Quanto cada Pokémon do time recebe de golpes de cada tipo</caption>
-      <thead><tr><th scope="col">Recebendo golpe de</th>${TIPOS_E_FATORES.tipos.map((t) => `<th scope="col"><abbr title="${t}">${t.slice(0, 3)}</abbr></th>`).join("")}</tr></thead>
-      <tbody></tbody>
-      <tfoot></tfoot>
-    </table>
-  </div>
-  <p class="nota-editorial">Cada coluna é o tipo de um golpe recebido. 2 e 4: apanha em dobro ou em quádruplo. ½ e ¼: resiste. 0: é imune. Casa vazia: dano normal. A conta olha só os tipos; habilidades e itens ficam de fora.</p>
+  <div class="time-leitura" data-resumo aria-live="polite"></div>
+  <p class="nota-editorial">Em cada vaga: o que aquele Pokémon recebe em quádruplo ou em dobro, a que resiste e do que é imune. O número ao lado de um tipo, na leitura do time, é quantos do time estão naquela situação. A conta olha só os tipos; habilidades e itens ficam de fora.</p>
 </section>`;
   return moldura({
     titulo: "Montar um time de Pokémon", caminho: "/time/", classe: "pagina-time", corpo, modulo: "time",

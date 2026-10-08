@@ -27,6 +27,9 @@ Vitrine e guia de descoberta: sem login, sem loja, sem funções sociais.
 
 ## Movimento-assinatura — o relevo vivo
 
+> Na rodada 9 a edição Pokémon trocou a ilha pelo hexágono de atributos. O que
+> segue descreve as rodadas 1 a 8; o que vale hoje está no fim deste arquivo.
+
 Todo jogo tem seis atributos: **história, exploração, dificuldade, liberdade,
 competitivo, nostalgia**. Cada atributo ocupa uma direção fixa da rosa dos
 ventos e vira um morro: quanto maior a nota, mais alto o morro e mais longe do
@@ -89,6 +92,9 @@ Só fatos verificáveis: nomes, ano do primeiro lançamento, console, região,
 geração. Nada de números de vendas ou notas de crítica.
 
 ## Direção de arte
+
+> Na rodada 9 a edição Pokémon ganhou outra direção (o aparelho de Pokédex),
+> descrita no fim deste arquivo. A que segue é a das rodadas 1 a 8.
 
 - **Paleta** — o fundo da página é o mar de uma carta náutica
   (azul-acinzentado claro, `#D2E1DF`); o papel quente (`#F1E8CF`) fica nas
@@ -337,3 +343,87 @@ Três acréscimos que surgiram durante a rodada e foram aceitos depois:
   nasce (77 pares). A explicação de como a mutação acontece é a frase da
   conquista do próprio mod, citada entre aspas.
 
+---
+
+## Rodada 9: o atlas vira Pokédex
+
+Pedido: tirar o quiz diário ("não gostei"), mudar o esquema e o estilo do
+montador de time, trocar as cores da edição Pokémon por algo mais característico
+de Pokémon e repaginar o site inteiro, mais criativo, mantendo as mesmas
+informações.
+
+Respostas da entrevista desta rodada:
+
+1. **Direção:** Pokédex. O site passa a ser o aparelho: corpo vermelho, tela,
+   lente azul, luzes e teclas; o amarelo e o azul do logotipo entram como apoio.
+2. **Assinatura:** as seis notas de cada jogo viram o hexágono de atributos das
+   telas de resumo dos jogos. As ilhas saem.
+3. **Alcance:** só a edição Pokémon. A edição Cobblemon continua como mapa de
+   Minecraft, com a folha de estilo dela.
+4. **Time:** a tela de equipe do jogo. Seis vagas, cada uma com o Pokémon, os
+   tipos e um resumo do que ele sofre; as fraquezas do time em selos de tipo
+   agrupados, sem a tabela grande.
+
+### Movimento-assinatura: o hexágono vivo
+
+Cada atributo é um vértice numa direção fixa; quanto maior a nota, mais longe do
+centro ele vai. A forma que sobra é o perfil do jogo. No navegador o perfil não
+pula de uma forma para a outra: ele se estica. É o mesmo desenho na abertura, na
+página de cada jogo (abre do centro até as notas), na comparação (até três
+perfis sobrepostos, nas cores de água, fogo e planta) e na bússola (o perfil de
+quem responde, vértice por vértice).
+
+### Jornada da página inicial (6 cenas)
+
+| Cena | Vê | Sente | Passa a acreditar | Energia |
+|---|---|---|---|---|
+| 1. O aparelho liga | As tampas escuras da tela se abrem; uma ficha de Pokédex com o hexágono de um jogo, e um teclado azul que troca o perfil | Reconhecimento: é uma Pokédex | Cada jogo tem uma forma | Média-alta |
+| 2. As regiões | Dez cartões lado a lado, cada um com a carta, os iniciais e os jogos | Vontade de passear | O atlas cobre a série inteira | Média |
+| 3. Trinta anos | Quatro números em letra de pontos e a régua de anos | Pausa | Há história e dado por trás | Calma |
+| 4. O hexágono responde | A tela apaga; a cada pedido o hexágono toma outra forma e, em volta, acendem os perfis dos jogos fortes naquele eixo | Surpresa: o desenho responde ao que eu quero | Existe um jogo com o meu perfil | **Pico** |
+| 5. As ferramentas | A Pokédex em gravura e dois perfis sobrepostos | Curiosidade prática | Dá para comparar antes de escolher | Média |
+| 6. O seu perfil | A tela inteira em amarelo, uma frase e uma tecla vermelha | Decisão | É só responder oito perguntas | Alta, resolvida |
+
+**Pico:** a cena 4, a mais longa (7,5 telas). Seis pedidos, um por eixo; o
+hexágono central mostra o perfil do jogo escolhido e um anel com os trinta
+perfis do atlas acende conforme cada jogo vai longe na direção pedida.
+
+### Direção de arte da edição Pokémon
+
+- **Paleta:** vermelho de Pokédex `#DC0A2D` no corpo do aparelho (fundo da
+  página, alto e rodapé); a tela em `#F1F5EA`, com trama de pontos, e apagada em
+  `#171A21`; grafite `#20232B` no texto, nas bordas e nas sombras duras; amarelo
+  `#FFCB05` nas teclas e no hexágono; azul `#29AAFD` na lente. As notas de 1 a 5
+  usam a escala da barra de vida, do vermelho ao verde. Os tipos aparecem nas 18
+  cores que os jogos usam.
+- **Tipografia:** M PLUS Rounded 1c para títulos e texto; DotGothic16 só para
+  números e leituras curtas da tela (ano, número da Pokédex, valor de atributo).
+- **O aparelho:** o cabeçalho é o alto da Pokédex (lente, três luzes, o degrau
+  em diagonal); o conteúdo fica na tela, com moldura escura e o canto de baixo
+  cortado; o rodapé tem o direcional e a grade do alto-falante.
+- **Peças dos jogos:** caixa de texto branca com sombra dura para o que o atlas
+  fala; a seta do menu nas opções da bússola e nos resultados da busca; a
+  setinha de "continua" na entrada da Pokédex; a base de batalha sob a arte de
+  cada espécie; barras de vida nos atributos.
+- **Cartas das regiões:** mar azul e terra do verde ao marrom, como no mapa dos
+  jogos.
+
+### O que mudou fora do visual
+
+- O quiz diário saiu, com os testes dele; `/quiz/` redireciona para os desafios.
+- O montador de time perdeu a tabela de 18 colunas. Cada vaga lista o que o
+  Pokémon recebe em quádruplo, em dobro, pela metade, por um quarto e do que é
+  imune; a leitura do time tem quatro grupos (buracos, sem resposta, de que o
+  time apanha, o que ele segura), com a contagem de quantos do time em cada tipo.
+- A edição Pokémon tem a sua folha de estilo (`src/pokedex.css`); a do Cobblemon
+  ficou em `src/estilo.css`, sem as regras que só a outra edição usava.
+- Saíram `relevo.js` e `ilha-viva.js`. O que o script de cartas ainda precisa
+  (a malha e as curvas de nível) foi para `scripts/malha.mjs`.
+
+### Trava anti-repetição
+
+Diferente das duas construções anteriores do registro em abertura (ficha de
+Pokédex com tampas que se abrem), pico (hexágono que muda de forma e anel de
+perfis), assinatura (hexágono no lugar da ilha) e paleta (vermelho, amarelo e
+azul sobre tela clara). A estrutura das cenas é parecida com a da primeira
+construção.

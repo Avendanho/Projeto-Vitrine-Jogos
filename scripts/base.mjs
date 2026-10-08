@@ -1,7 +1,9 @@
 /* O que todos os modelos de página compartilham: cores, dados gerados e pequenas utilidades de texto. */
 import { readFileSync } from "node:fs";
 
-export const MAR = "#D2E1DF", TINTA = "#0F2A3A", NOITE = "#0C2733", PAPEL = "#F1E8CF";
+/* As cores da edição Pokémon que os modelos precisam conhecer: a tela clara do aparelho, a tinta dela, a tela
+ * apagada (a cena escura da abertura) e o texto claro sobre ela. O resto está em src/pokedex.css. */
+export const MAR = "#F1F5EA", TINTA = "#20232B", NOITE = "#171A21", PAPEL = "#F1F5EA", VERMELHO = "#DC0A2D", AMARELO = "#FFCB05";
 
 const lerDados = (nome) => JSON.parse(readFileSync(new URL(`../dados/${nome}`, import.meta.url), "utf8"));
 export const POKEDEX = lerDados("pokedex.json");     // gerado por scripts/pokedex.mjs
@@ -27,6 +29,8 @@ export const ORDEM_TIPOS = ["Normal", "Fogo", "Água", "Planta", "Elétrico", "G
 export const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 export const semAcento = (t) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 export const maiuscula = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+/* O selo de um tipo, na cor dele (src/pokedex.css). */
+export const selo = (t) => `<span class="tipo" data-tipo="${semAcento(t)}">${t}</span>`;
 
 const EXTENSO = ["zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove", "dez", "onze", "doze", "treze",
   "catorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove", "vinte"];

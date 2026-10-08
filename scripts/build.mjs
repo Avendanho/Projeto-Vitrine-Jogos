@@ -7,7 +7,7 @@ import { JOGOS } from "../dados/jogos.mjs";
 import { ESPECIES } from "../dados/especies.mjs";
 import { REGIOES, CONSOLES, ESTILOS, PEDIDOS, MAPAS, ROTAS } from "../dados/atlas.mjs";
 import { terrenoSVG } from "./cenario.mjs";
-import { MAR, TINTA, POKEDEX, FICHAS, CARTAS, COBBLEMON } from "./base.mjs";
+import { POKEDEX, FICHAS, CARTAS, COBBLEMON } from "./base.mjs";
 import { paginaPokedex, paginaEspecie, TODAS_AS_ESPECIES } from "./paginas-pokedex.mjs";
 import {
   paginaCobblemonInicio, paginaCobblemonPokemon, paginaCobblemonEspecie, paginaCobblemonItens,
@@ -16,7 +16,7 @@ import {
 import { paginaCompararPokemon, paginaTime, paginaDiario } from "./paginas-ferramentas.mjs";
 import { moduloEspecies, moduloTipos, moduloJogos, moduloSpawns, moduloBusca } from "./dados-navegador.mjs";
 import { paginaDesafios, paginaDesafio, dadosDaRoleta, TODOS_OS_DESAFIOS, enderecoDoDesafio } from "./paginas-desafios.mjs";
-import { svgIlha, valoresDe, sementeDe, malhaQuadrada, EIXOS } from "../src/js/relevo.js";
+import { svgHexagono, gradeDoHexagono, valoresDe, EIXOS, TEMAS } from "../src/js/hexagono.js";
 import {
   paginaInicio, paginaJogo, paginaLinha, paginaComparar, paginaBussola,
   paginaRegiao, paginaRegioes, pagina404, dadosDoNavegador, DEMO_COMPARAR
@@ -93,7 +93,8 @@ async function escrever(caminho, conteudo) {
   await writeFile(destino, conteudo, "utf8");
 }
 
-const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="${MAR}"/><path d="M14 36c-2-12 8-22 20-22s20 6 18 20-12 18-22 17-14-6-16-15Z" fill="#BFD4A4" stroke="${TINTA}" stroke-width="3"/><path d="M24 34c0-7 6-11 12-10s9 5 8 11-6 8-11 8-9-3-9-9Z" fill="#EEDDA6" stroke="${TINTA}" stroke-opacity=".45" stroke-width="2"/><circle cx="35" cy="33" r="4.5" fill="#C4391F"/></svg>`;
+/* O ícone da aba: o canto do aparelho, com a lente azul e duas luzes. */
+const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#DC0A2D"/><path d="M0 46h30l10-9h24v13a14 14 0 0 1-14 14H14A14 14 0 0 1 0 50Z" fill="#9C0A22"/><circle cx="24" cy="23" r="15" fill="#fff" stroke="#20232B" stroke-width="3"/><circle cx="24" cy="23" r="10.5" fill="#29AAFD"/><circle cx="20" cy="19" r="3.4" fill="#C9ECFF"/><circle cx="48" cy="13" r="4.5" fill="#FFCB05" stroke="#20232B" stroke-width="2"/><circle cx="48" cy="27" r="4.5" fill="#45B25D" stroke="#20232B" stroke-width="2"/></svg>`;
 
 /* ---------- build ---------- */
 
@@ -104,6 +105,7 @@ await mkdir(DIST, { recursive: true });
 
 await Promise.all([
   cp(join(SRC, "estilo.css"), join(DIST, "estilo.css")),
+  cp(join(SRC, "pokedex.css"), join(DIST, "pokedex.css")),
   cp(join(SRC, "js"), join(DIST, "js"), { recursive: true }),
   cp(join(SRC, "fontes"), join(DIST, "fontes"), { recursive: true }),
   cp(join(SRC, "arte"), join(DIST, "arte"), { recursive: true }),
@@ -111,15 +113,16 @@ await Promise.all([
   cp(join(SRC, "modelos3d"), join(DIST, "modelos3d"), { recursive: true })
 ]);
 
-const malha = malhaQuadrada();
+/* O hexágono de cada jogo, na tela clara e na tela apagada; a grade sozinha e os dois contornos da demonstração de comparar. */
 for (const j of JOGOS) {
-  const v = valoresDe(j.atributos), s = sementeDe(j.slug);
-  await escrever(`ilhas/${j.slug}.svg`, svgIlha(v, s, "dia", malha));
-  await escrever(`ilhas/${j.slug}-noite.svg`, svgIlha(v, s, "noite", malha));
+  const v = valoresDe(j.atributos);
+  await escrever(`hex/${j.slug}.svg`, svgHexagono(v, "tela"));
+  await escrever(`hex/${j.slug}-noite.svg`, svgHexagono(v, "noite"));
 }
 const [demoA, demoB] = DEMO_COMPARAR.map((slug) => JOGOS.find((j) => j.slug === slug));
-await escrever("ilhas/demo-a.svg", svgIlha(valoresDe(demoA.atributos), sementeDe(demoA.slug), "#1F7BA6", malha));
-await escrever("ilhas/demo-b.svg", svgIlha(valoresDe(demoB.atributos), sementeDe(demoB.slug), "#C4391F", malha));
+await escrever("hex/grade.svg", `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" width="480" height="480">${gradeDoHexagono(480, TEMAS.tela)}</svg>`);
+await escrever("hex/demo-a.svg", svgHexagono(valoresDe(demoA.atributos), "#2F6FDB"));
+await escrever("hex/demo-b.svg", svgHexagono(valoresDe(demoB.atributos), "#DC0A2D"));
 
 for (const r of REGIOES) await escrever(`cartas/${r.id}.svg`, terrenoSVG(CARTAS[r.id]));
 

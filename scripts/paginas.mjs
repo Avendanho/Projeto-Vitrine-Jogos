@@ -4,9 +4,9 @@ import { JOGOS } from "../dados/jogos.mjs";
 import { ESPECIES } from "../dados/especies.mjs";
 import { REGIOES, CONSOLES, ESTILOS, TIPOS, PEDIDOS, MARCOS, HORIZONTE, ROMANOS, MAPAS } from "../dados/atlas.mjs";
 import { PERGUNTAS } from "../dados/quiz.mjs";
-import { EIXOS, TINTAS, valoresDe, encaixe } from "../src/js/relevo.js";
-import { perfilRegiao, rosaDosVentos, posicoesDosEixos, reguaDeAnos } from "./cenario.mjs";
-import { MAR, TINTA, NOITE, PAPEL, POKEDEX, FICHAS, CARTAS, ORDEM_TIPOS, esc, semAcento, maiuscula, extenso, numero, enderecoEspecie } from "./base.mjs";
+import { EIXOS, valoresDe, encaixe } from "../src/js/hexagono.js";
+import { perfilRegiao, posicoesDosEixos, reguaDeAnos } from "./cenario.mjs";
+import { MAR, TINTA, NOITE, PAPEL, VERMELHO, AMARELO, POKEDEX, FICHAS, CARTAS, ORDEM_TIPOS, esc, semAcento, maiuscula, extenso, numero, enderecoEspecie, selo } from "./base.mjs";
 import { rotasDaCarta, lugaresDaCarta, tracosDaCarta, caixaCarta } from "./carta.mjs";
 
 /* ---------- utilidades ---------- */
@@ -27,9 +27,10 @@ function vizinhos(j, n = 3) {
     .sort((a, b) => b.s - a.s).slice(0, n).map((x) => x.o);
 }
 
-export function ilha(j, opc = {}) {
+/* O hexágono de atributos de um jogo, como imagem (gerada no build em dist/hex/). */
+export function hex(j, opc = {}) {
   const { noite = false, classe = "", alt = "", preguica = true } = opc;
-  return `<img class="ilha ${classe}" src="/ilhas/${j.slug}${noite ? "-noite" : ""}.svg" alt="${esc(alt)}" width="480" height="480"${preguica ? ' loading="lazy" decoding="async"' : ""}>`;
+  return `<img class="hex ${classe}" src="/hex/${j.slug}${noite ? "-noite" : ""}.svg" alt="${esc(alt)}" width="480" height="480"${preguica ? ' loading="lazy" decoding="async"' : ""}>`;
 }
 
 function prancha(id) {
@@ -43,11 +44,11 @@ function prancha(id) {
 </figure>`;
 }
 
-function itemIlha(j, opc = {}) {
-  return `<a class="ilha-item" href="/jogos/${j.slug}/">
-  ${ilha(j, opc)}
-  <span class="ilha-nome">${esc(j.curto)}</span>
-  <span class="ilha-meta">${j.ano}, ${esc(consolesDe(j))}</span>
+function itemHex(j, opc = {}) {
+  return `<a class="hex-item" href="/jogos/${j.slug}/">
+  ${hex(j, opc)}
+  <span class="hex-nome">${esc(j.curto)}</span>
+  <span class="hex-meta">${j.ano}, ${esc(consolesDe(j))}</span>
 </a>`;
 }
 
@@ -60,10 +61,12 @@ function itemIlha(j, opc = {}) {
  *   registra uma promessa rejeitada. Esse aviso, e só ele, é silenciado. */
 const ANTES_DE_APARECER = `document.documentElement.classList.add("js");addEventListener("unhandledrejection",(e)=>{if(e.reason&&e.reason.name==="AbortError"&&/Transition was skipped/.test(e.reason.message))e.preventDefault()})`;
 
-/* O atlas tem duas edições, cada uma com as suas abas, o seu tema e a sua chamada principal. */
+/* O atlas tem duas edições, cada uma com as suas abas, a sua chamada principal e a sua folha de estilo:
+ * a edição Pokémon é um aparelho de Pokédex (src/pokedex.css); a do Cobblemon, um mapa em blocos (src/estilo.css). */
 export const EDICOES = {
   pokemon: {
-    nome: "Pokémon", inicio: "/", cor: MAR, sufixo: "PokéAtlas",
+    nome: "Pokémon", inicio: "/", cor: VERMELHO, sufixo: "PokéAtlas",
+    estilo: "pokedex", fontes: ["mplus-500", "mplus-800"],
     lema: "Um guia para descobrir qual jogo de Pokémon combina com você.",
     acao: { href: "/bussola/", texto: "Abrir a bússola" },
     nav: [
@@ -76,11 +79,12 @@ export const EDICOES = {
     ],
     avisos: [
       "Projeto de fã, sem fins lucrativos e sem vínculo com Nintendo, Game Freak, Creatures ou The Pokémon Company. Pokémon e os nomes dos jogos pertencem aos seus donos.",
-      "As notas de cada jogo são leitura editorial do atlas, não dado oficial. A arte dos Pokémon é a oficial, obtida do repositório público PokeAPI/sprites e reimpressa em gravura; as listas de Pokédex vêm da PokéAPI. As cartas das regiões são redesenhos do atlas sobre os mapas dos jogos. Fontes: Archivo e Alegreya."
+      "As notas de cada jogo são leitura editorial do atlas, não dado oficial. A arte dos Pokémon é a oficial, obtida do repositório público PokeAPI/sprites e reimpressa em gravura; as listas de Pokédex vêm da PokéAPI. As cartas das regiões são redesenhos do atlas sobre os mapas dos jogos. Fontes: M PLUS Rounded 1c e DotGothic16."
     ]
   },
   cobblemon: {
     nome: "Cobblemon", inicio: "/cobblemon/", cor: "#DCCB9F", sufixo: "PokéAtlas, edição Cobblemon",
+    estilo: "estilo", fontes: ["archivo", "pixelify"],
     lema: "O atlas do Cobblemon: o que nasce onde, o que se fabrica e jeitos diferentes de jogar.",
     acao: { href: "/cobblemon/desafios/#roleta", texto: "Sortear um desafio" },
     nav: [
@@ -122,9 +126,8 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
 <meta property="og:locale" content="pt_BR">
 <script>${ANTES_DE_APARECER}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/fontes/archivo.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fontes/${edicao === "cobblemon" ? "pixelify" : "alegreya"}.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/estilo.css">
+${ed.fontes.map((f) => `<link rel="preload" href="/fontes/${f}.woff2" as="font" type="font/woff2" crossorigin>`).join("\n")}
+<link rel="stylesheet" href="/${ed.estilo}.css">
 </head>
 <body class="edicao-${edicao} ${classe}">
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -182,47 +185,46 @@ function folhaRegiao(r) {
     <p class="folha-texto">${esc(r.texto)}</p>
     <div class="folha-iniciais">${r.iniciais.map(prancha).join("")}</div>
     <ul class="folha-jogos">
-      ${jogos.map((j) => `<li><a href="/jogos/${j.slug}/">${ilha(j)}<span><span class="ilha-nome">${esc(j.curto)}</span><span class="ilha-meta">${j.ano}</span></span></a></li>`).join("\n      ")}
+      ${jogos.map((j) => `<li><a href="/jogos/${j.slug}/">${hex(j)}<span><span class="hex-nome">${esc(j.curto)}</span><span class="hex-meta">${j.ano}</span></span></a></li>`).join("\n      ")}
     </ul>
   </div>
   ${caixaCarta(r.id, { ligacao: `/regioes/${r.id}/`, rotulo: `Abrir a carta de ${r.nome}` })}
 </article>`;
 }
 
-/* Posições do arquipélago noturno: uma grade frouxa, com cada ilha um pouco fora do lugar. */
-function arquipelago() {
-  const colunas = 6, linhas = Math.ceil(ORDENADOS.length / colunas);
-  return ORDENADOS.map((j, i) => {
-    const c = i % colunas, l = Math.floor(i / colunas);
-    const dx = ((i * 37) % 11 - 5) * 0.9, dy = ((i * 53) % 9 - 4) * 1.1;
-    const x = ((c + 0.5) / colunas) * 100 + dx * 0.5, y = ((l + 0.5) / linhas) * 100 + dy * 0.5;
-    const lado = x < 18 ? " nome-esquerda" : x > 82 ? " nome-direita" : "";
-    return `<span class="pico-ilha${lado}" data-slug="${j.slug}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">${ilha(j, { noite: true })}${ilha(j, { classe: "pico-ilha-acesa" })}<span class="pico-ilha-nome">${esc(j.curto)}</span></span>`;
-  }).join("");
-}
+/* Os nomes dos seis eixos em volta de um hexágono, cada um no seu vértice. */
+const eixosEmVolta = (raio = 50) => posicoesDosEixos(raio).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("");
 
 export function paginaInicio() {
   const primeiro = porSlug[DESTAQUES_ABERTURA[0]];
   const [da, db] = DEMO_COMPARAR.map((s) => porSlug[s]);
   const pedidos = EIXOS.map((e) => {
     const p = PEDIDOS[e.id], j = porSlug[p.eleito];
-    return `<li data-eixo="${e.id}">
+    return `<li data-eixo="${e.id}" data-eleito="${j.slug}">
         <p class="pico-frase">“${esc(p.frase)}”</p>
-        <p class="pico-resposta">O cume mais alto em ${e.nome.toLowerCase()} é <a href="/jogos/${j.slug}/">${esc(j.curto)}</a>.</p>
+        <p class="pico-resposta">O vértice mais distante em ${e.nome.toLowerCase()} é o de <a href="/jogos/${j.slug}/">${esc(j.curto)}</a>.</p>
       </li>`;
   }).join("\n      ");
 
   const corpo = `
 <section class="abertura" ${DIA} aria-labelledby="t-abertura">
-  <canvas class="abertura-mar" aria-hidden="true"></canvas>
-  <div class="abertura-eixos" aria-hidden="true">${EIXOS.map((e) => `<span data-eixo="${e.id}">${e.nome}</span>`).join("")}</div>
+  <div class="abertura-visor">
+    <div class="hex-vivo abertura-hex">
+      <canvas aria-hidden="true"></canvas>
+      ${eixosEmVolta(50)}
+    </div>
+    <p class="abertura-leitura" aria-hidden="true"><span data-leitura-numero>01</span><span>de ${String(DESTAQUES_ABERTURA.length).padStart(2, "0")}</span><span data-leitura-nota></span></p>
+  </div>
   <div class="abertura-texto">
     <h1 class="marca-gigante" id="t-abertura">PokéAtlas</h1>
-    <p class="abertura-lema" data-entra="palavras" data-ritmo="1200">Todo jogo de Pokémon é uma ilha. Uma delas tem o seu formato.</p>
-  </div>
-  <div class="abertura-legenda">
-    <p>No mapa agora, <a href="/jogos/${primeiro.slug}/" data-ilha-atual>${esc(primeiro.curto)}</a>.</p>
-    <p>Seis direções, seis qualidades. Morro alto e costa distante querem dizer nota alta.</p>
+    <p class="abertura-lema" data-entra="palavras" data-ritmo="1200">Todo jogo de Pokémon tem um perfil. Um deles é o seu.</p>
+    <div class="abertura-legenda">
+      <p>Na tela agora, <a href="/jogos/${primeiro.slug}/" data-perfil-atual>${esc(primeiro.curto)}</a>.</p>
+      <p>Seis vértices, seis qualidades. Quanto mais longe do centro, mais alta a nota.</p>
+    </div>
+    <div class="abertura-teclas" role="group" aria-label="Pôr outro perfil na tela">
+      ${DESTAQUES_ABERTURA.map((slug, i) => `<button type="button" data-perfil="${slug}" aria-pressed="${i === 0}">${esc(porSlug[slug].curto)}</button>`).join("\n      ")}
+    </div>
   </div>
 </section>
 
@@ -249,7 +251,7 @@ export function paginaInicio() {
       <div><dd data-entra="contar" data-ate="${ANO_ATUAL - ORDENADOS[0].ano}">${ANO_ATUAL - ORDENADOS[0].ano}</dd><dt>anos desde Red e Green</dt></div>
       <div><dd data-entra="contar" data-ate="${Math.max(...REGIOES.map((r) => r.geracao))}">${Math.max(...REGIOES.map((r) => r.geracao))}</dd><dt>gerações lançadas</dt></div>
       <div><dd data-entra="contar" data-ate="${REGIOES.length}">${REGIOES.length}</dd><dt>regiões mapeadas</dt></div>
-      <div><dd data-entra="contar" data-ate="${JOGOS.length}">${JOGOS.length}</dd><dt>ilhas neste atlas</dt></div>
+      <div><dd data-entra="contar" data-ate="${JOGOS.length}">${JOGOS.length}</dd><dt>jogos neste atlas</dt></div>
     </dl>
   </div>
   <div class="tempo-regua" data-entra="surgir">
@@ -260,17 +262,25 @@ export function paginaInicio() {
 
 <section class="pico" data-cena data-telas="7.5" data-fundo="${NOITE}" data-tinta="${PAPEL}" aria-labelledby="t-pico">
   <div class="palco">
-    <div class="pico-mapa" aria-hidden="true">
-      <div class="pico-arquipelago">${arquipelago()}</div>
-      <div class="pico-bussola">
-        ${rosaDosVentos()}
-        ${posicoesDosEixos(56).map((e) => `<span class="pico-direcao" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
+    <div class="pico-visor" aria-hidden="true">
+      <div class="hex-vivo pico-hex">
+        <canvas></canvas>
+        ${eixosEmVolta(50)}
       </div>
+      <ul class="pico-jogos">
+        ${ORDENADOS.map((j, i) => {
+          // os trinta perfis ficam num anel em volta do hexágono, em ordem de lançamento, a partir do alto;
+          // o nome de cada um abre para dentro do anel
+          const a = (i / ORDENADOS.length) * Math.PI * 2 - Math.PI / 2, x = Math.cos(a), y = Math.sin(a);
+          const lado = [x < -0.4 ? "nome-esquerda" : x > 0.4 ? "nome-direita" : "", y > 0.3 ? "nome-acima" : ""].filter(Boolean).join(" ");
+          return `<li data-slug="${j.slug}"${lado ? ` class="${lado}"` : ""} style="left:${(50 + x * 45.5).toFixed(2)}%;top:${(50 + y * 45.5).toFixed(2)}%"><img src="/hex/${j.slug}-noite.svg" alt="" width="96" height="96" loading="lazy" decoding="async"><span>${esc(j.curto)}</span></li>`;
+        }).join("")}
+      </ul>
     </div>
     <div class="pico-texto">
-      <h2 id="t-pico">${maiuscula(extenso(JOGOS.length))} ilhas, uma agulha</h2>
+      <h2 id="t-pico">${maiuscula(extenso(JOGOS.length))} jogos, um hexágono</h2>
       <div class="pico-roteiro">
-        <p class="pico-abre">A agulha aponta para o que se procura, e só as ilhas altas naquela direção continuam acesas.</p>
+        <p class="pico-abre">Cada pedido puxa um vértice. Acendem os jogos que vão longe naquela direção, e o hexágono mostra o que o atlas escolheria.</p>
         <ol class="pico-pedidos">
       ${pedidos}
         </ol>
@@ -286,7 +296,7 @@ export function paginaInicio() {
 <section class="ferramentas" ${DIA}>
   <div class="ferramenta ferramenta-pokedex">
     <ul class="mosaico mosaico-especies" aria-label="Algumas espécies da Pokédex">
-      ${FAVORITOS.map(([e, forca]) => `<li class="mosaico-ilha" data-deriva="${forca}"><a href="${enderecoEspecie(e)}" aria-label="${esc(FICHAS[e].nome)}"><img src="/arte/mini/${e}.webp" alt="" width="184" height="184" loading="lazy" decoding="async"></a></li>`).join("\n      ")}
+      ${FAVORITOS.map(([e, forca]) => `<li class="mosaico-item" data-deriva="${forca}"><a href="${enderecoEspecie(e)}" aria-label="${esc(FICHAS[e].nome)}"><img src="/arte/mini/${e}.webp" alt="" width="184" height="184" loading="lazy" decoding="async"></a></li>`).join("\n      ")}
     </ul>
     <div class="ferramenta-texto">
       <h2>A Pokédex inteira, em gravura</h2>
@@ -303,28 +313,29 @@ export function paginaInicio() {
   <div class="ferramenta ferramenta-comparar">
     <div class="ferramenta-texto">
       <h2>Na dúvida entre dois, sobreponha</h2>
-      <p class="prosa">Duas ilhas, duas tintas. Onde as costas coincidem, os jogos se parecem. Onde uma avança sozinha, está a diferença.</p>
+      <p class="prosa">Dois perfis, duas cores. Onde os contornos coincidem, os jogos se parecem. Onde um avança sozinho, está a diferença.</p>
       <a class="botao botao-contorno" href="/comparar/?a=${da.slug}&amp;b=${db.slug}">Comparar dois jogos</a>
     </div>
     <figure class="sobreposicao">
-      <div class="sobreposicao-ilhas" aria-hidden="true">
-        <img src="/ilhas/demo-a.svg" alt="" width="480" height="480" loading="lazy" data-segue="14">
-        <img src="/ilhas/demo-b.svg" alt="" width="480" height="480" loading="lazy" data-segue="-14">
+      <div class="sobreposicao-hex" aria-hidden="true">
+        <img src="/hex/grade.svg" alt="" width="480" height="480" loading="lazy">
+        <img src="/hex/demo-a.svg" alt="" width="480" height="480" loading="lazy" data-segue="10">
+        <img src="/hex/demo-b.svg" alt="" width="480" height="480" loading="lazy" data-segue="-10">
       </div>
       <figcaption><span class="serie serie-a"></span>${esc(da.curto)} <span class="serie serie-b"></span>${esc(db.curto)}</figcaption>
     </figure>
   </div>
 </section>
 
-<section class="fechamento" ${DIA} aria-labelledby="t-fechamento">
-  <h2 id="t-fechamento" data-entra="palavras" data-ritmo="1400">Em algum ponto deste mar existe uma ilha com o seu formato.</h2>
-  <p class="prosa">${maiuscula(extenso(PERGUNTAS.length))} perguntas. O mapa se desenha enquanto você responde.</p>
+<section class="fechamento" data-fundo="${AMARELO}" data-tinta="${TINTA}" aria-labelledby="t-fechamento">
+  <h2 id="t-fechamento" data-entra="palavras" data-ritmo="1400">Um destes ${extenso(JOGOS.length)} jogos tem o seu perfil.</h2>
+  <p class="prosa">${maiuscula(extenso(PERGUNTAS.length))} perguntas. O hexágono se desenha enquanto você responde.</p>
   <a class="botao botao-grande" href="/bussola/">Abrir a bússola</a>
 </section>`;
 
   return moldura({
     titulo: "PokéAtlas — descubra qual jogo de Pokémon combina com você",
-    descricao: "Um atlas visual dos jogos de Pokémon. Explore as regiões e a Pokédex, compare títulos e use a bússola para encontrar o jogo que tem o seu formato.",
+    descricao: "Um atlas visual dos jogos de Pokémon. Explore as regiões e a Pokédex, compare títulos e use a bússola para encontrar o jogo que tem o seu perfil.",
     caminho: "/", classe: "pagina-inicio", corpo, modulo: "inicio", rolagem: true
   });
 }
@@ -362,24 +373,24 @@ export function paginaJogo(j) {
         ${ficha.map(([t, d]) => `<div><dt>${t}</dt><dd>${d}</dd></div>`).join("\n        ")}
       </dl>
     </div>
-    <figure class="jogo-mapa">
-      <div class="mapa-vivo mapa-do-jogo">
-        ${ilha(j, { preguica: false, alt: `Ilha de ${j.curto}. Notas: ${resumo}.` })}
+    <figure class="jogo-hex">
+      <div class="hex-vivo hex-do-jogo">
+        ${hex(j, { preguica: false, alt: `Hexágono de atributos de ${j.curto}. Notas: ${resumo}.` })}
         <canvas aria-hidden="true"></canvas>
-        ${posicoesDosEixos(50).map((e) => `<span class="mapa-direcao" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
+        ${posicoesDosEixos(50).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
       </div>
     </figure>
   </section>
 
-  <section class="jogo-relevo" aria-labelledby="t-relevo">
-    <h2 id="t-relevo">Leitura do relevo</h2>
+  <section class="jogo-leitura" aria-labelledby="t-leitura">
+    <h2 id="t-leitura">Leitura do perfil</h2>
     <p class="nota-editorial">Notas de 1 a 5, na avaliação do atlas.</p>
-    <ul class="relevo-lista">
+    <ul class="leitura-lista">
       ${eixos.map((e) => `<li data-eixo="${e.id}">
-        <span class="relevo-eixo">${e.nome}</span>
+        <span class="leitura-eixo">${e.nome}</span>
         ${barra(e.nota)}
-        <span class="relevo-nota"><span class="so-leitor">nota </span>${e.nota}<span class="so-leitor"> de 5</span></span>
-        <span class="relevo-texto">${esc(j.notas[e.id] ?? `${maiuscula(e.nota >= 4 ? PEDIDOS[e.id].alto : e.nota <= 2 ? PEDIDOS[e.id].baixo : "fica na média do arquipélago")}.`)}</span>
+        <span class="leitura-nota"><span class="so-leitor">nota </span>${e.nota}<span class="so-leitor"> de 5</span></span>
+        <span class="leitura-texto">${esc(j.notas[e.id] ?? `${maiuscula(e.nota >= 4 ? PEDIDOS[e.id].alto : e.nota <= 2 ? PEDIDOS[e.id].baixo : "fica na média dos jogos do atlas")}.`)}</span>
       </li>`).join("\n      ")}
     </ul>
   </section>
@@ -418,9 +429,9 @@ export function paginaJogo(j) {
   ${secaoPokedex(j)}
 
   <section class="jogo-vizinhas" aria-labelledby="t-vizinhas">
-    <h2 id="t-vizinhas">Ilhas de formato parecido</h2>
-    <ul class="arquipelago arquipelago-curto">
-      ${perto.map((o) => `<li>${itemIlha(o)}<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${o.slug}">Comparar as duas</a></li>`).join("\n      ")}
+    <h2 id="t-vizinhas">Jogos de perfil parecido</h2>
+    <ul class="estante estante-curta">
+      ${perto.map((o) => `<li>${itemHex(o)}<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${o.slug}">Comparar os dois</a></li>`).join("\n      ")}
     </ul>
   </section>
 
@@ -432,7 +443,7 @@ export function paginaJogo(j) {
 
   return moldura({
     titulo: j.titulo, caminho: `/jogos/${j.slug}/`, classe: "pagina-jogo", corpo, modulo: "jogo", extra: j.pokedex ? "pokedex" : null,
-    descricao: `${j.chamada} Veja para quem é ${j.curto}, o relevo do jogo e títulos parecidos.`
+    descricao: `${j.chamada} Veja para quem é ${j.curto}, o perfil do jogo e títulos parecidos.`
   });
 }
 
@@ -453,7 +464,7 @@ export function paginaLinha() {
       <h2 class="linha-rotulo">${ano}</h2>
       ${marco ? `<p class="linha-marco">${esc(marco.texto)}</p>` : ""}
       ${estreias.length ? `<p class="linha-estreia">Primeiro jogo do atlas ${estreias.length > 1 ? "nestas plataformas" : "nesta plataforma"}: ${estreias.map(esc).join(" e ")}.</p>` : ""}
-      ${jogos.length ? `<ul class="linha-jogos">${jogos.map((j) => `<li data-tipo="${j.tipo}"><a href="/jogos/${j.slug}/">${ilha(j)}<span class="linha-jogo-texto"><span class="ilha-nome">${esc(j.curto)}</span><span class="ilha-meta">${esc(nome(TIPOS, j.tipo))}, ${esc(consolesDe(j))}</span><span class="linha-chamada">${esc(j.chamada)}</span></span></a></li>`).join("")}</ul>` : ""}
+      ${jogos.length ? `<ul class="linha-jogos">${jogos.map((j) => `<li data-tipo="${j.tipo}"><a href="/jogos/${j.slug}/">${hex(j)}<span class="linha-jogo-texto"><span class="hex-nome">${esc(j.curto)}</span><span class="hex-meta">${esc(nome(TIPOS, j.tipo))}, ${esc(consolesDe(j))}</span><span class="linha-chamada">${esc(j.chamada)}</span></span></a></li>`).join("")}</ul>` : ""}
     </li>`;
   }).join("\n    ");
 
@@ -500,21 +511,21 @@ export function paginaComparar() {
   const corpo = `
 <section class="cabecalho">
   <h1>Comparar</h1>
-  <p class="prosa">Escolha dois jogos, ou três, e veja as ilhas uma sobre a outra. Onde as costas coincidem, eles se parecem.</p>
+  <p class="prosa">Escolha dois jogos, ou três, e veja os perfis um sobre o outro. Onde os contornos coincidem, eles se parecem.</p>
   <p><a class="ligacao" href="/comparar/pokemon/">Comparar dois Pokémon, atributo por atributo</a></p>
 </section>
 <section class="comparar">
-  <noscript><p class="prosa">A comparação precisa de JavaScript para sobrepor as ilhas. Sem ele, cada página de jogo, a partir da <a href="/linha-do-tempo/">linha do tempo</a>, traz as mesmas notas.</p></noscript>
+  <noscript><p class="prosa">A comparação precisa de JavaScript para sobrepor os perfis. Sem ele, cada página de jogo, a partir da <a href="/linha-do-tempo/">linha do tempo</a>, traz as mesmas notas.</p></noscript>
   <form class="comparar-escolha" aria-label="Jogos a comparar">
-    <label class="escolha escolha-a"><span><span class="serie serie-a"></span>Primeira ilha</span><select name="a">${opcoes(false)}</select></label>
-    <label class="escolha escolha-b"><span><span class="serie serie-b"></span>Segunda ilha</span><select name="b">${opcoes(false)}</select></label>
+    <label class="escolha escolha-a"><span><span class="serie serie-a"></span>Primeiro jogo</span><select name="a">${opcoes(false)}</select></label>
+    <label class="escolha escolha-b"><span><span class="serie serie-b"></span>Segundo jogo</span><select name="b">${opcoes(false)}</select></label>
     <label class="escolha escolha-c"><span><span class="serie serie-c"></span>Terceira, se quiser</span><select name="c">${opcoes(true)}</select></label>
   </form>
   <div class="comparar-grade">
-    <figure class="comparar-mapa">
-      <div class="mapa-vivo">
-        <canvas role="img" aria-label="Ilhas dos jogos escolhidos, sobrepostas"></canvas>
-        ${posicoesDosEixos(50).map((e) => `<span class="mapa-direcao" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
+    <figure class="comparar-hex">
+      <div class="hex-vivo">
+        <canvas role="img" aria-label="Perfis dos jogos escolhidos, sobrepostos"></canvas>
+        ${posicoesDosEixos(50).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
       </div>
       <figcaption class="comparar-chave" data-chave></figcaption>
     </figure>
@@ -533,7 +544,7 @@ export function paginaComparar() {
 
   return moldura({
     titulo: "Comparar", caminho: "/comparar/", classe: "pagina-comparar", corpo, modulo: "comparar",
-    descricao: "Compare dois ou três jogos de Pokémon: relevos sobrepostos, nota por nota e ficha lado a lado."
+    descricao: "Compare dois ou três jogos de Pokémon: perfis sobrepostos, nota por nota e ficha lado a lado."
   });
 }
 
@@ -548,22 +559,22 @@ export function paginaBussola() {
       <p class="bussola-passo" data-passo aria-live="polite">Pergunta 1 de ${PERGUNTAS.length}</p>
     </header>
     <div class="bussola-pergunta" data-pergunta>
-      <noscript><p class="prosa">A bússola precisa de JavaScript para desenhar o seu mapa. Enquanto isso, a <a href="/linha-do-tempo/">linha do tempo</a> mostra todas as ilhas.</p></noscript>
+      <noscript><p class="prosa">A bússola precisa de JavaScript para desenhar o seu perfil. Enquanto isso, a <a href="/linha-do-tempo/">linha do tempo</a> mostra todos os jogos.</p></noscript>
     </div>
     <div class="bussola-acoes">
       <button type="button" class="ligacao" data-voltar hidden>Voltar uma pergunta</button>
     </div>
   </div>
-  <figure class="bussola-mapa">
-    <div class="mapa-vivo">
-      <canvas role="img" aria-label="A sua ilha, que cresce a cada resposta"></canvas>
-      ${posicoesDosEixos(50).map((e) => `<span class="mapa-direcao" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
+  <figure class="bussola-hex">
+    <div class="hex-vivo">
+      <canvas role="img" aria-label="O seu perfil, que cresce a cada resposta"></canvas>
+      ${posicoesDosEixos(50).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
     </div>
-    <figcaption data-legenda>A sua ilha ainda está submersa. Cada resposta levanta um pedaço dela.</figcaption>
+    <figcaption data-legenda>O seu perfil ainda está em branco. Cada resposta puxa um vértice.</figcaption>
   </figure>
 </section>
 <section class="resultado" data-resultado hidden aria-labelledby="t-resultado">
-  <h2 id="t-resultado" tabindex="-1">As ilhas com o seu formato</h2>
+  <h2 id="t-resultado" tabindex="-1">Os jogos com o seu perfil</h2>
   <p class="prosa" data-resumo></p>
   <ol class="resultado-lista" data-lista></ol>
   <div class="resultado-acoes">
@@ -584,8 +595,8 @@ export function paginaBussola() {
 export function pagina404() {
   const corpo = `
 <section class="cabecalho cabecalho-perdido">
-  <h1>Esta ilha não está no mapa</h1>
-  <p class="prosa">O endereço não leva a lugar nenhum do atlas. A linha do tempo mostra todas as ilhas que existem.</p>
+  <h1>Este registro não está na Pokédex</h1>
+  <p class="prosa">O endereço não leva a lugar nenhum do atlas. A linha do tempo mostra todos os jogos que existem.</p>
   <p><a class="botao" href="/linha-do-tempo/">Ver todos os jogos</a></p>
 </section>`;
   return moldura({ titulo: "Página não encontrada", caminho: "/404", classe: "pagina-404", corpo, descricao: "Página não encontrada no PokéAtlas." });
@@ -619,7 +630,7 @@ function secaoPokedex(j) {
         const regiao = REGIAO_DA_LISTA[l.id];
         const forma = regiao && POKEDEX.formas[regiao][e];
         const [arte, ts] = forma || [e, POKEDEX.especies[e][1]];
-        return `<li data-nome="${esc(semAcento(nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="${enderecoEspecie(e)}"><span class="dex-arte"><img src="/arte/mini/${arte}.webp" data-cor="/arte/mini/${arte}-cor.webp" alt="" width="92" height="92" loading="lazy" decoding="async"></span><span class="dex-numero">${String(n).padStart(3, "0")}</span><span class="dex-nome">${esc(nome)}</span>${forma ? `<span class="dex-forma">forma de ${NOME_DA_REGIAO[regiao]}</span>` : ""}<span class="dex-tipos">${ts.join(", ")}</span></a></li>`;
+        return `<li data-nome="${esc(semAcento(nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="${enderecoEspecie(e)}"><span class="dex-arte"><img src="/arte/mini/${arte}.webp" data-cor="/arte/mini/${arte}-cor.webp" alt="" width="92" height="92" loading="lazy" decoding="async"></span><span class="dex-numero">${String(n).padStart(3, "0")}</span><span class="dex-nome">${esc(nome)}</span>${forma ? `<span class="dex-forma">forma de ${NOME_DA_REGIAO[regiao]}</span>` : ""}<span class="dex-tipos">${ts.map(selo).join(" ")}</span></a></li>`;
       }).join("")}
     </ol>`;
   return `<section class="jogo-pokedex" aria-labelledby="t-pokedex" data-pokedex>
@@ -696,8 +707,8 @@ export function paginaRegiao(r) {
 
   <section class="regiao-jogos" aria-labelledby="t-jogos">
     <h2 id="t-jogos">${jogos.length === 1 ? "O jogo que se passa aqui" : "Jogos que se passam aqui"}</h2>
-    <ul class="arquipelago arquipelago-curto">
-      ${jogos.map((j) => `<li>${itemIlha(j)}${j.pokedex ? `<a class="ligacao" href="/jogos/${j.slug}/#t-pokedex">Ver a Pokédex</a>` : ""}</li>`).join("\n      ")}
+    <ul class="estante estante-curta">
+      ${jogos.map((j) => `<li>${itemHex(j)}${j.pokedex ? `<a class="ligacao" href="/jogos/${j.slug}/#t-pokedex">Ver a Pokédex</a>` : ""}</li>`).join("\n      ")}
     </ul>
   </section>
 
@@ -717,7 +728,7 @@ export function paginaRegiao(r) {
 
 /* A chave das cartas: as cinco faixas de altitude e os três símbolos. */
 function chaveDasCartas() {
-  const faixas = TINTAS.dia.terra.map((cor) => `<span style="background:${cor}"></span>`).join("");
+  const faixas = [1, 2, 3, 4, 5].map((n) => `<span style="background:var(--terra-${n})"></span>`).join("");
   return `<li class="regioes-chave">
       <h2>Como ler as cartas</h2>
       <dl>
@@ -741,7 +752,7 @@ export function paginaRegioes() {
     ${REGIOES.map((r) => `<li${CARTAS[r.id].proporcao < 0.7 ? ' class="regioes-alta"' : ""}>
       ${caixaCarta(r.id, { ligacao: `/regioes/${r.id}/`, rotulo: `Carta de ${r.nome}` })}
       <a class="regioes-nome" href="/regioes/${r.id}/">${r.nome}</a>
-      <span class="ilha-meta">Geração ${ROMANOS[r.geracao]}. ${esc(r.inspiracao)}</span>
+      <span class="hex-meta">Geração ${ROMANOS[r.geracao]}. ${esc(r.inspiracao)}</span>
     </li>`).join("\n    ")}
     ${chaveDasCartas()}
   </ul>

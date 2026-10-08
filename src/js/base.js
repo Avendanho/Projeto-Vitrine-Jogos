@@ -60,8 +60,8 @@ document.addEventListener("click", (e) => {
     const arte = ligacao.querySelector(".dex-arte") || ligacao.querySelector('img[src^="/arte/mini/"]');
     if (arte) arte.style.viewTransitionName = "especie";
   } else if (destino.startsWith("/jogos/")) {
-    const ilha = ligacao.querySelector("img.ilha");
-    if (ilha) ilha.style.viewTransitionName = "ilha";
+    const perfil = ligacao.querySelector("img.hex");
+    if (perfil) perfil.style.viewTransitionName = "perfil";
   }
 });
 

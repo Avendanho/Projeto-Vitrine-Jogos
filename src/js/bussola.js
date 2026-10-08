@@ -1,21 +1,20 @@
-/* Bússola: cada resposta esculpe a ilha do visitante; no fim, as três ilhas
- * do catálogo com o formato mais parecido, e o porquê de cada uma. */
-import { EIXOS, encaixe, sementeDe } from "./relevo.js";
+/* Bússola: cada resposta puxa um vértice do perfil do visitante; no fim, os três jogos
+ * do catálogo com o perfil mais parecido, e o porquê de cada um. */
+import { EIXOS, encaixe } from "./hexagono.js";
 import { JOGOS, PEDIDOS, PERGUNTAS } from "./dados.js";
-import { ilhaViva } from "./ilha-viva.js";
+import { hexVivo } from "./hex-vivo.js";
 
-const SEMENTE = 4242;
-const ORDEM = ["Primeira ilha", "Segunda ilha", "Terceira ilha"];
+const ORDEM = ["Primeiro da lista", "Segundo", "Terceiro"];
 
 const secao = document.querySelector(".bussola");
 const passo = secao.querySelector("[data-passo]");
 const quadro = secao.querySelector("[data-pergunta]");
 const voltar = secao.querySelector("[data-voltar]");
 const legenda = secao.querySelector("[data-legenda]");
-const caixa = secao.querySelector(".mapa-vivo");
-const direcoes = [...caixa.querySelectorAll(".mapa-direcao")];
+const caixa = secao.querySelector(".hex-vivo");
+const direcoes = [...caixa.querySelectorAll(".hex-eixo")];
 const resultado = document.querySelector("[data-resultado]");
-const ilha = ilhaViva(caixa.querySelector("canvas"), { g: 90, emergir: false });
+const meuPerfil = hexVivo(caixa.querySelector("canvas"), { pulso: true });
 caixa.classList.add("vivo");
 
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -35,8 +34,8 @@ function perfil(ate = respostas.length) {
   });
 }
 
-function mostrarIlha() {
-  ilha.definir([{ valores: perfil(), semente: SEMENTE }]);
+function mostrarPerfil() {
+  meuPerfil.definir([{ valores: perfil() }]);
 }
 
 function mostrarPergunta(foco = true) {
@@ -55,13 +54,13 @@ function responder(indice) {
   respostas[atual] = indice;
   respostas.length = atual + 1;
   const depois = perfil();
-  mostrarIlha();
+  mostrarPerfil();
 
   const subiram = EIXOS.filter((_, i) => depois[i] - antes[i] > 0.01);
   for (const d of direcoes) d.classList.toggle("ativo", subiram.some((e) => e.id === d.dataset.eixo));
   legenda.textContent = PERGUNTAS[atual].filtro
-    ? "Essa resposta não mexe no relevo: ela escolhe em que mar procurar."
-    : subiram.length ? `A terra subiu em ${lista(subiram.map((e) => e.nome.toLowerCase()))}.` : "Nada subiu desta vez. A sua ilha segue como estava.";
+    ? "Essa resposta não mexe no perfil: ela escolhe entre quais jogos procurar."
+    : subiram.length ? `O perfil esticou em ${lista(subiram.map((e) => e.nome.toLowerCase()))}.` : "Nada mudou desta vez. O seu perfil segue como estava.";
 
   quadro.classList.remove("entrando");
   quadro.classList.add("saindo");
@@ -103,26 +102,26 @@ function concluir(rolar) {
   const fortes = EIXOS.map((e, i) => ({ e, v: u[i] })).sort((a, b) => b.v - a.v).filter((x) => x.v > 0).slice(0, 2);
 
   secao.dataset.estado = "resultado";
-  passo.textContent = "Mapa completo";
+  passo.textContent = "Perfil completo";
   voltar.hidden = false;
   for (const d of direcoes) d.classList.remove("ativo");
-  legenda.textContent = "Esta é a sua ilha.";
+  legenda.textContent = "Este é o seu perfil.";
   quadro.classList.remove("saindo");
-  quadro.innerHTML = `<h2 tabindex="-1">A sua ilha está pronta.</h2><p class="prosa">${fortes.length ? `Ela se ergue mais em ${lista(fortes.map((x) => x.e.nome.toLowerCase()))}.` : "Ela ficou baixa em todas as direções: você não puxou forte para lado nenhum."} Logo abaixo estão as ilhas do atlas com o formato mais parecido.</p>`;
+  quadro.innerHTML = `<h2 tabindex="-1">O seu perfil está pronto.</h2><p class="prosa">${fortes.length ? `Ele puxa mais para ${lista(fortes.map((x) => x.e.nome.toLowerCase()))}.` : "Ele ficou curto em todas as direções: você não puxou forte para lado nenhum."} Logo abaixo estão os jogos do atlas com o perfil mais parecido.</p>`;
 
   const n = escolhidos.length;
   resultado.querySelector("[data-resumo]").textContent =
-    `Entre os jogos que cabem nas suas duas últimas respostas, ${n === 1 ? "este é o que mais se parece" : `estes ${n === 2 ? "dois" : "três"} são os que mais se parecem`} com o relevo que você desenhou. A linha vermelha sobre cada mapa é a sua ilha.`;
+    `Entre os jogos que cabem nas suas duas últimas respostas, ${n === 1 ? "este é o que mais se parece" : `estes ${n === 2 ? "dois" : "três"} são os que mais se parecem`} com o perfil que você desenhou. A linha vermelha sobre cada hexágono é o seu.`;
   resultado.querySelector("[data-lista]").innerHTML = escolhidos.map((j, k) => {
     const { porque, atencao } = explicar(j, u);
     const outro = escolhidos[k === 0 ? 1 : 0];
     return `<li>
       <figure>
-        <div class="mapa-vivo vivo" data-sobre="${j.slug}">
-          <img class="ilha" src="/ilhas/${j.slug}.svg" alt="" width="480" height="480">
-          <canvas role="img" aria-label="A sua ilha, em linha vermelha, sobre a ilha de ${esc(j.curto)}"></canvas>
+        <div class="hex-vivo vivo" data-sobre="${j.slug}">
+          <img class="hex" src="/hex/${j.slug}.svg" alt="" width="480" height="480">
+          <canvas role="img" aria-label="O seu perfil, em linha vermelha, sobre o de ${esc(j.curto)}"></canvas>
         </div>
-        <figcaption class="resultado-chave"><span class="serie"></span>a sua ilha</figcaption>
+        <figcaption class="resultado-chave"><span class="serie"></span>o seu perfil</figcaption>
       </figure>
       <div>
         <p class="resultado-ordem">${ORDEM[k]}</p>
@@ -130,16 +129,16 @@ function concluir(rolar) {
         <p class="resultado-chamada">${esc(j.chamada)}</p>
         <div class="resultado-porque"><h4>Por que combina com você</h4><ul class="lista-marcada">${porque}</ul></div>
         ${atencao ? `<p class="resultado-atencao"><strong>Fique de olho.</strong> ${esc(atencao)}</p>` : ""}
-        <p class="resultado-ligacoes"><a class="botao botao-contorno" href="/jogos/${j.slug}/">Ver a ilha de ${esc(j.curto)}</a>${outro ? `<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${outro.slug}">Comparar com ${esc(outro.curto)}</a>` : ""}</p>
+        <p class="resultado-ligacoes"><a class="botao botao-contorno" href="/jogos/${j.slug}/">Abrir a ficha de ${esc(j.curto)}</a>${outro ? `<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${outro.slug}">Comparar com ${esc(outro.curto)}</a>` : ""}</p>
       </div>
     </li>`;
   }).join("");
 
-  // sobre cada ilha recomendada, o contorno da ilha do visitante
+  // sobre cada jogo recomendado, o contorno do perfil do visitante
   for (const alvo of resultado.querySelectorAll("[data-sobre]")) {
-    const sobre = ilhaViva(alvo.querySelector("canvas"), { g: 72, mare: false, emergir: false });
-    sobre.definir([{ valores: u, semente: SEMENTE, cor: "#C4391F" }]);
-    alvo.querySelector(".ilha").style.opacity = "1";
+    const sobre = hexVivo(alvo.querySelector("canvas"), { grade: false });
+    sobre.definir([{ valores: u, cor: "#DC0A2D" }]);
+    alvo.querySelector(".hex").style.opacity = "1";
   }
 
   resultado.hidden = false;
@@ -157,7 +156,7 @@ function recomecar(ate) {
   secao.dataset.estado = "perguntas";
   resultado.hidden = true;
   history.replaceState(null, "", location.pathname);
-  mostrarIlha();
+  mostrarPerfil();
   mostrarPergunta();
 }
 
@@ -167,11 +166,11 @@ quadro.addEventListener("click", (e) => {
 });
 voltar.addEventListener("click", () => {
   if (secao.dataset.estado === "resultado") recomecar(PERGUNTAS.length - 1);
-  else if (atual > 0) { atual--; respostas.length = atual + 1; mostrarIlha(); mostrarPergunta(); }
+  else if (atual > 0) { atual--; respostas.length = atual + 1; mostrarPerfil(); mostrarPergunta(); }
 });
 resultado.querySelector("[data-refazer]").addEventListener("click", () => {
   recomecar(0);
-  legenda.textContent = "A sua ilha ainda está submersa. Cada resposta levanta um pedaço dela.";
+  legenda.textContent = "O seu perfil ainda está em branco. Cada resposta puxa um vértice.";
   secao.scrollIntoView({ block: "start" });
 });
 resultado.querySelector("[data-copiar]").addEventListener("click", async () => {
@@ -185,15 +184,15 @@ resultado.querySelector("[data-copiar]").addEventListener("click", async () => {
   }
 });
 
-/* um resultado guardado no endereço abre direto no mapa completo */
+/* um resultado guardado no endereço abre direto no perfil completo */
 const guardado = /^#r=(\d+)$/.exec(location.hash);
 if (guardado && guardado[1].length === PERGUNTAS.length &&
     [...guardado[1]].every((d, q) => Number(d) < PERGUNTAS[q].opcoes.length)) {
   respostas = [...guardado[1]].map(Number);
   atual = PERGUNTAS.length - 1;
-  mostrarIlha();
+  mostrarPerfil();
   concluir(false);
 } else {
-  mostrarIlha();
+  mostrarPerfil();
   mostrarPergunta(false);
 }

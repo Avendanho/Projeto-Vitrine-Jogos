@@ -1,22 +1,22 @@
-/* Comparar: até três ilhas sobrepostas, nota por nota e ficha lado a lado. */
-import { EIXOS, sementeDe } from "./relevo.js";
+/* Comparar: até três perfis sobrepostos, nota por nota e ficha lado a lado. */
+import { EIXOS } from "./hexagono.js";
 import { JOGOS } from "./dados.js";
-import { ilhaViva } from "./ilha-viva.js";
+import { hexVivo } from "./hex-vivo.js";
 
 const SERIES = [
-  { id: "a", cor: "#1F7BA6", preenchimento: "rgba(31, 123, 166, 0.11)", tracejado: [] },
-  { id: "b", cor: "#C4391F", preenchimento: "rgba(196, 57, 31, 0.1)", tracejado: [9, 5] },
-  { id: "c", cor: "#6D4BA0", preenchimento: "rgba(109, 75, 160, 0.1)", tracejado: [2, 5] }
+  { id: "a", cor: "#2F6FDB", tracejado: [] },           // as três cores dos primeiros companheiros: água, fogo e planta
+  { id: "b", cor: "#DC0A2D", tracejado: [9, 5] },
+  { id: "c", cor: "#2E9E4F", tracejado: [2, 5] }
 ];
 const PADRAO = { a: "red-blue-yellow", b: "scarlet-violet", c: "" };
 
 const formulario = document.querySelector(".comparar-escolha");
-const caixa = document.querySelector(".comparar-mapa .mapa-vivo");
+const caixa = document.querySelector(".comparar-hex .hex-vivo");
 const chave = document.querySelector("[data-chave]");
 const hastes = document.querySelector("[data-hastes]");
 const veredito = document.querySelector("[data-veredito]");
 const tabela = document.querySelector("[data-tabela]");
-const ilha = ilhaViva(caixa.querySelector("canvas"), { g: 90, mare: false, emergir: false });
+const perfis = hexVivo(caixa.querySelector("canvas"));
 caixa.classList.add("vivo");
 
 const esc = (t) => String(t ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -65,7 +65,7 @@ function desenharVeredito(pares) {
     return `<article class="veredito" style="--cor:${serie.cor}">
       <h3>${esc(jogo.curto)}</h3>
       <p>${texto} ${esc(jogo.chamada)}</p>
-      <a href="/jogos/${jogo.slug}/">Ver a ilha de ${esc(jogo.curto)}</a>
+      <a href="/jogos/${jogo.slug}/">Abrir a ficha de ${esc(jogo.curto)}</a>
     </article>`;
   }).join("");
 }
@@ -86,12 +86,9 @@ function desenharTabela(pares) {
 
 function atualizar(gravar = true) {
   const pares = escolhidos();
-  ilha.definir(pares.map(({ serie, jogo }) => ({
-    valores: jogo.valores, semente: sementeDe(jogo.slug),
-    cor: serie.cor, preenchimento: serie.preenchimento, tracejado: serie.tracejado
-  })));
+  perfis.definir(pares.map(({ serie, jogo }) => ({ valores: jogo.valores, cor: serie.cor, tracejado: serie.tracejado })));
   chave.innerHTML = pares.map(({ serie, jogo }) => `<span><span class="serie serie-${serie.id}"></span>${esc(jogo.curto)}</span>`).join("");
-  caixa.querySelector("canvas").setAttribute("aria-label", `Ilhas sobrepostas de ${lista(pares.map((p) => p.jogo.curto))}`);
+  caixa.querySelector("canvas").setAttribute("aria-label", `Perfis sobrepostos de ${lista(pares.map((p) => p.jogo.curto))}`);
   desenharHastes(pares);
   desenharVeredito(pares);
   desenharTabela(pares);

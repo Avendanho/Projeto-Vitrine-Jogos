@@ -2,8 +2,8 @@
  * Tudo sai de dados/fichas.json e dados/pokedex.json; as curiosidades são
  * calculadas aqui, comparando cada espécie com as outras. */
 import { ROMANOS } from "../dados/atlas.mjs";
-import { POKEDEX, FICHAS, COBBLEMON, FORMAS_COM_ARTE, ORDEM_TIPOS, esc, semAcento, extenso, maiuscula, enumerar, numero, enderecoEspecie, enderecoCobblemon } from "./base.mjs";
-import { moldura, ilha, ORDENADOS } from "./paginas.mjs";
+import { POKEDEX, FICHAS, COBBLEMON, FORMAS_COM_ARTE, ORDEM_TIPOS, esc, semAcento, extenso, maiuscula, enumerar, numero, enderecoEspecie, enderecoCobblemon, selo } from "./base.mjs";
+import { moldura, hex, ORDENADOS } from "./paginas.mjs";
 
 const IDS = Object.keys(FICHAS).map(Number).sort((a, b) => a - b);
 const TOTAL = IDS.length;
@@ -138,7 +138,7 @@ function mini(id, { classe = "" } = {}) {
 
 function itemDaLista(id) {
   const f = FICHAS[id], ts = tiposDe(id);
-  return `<li data-n="${id}" data-nome="${esc(semAcento(f.nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="${enderecoEspecie(id)}">${mini(id)}<span class="dex-numero">${n4(id)}</span><span class="dex-nome">${esc(f.nome)}</span><span class="dex-tipos">${ts.join(", ")}</span></a></li>`;
+  return `<li data-n="${id}" data-nome="${esc(semAcento(f.nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="${enderecoEspecie(id)}">${mini(id)}<span class="dex-numero">${n4(id)}</span><span class="dex-nome">${esc(f.nome)}</span><span class="dex-tipos">${ts.map(selo).join(" ")}</span></a></li>`;
 }
 
 const faixaDoAtributo = (v) => (v < 50 ? 1 : v < 75 ? 2 : v < 100 ? 3 : v < 125 ? 4 : 5);
@@ -193,7 +193,7 @@ function secaoDeFormas(id) {
         <div class="forma-texto">
           <p class="forma-classe">${classeDaForma(x)}</p>
           <h3 lang="en">${esc(x.nome)}</h3>
-          <p class="forma-tipos">${x.tipos.join(", ")}</p>
+          <p class="forma-tipos">${x.tipos.map(selo).join(" ")}</p>
           ${mudaram ? `<dl class="forma-atributos">${x.atributos.map((v, k) => `<div${v !== f.atributos[k] ? ' class="mudou"' : ""}><dt>${ABREVIADOS[k]}</dt><dd>${v}</dd></div>`).join("")}<div class="forma-total"><dt>Total</dt><dd>${total}</dd></div></dl>
           <p class="forma-nota">${diferenca === 0 ? "Mesmo total da forma padrão, distribuído de outro jeito." : `${Math.abs(diferenca)} ${diferenca > 0 ? "a mais" : "a menos"} que a forma padrão.`}</p>`
             : x.classe === "gmax" ? `<p class="forma-nota">Mesmos atributos base. Em campo, os PS aumentam e os golpes viram Golpes G-Max. Mede ${numero(x.altura, Number.isInteger(x.altura) ? 0 : 1)} m.</p>`
@@ -243,7 +243,7 @@ export function paginaEspecie(id) {
       <p class="especie-numero">Nº ${n4(id)}</p>
       <h1>${esc(f.nome)}</h1>
       <p class="especie-categoria">${esc(f.categoria)}</p>
-      <ul class="especie-tipos" aria-label="Tipos">${ts.map((t) => `<li><a class="ficha" href="/pokedex/?tipo=${semAcento(t)}">${t}</a></li>`).join("")}</ul>
+      <ul class="especie-tipos" aria-label="Tipos">${ts.map((t) => `<li><a class="tipo" data-tipo="${semAcento(t)}" href="/pokedex/?tipo=${semAcento(t)}">${t}</a></li>`).join("")}</ul>
     </div>
     <figure class="prancha especie-prancha" tabindex="0">
       <span class="prancha-arte">
@@ -295,7 +295,7 @@ export function paginaEspecie(id) {
     <h2 id="t-jogos">Jogos em que aparece</h2>
     <p class="nota-editorial">${onde.length ? `Está na Pokédex de ${onde.length} dos ${JOGOS_COM_LISTA.length} jogos do atlas que têm lista. Derivados sem lista catalogada ficam de fora.` : "Não está na Pokédex regional de nenhum jogo do atlas."}</p>
     <ul class="jogos-da-especie">
-      ${onde.map(({ jogo, n, rotulo }) => `<li><a href="/jogos/${jogo.slug}/">${ilha(jogo)}<span><span class="ilha-nome">${esc(jogo.curto)}</span><span class="ilha-meta">${jogo.ano}. ${rotulo === "Elenco" ? "No elenco" : `Nº ${String(n).padStart(3, "0")} em ${esc(rotulo)}`}</span></span></a></li>`).join("\n      ")}
+      ${onde.map(({ jogo, n, rotulo }) => `<li><a href="/jogos/${jogo.slug}/">${hex(jogo)}<span><span class="hex-nome">${esc(jogo.curto)}</span><span class="hex-meta">${jogo.ano}. ${rotulo === "Elenco" ? "No elenco" : `Nº ${String(n).padStart(3, "0")} em ${esc(rotulo)}`}</span></span></a></li>`).join("\n      ")}
     </ul>
     ${noCobblemon ? `<p class="especie-cobblemon">Também está no mod Cobblemon. <a href="${enderecoCobblemon(id)}">Ver onde ${esc(f.nome)} nasce por lá</a>.</p>` : ""}
   </section>

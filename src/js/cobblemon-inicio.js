@@ -5,7 +5,7 @@
  * revela em volta de um marcador, como um mapa do jogo se preenche por onde o
  * jogador anda. Na cena dos ambientes, o mapa inteiro aparece e só o ambiente
  * da vez fica aceso; caverna, Nether e Fim trocam o mapa de dimensão. */
-import { ruido } from "./relevo.js";
+import { ruido } from "./ruido.js";
 
 const PARADO = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const PAPEL = [220, 203, 159];

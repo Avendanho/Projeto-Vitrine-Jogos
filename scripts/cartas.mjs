@@ -14,7 +14,8 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
-import { criarMalha, aneis, ruido, NIVEIS } from "../src/js/relevo.js";
+import { criarMalha, aneis, NIVEIS } from "./malha.mjs";
+import { ruido } from "../src/js/ruido.js";
 import { MAPAS, ROTAS } from "../dados/atlas.mjs";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");

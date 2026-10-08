@@ -8,6 +8,14 @@ export function multiplicador(tabela, tipos, atacante, tiposDoDefensor) {
   return tiposDoDefensor.reduce((fator, t) => fator * (tabela[a]?.[tipos.indexOf(t)] ?? 1), 1);
 }
 
+/* O que um Pokémon sofre, separado pelo fator: os tipos que batem em quádruplo e em dobro, os que rendem a
+ * metade e um quarto, e os que não fazem efeito. Dano normal fica de fora. */
+export function sofre(tabela, tipos, tiposDoDefensor) {
+  const grupos = { 4: [], 2: [], 0.5: [], 0.25: [], 0: [] };
+  for (const t of tipos) grupos[multiplicador(tabela, tipos, t, tiposDoDefensor)]?.push(t);
+  return { quadruplo: grupos[4], dobro: grupos[2], metade: grupos[0.5], quarto: grupos[0.25], imune: grupos[0] };
+}
+
 /* time: lista de espécies, cada uma com `tipos`. Devolve, para cada tipo atacante, quantos do time
  * apanham mais, quantos resistem e quantos são imunes; e três listas:
  *   buracos       tipos a que dois ou mais são fracos e ninguém resiste nem é imune
@@ -28,5 +36,5 @@ export function analisar(tabela, tipos, time) {
   };
 }
 
-/* Como o fator aparece escrito na tabela. O 1 fica em branco, para a tabela respirar. */
+/* Como o fator aparece escrito. O 1 fica em branco. */
 export const escrito = (fator) => ({ 0: "0", 0.25: "¼", 0.5: "½", 1: "", 2: "2", 4: "4" })[fator] ?? String(fator);
