@@ -100,3 +100,12 @@ if (document.body.classList.contains("edicao-cobblemon")) {
     }
   }
 }
+
+/* Busca global: o botão do cabeçalho e os atalhos "/" e Ctrl+K (ou ⌘K). O módulo da busca e o índice só são
+ * baixados na primeira vez que alguém abre. */
+const abrirBusca = () => import("./busca.js").then((m) => m.abrirBusca()).catch(() => { location.href = document.body.classList.contains("edicao-cobblemon") ? "/cobblemon/pokemon/" : "/pokedex/"; });
+document.querySelector("[data-busca-abrir]")?.addEventListener("click", abrirBusca);
+document.addEventListener("keydown", (e) => {
+  const escrevendo = e.target.closest?.("input, textarea, select, [contenteditable]");
+  if ((e.key === "k" && (e.ctrlKey || e.metaKey)) || (e.key === "/" && !escrevendo && !e.ctrlKey && !e.metaKey && !e.altKey)) { e.preventDefault(); abrirBusca(); }
+});

@@ -1,6 +1,7 @@
 /* Os módulos de dados que o navegador importa, gerados no build em dist/js/dados/.
  * Cada função devolve o texto de um módulo. As páginas só baixam o que usam. */
-import { FICHAS, POKEDEX, TIPOS_E_FATORES, COBBLEMON, enderecoCobblemon } from "./base.mjs";
+import { FICHAS, POKEDEX, TIPOS_E_FATORES, COBBLEMON, enderecoCobblemon, enderecoEspecie } from "./base.mjs";
+import { DESAFIOS } from "../dados/desafios.mjs";
 import { JOGOS } from "../dados/jogos.mjs";
 import { REGIOES, ROTAS } from "../dados/atlas.mjs";
 
@@ -45,3 +46,24 @@ export function moduloSpawns() {
   const d = spawnsParaONavegador();
   return `${cabecalho}export const BIOMAS = ${JSON.stringify(d.biomas)};\nexport const SPAWNS = ${JSON.stringify(d.spawns)};\nexport const ESPECIES = ${JSON.stringify(d.especies)};\nexport const CONTEXTOS = ${JSON.stringify(COBBLEMON.contextos)};\n`;
 }
+
+/* O índice da busca global: tudo o que tem página ou âncora nas duas edições.
+ * Cada entrada é [tipo, nome, endereço, edição, número]; o número só existe para os Pokémon. */
+export function indiceDaBusca() {
+  const P = "pokemon", C = "cobblemon", ancora = (id) => id.split(":").pop().replace(/\//g, "-");
+  return [
+    ...[["Abrir a bússola", "/bussola/"], ["Pokédex", "/pokedex/"], ["Regiões", "/regioes/"], ["Linha do tempo", "/linha-do-tempo/"], ["Comparar jogos", "/comparar/"], ["Comparar Pokémon", "/comparar/pokemon/"],
+      ["Desafios", "/desafios/"], ["Quiz: quem é esse Pokémon?", "/quiz/"], ["Montar um time", "/time/"], ["Diário de desafio", "/diario/"]].map(([nome, url]) => ["Ferramenta", nome, url, P]),
+    ...[["Pokémon do Cobblemon", "/cobblemon/pokemon/"], ["Itens do Cobblemon", "/cobblemon/itens/"], ["Estruturas do Cobblemon", "/cobblemon/estruturas/"], ["Biomas do Cobblemon", "/cobblemon/biomas/"],
+      ["Plano de caçada", "/cobblemon/cacada/"], ["Desafios de Cobblemon", "/cobblemon/desafios/"]].map(([nome, url]) => ["Ferramenta", nome, url, C]),
+    ...JOGOS.map((j) => ["Jogo", j.titulo ?? j.curto, `/jogos/${j.slug}/`, P]),
+    ...REGIOES.map((r) => ["Região", r.nome, `/regioes/${r.id}/`, P]),
+    ...Object.keys(FICHAS).map(Number).sort((a, b) => a - b).map((id) => ["Pokémon", FICHAS[id].nome, enderecoEspecie(id), P, id]),
+    ...DESAFIOS.map((d) => ["Desafio", d.nome, `${d.edicao === C ? "/cobblemon/desafios/" : "/desafios/"}${d.slug}/`, d.edicao]),
+    ...COBBLEMON.ambientes.map((a) => ["Bioma", a.nome, `/cobblemon/biomas/#${a.id}`, C]),
+    ...Object.values(COBBLEMON.especies).filter((e) => e.impl).sort((a, b) => a.n - b.n).map((e) => ["Pokémon", e.nome, enderecoCobblemon(e.n), C, e.n]),
+    ...COBBLEMON.estruturas.map((e) => ["Estrutura", e.nome, `/cobblemon/estruturas/#${ancora(e.id)}`, C]),
+    ...COBBLEMON.itens.map((i) => ["Item", i.nome, `/cobblemon/itens/#item-${i.id}`, C])
+  ];
+}
+export const moduloBusca = () => `${cabecalho}export const INDICE = ${JSON.stringify(indiceDaBusca())};\n`;

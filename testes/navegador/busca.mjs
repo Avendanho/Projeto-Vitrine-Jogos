@@ -1,0 +1,54 @@
+/* Busca global: abre por botão e por atalho, acha nas duas edições, navega por teclado, fecha com Esc. */
+import { abrir, conferir, fechar, BASE } from "./_comum.mjs";
+import { COBBLEMON } from "../../scripts/base.mjs";
+
+const fotos = process.argv[2];
+const { navegador, pagina, erros } = await abrir();
+await pagina.goto(`${BASE}/regioes/`, { waitUntil: "networkidle" });
+const baixou = () => pagina.evaluate(() => performance.getEntriesByType("resource").some((r) => r.name.includes("/js/dados/busca.js")));
+conferir("o índice não é baixado antes de alguém abrir a busca", !(await baixou()));
+await pagina.click("[data-busca-abrir]");
+await pagina.waitForSelector("dialog.busca[open]");
+conferir("o botão abre a busca e baixa o índice", await baixou());
+await pagina.keyboard.type("char");
+await pagina.waitForSelector(".busca-resultados li");
+const primeiros = await pagina.$$eval(".busca-resultados .busca-nome", (els) => els.slice(0, 3).map((e) => e.textContent));
+conferir("\"char\" traz primeiro os nomes que começam assim", primeiros.every((n) => n.toLowerCase().startsWith("char")), primeiros.join(", "));
+conferir("resultados da outra edição dizem de onde são", (await pagina.textContent(".busca-resultados")).includes("no Cobblemon"));
+if (fotos) await pagina.screenshot({ path: `${fotos}/t10.png` });
+await pagina.keyboard.press("ArrowDown");
+const alvo = await pagina.getAttribute('.busca-resultados li[aria-selected="true"] a', "href");
+await Promise.all([pagina.waitForURL((u) => u.pathname === alvo.split("#")[0]), pagina.keyboard.press("Enter")]);
+conferir("seta e Enter abrem o resultado marcado", true, alvo);
+await pagina.keyboard.press("/");
+await pagina.waitForSelector("dialog.busca[open]");
+conferir("a barra abre a busca quando não se está escrevendo", true);
+await pagina.keyboard.type("zzzzqq");
+conferir("sem resultado, a busca diz que não achou", (await pagina.textContent("[data-dica]")).includes("Nada com"));
+await pagina.keyboard.press("Escape");
+conferir("Esc fecha", await pagina.locator("dialog.busca[open]").count() === 0);
+await pagina.goto(`${BASE}/quiz/`, { waitUntil: "networkidle" });
+await pagina.click("#quiz-campo"); await pagina.keyboard.type("a/b");
+conferir("a barra digitada num campo não abre a busca", await pagina.locator("dialog.busca[open]").count() === 0 && (await pagina.inputValue("#quiz-campo")) === "a/b");
+await pagina.keyboard.press("Control+k");
+await pagina.waitForSelector("dialog.busca[open]");
+conferir("Ctrl+K abre de qualquer lugar", true);
+await pagina.keyboard.press("Escape");
+
+await pagina.goto(`${BASE}/cobblemon/`, { waitUntil: "networkidle" });
+await pagina.click("[data-busca-abrir]"); await pagina.waitForSelector("dialog.busca[open]");
+await pagina.keyboard.type("wooper"); await pagina.waitForSelector(".busca-resultados li");
+conferir("na edição Cobblemon, o Wooper do Cobblemon vem primeiro", (await pagina.getAttribute(".busca-resultados li:first-child a", "href")) === "/cobblemon/pokemon/wooper/");
+await pagina.fill("#busca-texto", COBBLEMON.itens.find((i) => i.id === "healing_machine").nome); await pagina.waitForSelector(".busca-resultados li");
+const item = await pagina.getAttribute('.busca-resultados a[href*="/cobblemon/itens/#item-"]', "href");
+await pagina.goto(BASE + item, { waitUntil: "networkidle" });
+conferir("um item leva à âncora dele na página de itens", await pagina.evaluate(() => { const el = document.querySelector(location.hash); return Boolean(el) && el.getBoundingClientRect().top < innerHeight; }), item);
+if (fotos) { await pagina.goto(`${BASE}/cobblemon/biomas/`, { waitUntil: "networkidle" }); await pagina.keyboard.press("/"); await pagina.waitForSelector("dialog.busca[open]"); await pagina.keyboard.type("ruin"); await pagina.waitForTimeout(300); await pagina.screenshot({ path: `${fotos}/t10-cb.png` }); }
+const cel = await abrir({ celular: true });
+await cel.pagina.goto(`${BASE}/pokedex/`, { waitUntil: "networkidle" });
+conferir("no celular o botão Buscar fica visível fora do menu", await cel.pagina.locator("[data-busca-abrir]").isVisible());
+await cel.pagina.click("[data-busca-abrir]"); await cel.pagina.waitForSelector("dialog.busca[open]");
+await cel.pagina.fill("#busca-texto", "pika"); await cel.pagina.waitForSelector(".busca-resultados li");
+conferir("e a caixa cabe na tela", await cel.pagina.evaluate(() => document.querySelector("dialog.busca").getBoundingClientRect().right <= innerWidth && document.documentElement.scrollWidth === 390));
+await cel.navegador.close();
+await fechar(navegador, erros);

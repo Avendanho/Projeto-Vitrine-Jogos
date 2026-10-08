@@ -14,7 +14,7 @@ import {
   paginaCobblemonEstruturas, paginaCobblemonBiomas, paginaCobblemonCacada, ESPECIES_DO_COBBLEMON
 } from "./paginas-cobblemon.mjs";
 import { paginaCompararPokemon, paginaQuiz, paginaTime, paginaDiario } from "./paginas-ferramentas.mjs";
-import { moduloEspecies, moduloTipos, moduloJogos, moduloSpawns } from "./dados-navegador.mjs";
+import { moduloEspecies, moduloTipos, moduloJogos, moduloSpawns, moduloBusca } from "./dados-navegador.mjs";
 import { paginaDesafios, paginaDesafio, dadosDaRoleta, TODOS_OS_DESAFIOS, enderecoDoDesafio } from "./paginas-desafios.mjs";
 import { svgIlha, valoresDe, sementeDe, malhaQuadrada, EIXOS } from "../src/js/relevo.js";
 import {
@@ -150,6 +150,7 @@ await escrever("cobblemon/estruturas/index.html", paginaCobblemonEstruturas());
 await escrever("cobblemon/biomas/index.html", paginaCobblemonBiomas());
 await escrever("cobblemon/cacada/index.html", paginaCobblemonCacada());
 await escrever("js/dados/spawns.js", moduloSpawns());
+await escrever("js/dados/busca.js", moduloBusca());
 
 // desafios, nas duas edições
 for (const edicao of ["pokemon", "cobblemon"]) {

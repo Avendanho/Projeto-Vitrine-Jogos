@@ -225,7 +225,14 @@ html:not(.js) [data-trilho] { flex-wrap: wrap; }
 .pagina-inicio .edicoes a[aria-current] { color: inherit; background: currentColor; }
 .pagina-inicio .edicoes a[aria-current] span { color: var(--fundo-vivo, var(--mar)); }
 
-@media (max-width: 1080px) {
+/* Com a busca e as ferramentas, o cabeçalho ficou mais cheio: em telas médias a chamada principal sai dele
+ * (continua no rodapé e nas páginas) e, abaixo de 1200px, as abas vão para o botão Menu. */
+@media (max-width: 1440px) {
+  .topo-nav { gap: clamp(12px, 1.5vw, 26px); }
+  .topo-nav .botao { display: none; }
+}
+@media (max-width: 1200px) {
+  .js .topo-nav .botao { display: inline-flex; }
   .topo { padding-block: 10px 24px; }
   .js .topo-menu {
     display: inline-block; padding: 9px 13px; background: none;
@@ -1695,6 +1702,34 @@ a.slot:hover { background: #B4B4D8; }
 .cacada-lugar ul strong { font-family: var(--pixel); font-size: 1.1rem; font-weight: 600; }
 .cacada-lugar ul div > span:not(.raridade) { flex-basis: 100%; }
 .cacada-mais { color: var(--tinta-suave); }
+
+/* ---------- busca global ---------- */
+
+.topo-busca { padding: 7px 12px; font: inherit; font-size: var(--t-pequeno); font-weight: 600; line-height: 1.2; color: inherit; background: transparent; border: 1.5px solid currentColor; border-radius: 2px; cursor: pointer; }
+.topo-busca:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
+html:not(.js) .topo-busca { display: none; }
+.busca { width: min(92vw, 40rem); max-height: min(80vh, 44rem); margin-top: 9vh; padding: 0; color: var(--tinta); background: var(--papel-claro); border: 2px solid var(--tinta); box-shadow: 0 18px 50px rgb(0 0 0 / 0.28); }
+.busca[open] { display: flex; flex-direction: column; }
+.busca::backdrop { background: rgb(0 0 0 / 0.4); }
+.busca-campo { display: flex; align-items: center; gap: var(--e2); padding: var(--e2) var(--e3); border-bottom: 1.5px solid currentColor; }
+.busca-campo input { flex: 1; min-width: 0; padding: 10px 0; font: inherit; font-size: 1.2rem; color: inherit; background: transparent; border: 0; outline: 0; }
+.busca-resultados { overflow-y: auto; overscroll-behavior: contain; }
+.busca-resultados a { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: var(--e2); align-items: baseline; padding: 9px var(--e3); text-decoration: none; }
+.busca-resultados li[aria-selected="true"] a, .busca-resultados a:hover { background: var(--tinta); color: var(--mar); }
+.busca-tipo { font-size: 0.78rem; opacity: 0.75; }
+.busca-nome { font-weight: 660; overflow-wrap: anywhere; }
+.busca-dica { padding: var(--e2) var(--e3) var(--e3); font-size: var(--t-pequeno); color: var(--tinta-suave); }
+.busca-dica:empty { display: none; }
+.edicao-cobblemon .topo-busca { font-family: var(--pixel); font-size: 1rem; font-weight: 500; border: 2px solid var(--preto); border-radius: 0; background: var(--papel); box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--sombra); }
+.edicao-cobblemon .busca { background: var(--papel); border: 3px solid var(--preto); box-shadow: inset 3px 3px 0 #fff, inset -3px -3px 0 var(--sombra), 0 18px 50px rgb(0 0 0 / 0.35); }
+.edicao-cobblemon .busca-nome { font-family: var(--pixel); font-size: 1.1rem; font-weight: 500; }
+.edicao-cobblemon .busca-resultados li[aria-selected="true"] a, .edicao-cobblemon .busca-resultados a:hover { background: var(--rota); color: #fff; }
+.cb-itens-lista li { scroll-margin-top: 96px; }
+.cb-itens-lista li:target { outline: 4px solid var(--rota); outline-offset: 4px; }
+@media (max-width: 520px) {
+  .topo-busca { padding: 6px 8px; font-size: 0.8rem; }
+  .busca-resultados a { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
 
 /* ---------- movimento reduzido ---------- */
 

@@ -361,7 +361,7 @@ export function paginaCobblemonItens() {
     <h2 id="t-${g.id}">${esc(g.nome)}</h2>
     ${NOTAS[g.id] ? `<p class="nota-editorial">${NOTAS[g.id]}</p>` : ""}
     <ul class="cb-itens-lista">
-      ${g.itens.map((i) => `<li data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>${bancada(i)}` : ""}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
+      ${g.itens.map((i) => `<li id="item-${i.id}" data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>${bancada(i)}` : ""}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
     </ul>
   </section>`).join("\n  ")}
   <section class="cb-grupo cb-grupo-jogo" id="g-minecraft" aria-labelledby="t-minecraft">

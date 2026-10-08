@@ -132,6 +132,7 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
 <header class="topo">
   <a class="marca" href="${ed.inicio}"${caminho === ed.inicio ? ' aria-current="page"' : ""}>PokéAtlas</a>
   <div class="edicoes" role="group" aria-label="Edição do atlas">${seletor}</div>
+  <button type="button" class="topo-busca" data-busca-abrir aria-haspopup="dialog" aria-keyshortcuts="/ Control+K">Buscar</button>
   <button type="button" class="topo-menu" aria-expanded="false" aria-controls="menu">Menu</button>
   <nav class="topo-nav" id="menu" aria-label="Seções">
     ${ed.nav.map(link).join("\n    ")}
