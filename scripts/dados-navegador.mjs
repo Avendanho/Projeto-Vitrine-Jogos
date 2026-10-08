@@ -55,7 +55,7 @@ export function indiceDaBusca() {
   const P = "pokemon", C = "cobblemon", ancora = (id) => id.split(":").pop().replace(/\//g, "-");
   return [
     ...[["Abrir a bússola", "/bussola/"], ["Pokédex", "/pokedex/"], ["Regiões", "/regioes/"], ["Linha do tempo", "/linha-do-tempo/"], ["Comparar jogos", "/comparar/"], ["Comparar Pokémon", "/comparar/pokemon/"],
-      ["Desafios", "/desafios/"], ["Quiz: quem é esse Pokémon?", "/quiz/"], ["Montar um time", "/time/"], ["Diário de desafio", "/diario/"]].map(([nome, url]) => ["Ferramenta", nome, url, P]),
+      ["Desafios", "/desafios/"], ["Montar um time", "/time/"], ["Diário de desafio", "/diario/"]].map(([nome, url]) => ["Ferramenta", nome, url, P]),
     ...[["Pokémon do Cobblemon", "/cobblemon/pokemon/"], ["Itens do Cobblemon", "/cobblemon/itens/"], ["Estruturas do Cobblemon", "/cobblemon/estruturas/"], ["Biomas do Cobblemon", "/cobblemon/biomas/"],
       ["Plano de caçada", "/cobblemon/cacada/"], ["Desafios de Cobblemon", "/cobblemon/desafios/"]].map(([nome, url]) => ["Ferramenta", nome, url, C]),
     ...JOGOS.map((j) => ["Jogo", j.titulo ?? j.curto, `/jogos/${j.slug}/`, P]),

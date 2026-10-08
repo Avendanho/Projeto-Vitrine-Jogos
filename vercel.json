@@ -8,7 +8,8 @@
   "trailingSlash": true,
   "redirects": [
     { "source": "/biblioteca/", "destination": "/pokedex/", "permanent": false },
-    { "source": "/cobblemon/guia/", "destination": "/cobblemon/biomas/", "permanent": false }
+    { "source": "/cobblemon/guia/", "destination": "/cobblemon/biomas/", "permanent": false },
+    { "source": "/quiz/", "destination": "/desafios/", "permanent": false }
   ],
   "headers": [
     {

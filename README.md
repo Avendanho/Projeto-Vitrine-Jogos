@@ -112,7 +112,6 @@ Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) p
 - Todos os dados são extraídos dos arquivos da versão **1.8.1** do mod por `scripts/cobblemon.mjs`.
 
 ### 8. 🧰 Ferramentas do Treinador
-- **Quiz diário** (`/quiz/`): "Quem é esse Pokémon?", com dois enigmas por dia, iguais para todo mundo. Pela ficha, cada palpite revela o que bate (tipo, geração, cor, estágio, altura, peso); pela gravura, a tinta aparece aos poucos.
 - **Montar um time** (`/time/`): até seis Pokémon, com a tabela do que cada um recebe de cada tipo, os buracos do time e os tipos sem resposta. Filtra pela Pokédex de cada jogo, e o time vai no endereço.
 - **Comparar Pokémon** (`/comparar/pokemon/`): atributos de base de dois Pokémon frente a frente.
 - **Busca global:** o botão **Buscar** e os atalhos `/` e `Ctrl+K` acham jogos, regiões, Pokémon, desafios, itens, estruturas e biomas de qualquer página.
@@ -143,7 +142,7 @@ Jornada contínua dividida em 6 cenas orientadas pelo scroll:
 ## ⚡ Arquitetura e Engenharia
 
 - **Zero Dependências em Produção:** Sem frameworks pesados (sem React, Vue, Next.js ou Tailwind). Toda a aplicação roda sobre HTML5 semântico, CSS moderno (com variáveis e Grid/Flexbox) e Vanilla JavaScript (ES Modules).
-- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.987 páginas HTML estáticas prontas em ~1,2 segundos**.
+- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.986 páginas HTML estáticas prontas em ~1,2 segundos**.
 - **Performance Extrema:** Carregamento instantâneo, First Contentful Paint (FCP) quase imediato e consumo mínimo de recursos no cliente.
 - **3D sem biblioteca:** as maquetes de estruturas e biomas e os modelos de Pokémon giram num visor próprio (`src/js/visor.js`), com WebGL e, onde o navegador não o entrega, um desenhista de software.
 - **Testes:** as regras de cada ferramenta ficam em módulos puros (`src/js/*-logica.js`) testados com `node:test`; roteiros de navegador em `testes/navegador/` conferem cada página com Playwright.
@@ -184,8 +183,8 @@ Projeto-Vitrine-Jogos/
 │   │   ├── rolagem.js           # Animações de rolagem das páginas de abertura
 │   │   ├── visor.js             # Visor 3D: giro, zoom, tela cheia
 │   │   ├── maquete*.js, modelo*.js   # Desenhistas de maquetes e de modelos de Pokémon
-│   │   ├── *-logica.js          # Regras testáveis: quiz, time, diário, caçada, busca
-│   │   └── ...                  # Um módulo por página (bussola, pokedex, quiz, time, diario...)
+│   │   ├── *-logica.js          # Regras testáveis: time, diário, caçada, busca
+│   │   └── ...                  # Um módulo por página (bussola, pokedex, time, diario...)
 │   ├── arte/                    # Gravuras, modelos desenhados, ícones e maquetes paradas
 │   ├── maquetes/                # Blocos das estruturas e dos biomas, para o visor
 │   └── modelos3d/               # Modelo e textura de cada Pokémon do Cobblemon, para o visor
@@ -239,8 +238,8 @@ Projeto-Vitrine-Jogos/
 | Comando | Descrição |
 | :--- | :--- |
 | `npm run dev` | Compila o site em `dist/` e inicia o servidor local em `http://localhost:4600`. |
-| `npm run build` | Valida as regras de negócio e compila todas as 1.987 páginas HTML. |
-| `npm test` | Testes de unidade das regras (quiz, time, diário, caçada, busca, modelos, dados). |
+| `npm run build` | Valida as regras de negócio e compila todas as 1.986 páginas HTML. |
+| `npm test` | Testes de unidade das regras (time, diário, caçada, busca, modelos, dados). |
 | `npm run test:navegador` | Roteiros de navegador de todas as ferramentas (precisa do `npm run dev` rodando). |
 | `npm run verificar` | Auditoria visual: rola cada página em desktop, celular e movimento reduzido e tira fotos. |
 | `npm run pokedex` | *(Dados)* Reconstrói `pokedex.json` e `fichas.json` a partir da PokéAPI. |

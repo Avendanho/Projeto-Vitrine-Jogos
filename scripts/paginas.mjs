@@ -72,7 +72,6 @@ export const EDICOES = {
       { href: "/linha-do-tempo/", texto: "Linha do tempo" },
       { href: "/comparar/", texto: "Comparar" },
       { href: "/desafios/", texto: "Desafios" },
-      { href: "/quiz/", texto: "Quiz" },
       { href: "/time/", texto: "Time" }
     ],
     avisos: [

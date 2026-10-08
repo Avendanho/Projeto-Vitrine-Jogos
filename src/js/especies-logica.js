@@ -1,5 +1,5 @@
 /* Regras sobre a lista de espécies que o navegador recebe (js/dados/especies.js), sem tocar na página:
- * servem ao comparador, ao quiz, ao time e ao diário, e rodam igual no Node, para os testes. */
+ * servem ao comparador, ao time e ao diário, e rodam igual no Node, para os testes. */
 
 export const semAcento = (texto) => String(texto).normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 

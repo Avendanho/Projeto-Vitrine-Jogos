@@ -1,7 +1,6 @@
 /* A gravura feita no navegador, a partir da arte em cor. É o mesmo traço de scripts/arte.mjs: o tom
  * escuro vira linha grossa, o claro vira linha fina, o branco some; tons bem escuros ganham uma segunda
- * trama cruzada e o contorno fica cheio. Com forca menor que 1 a tinta rareia: o quiz usa isso para
- * mostrar a figura aos poucos. */
+ * trama cruzada e o contorno fica cheio. */
 const TINTA = [15, 42, 58];
 
 function degrau(a, b, x) {
@@ -9,7 +8,7 @@ function degrau(a, b, x) {
   return t * t * (3 - 2 * t);
 }
 
-export function gravar(canvas, imagem, forca = 1) {
+export function gravar(canvas, imagem) {
   const L = canvas.width;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   ctx.clearRect(0, 0, L, L);
@@ -23,7 +22,7 @@ export function gravar(canvas, imagem, forca = 1) {
       const alfa = d[i + 3] / 255;
       if (alfa === 0) continue;
       const luz = (0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255;
-      const escuro = Math.min(1, Math.max(0, (1 - luz - 0.1) * 1.3)) * forca;
+      const escuro = Math.min(1, Math.max(0, (1 - luz - 0.1) * 1.3));
       const t1 = ((x * cx + y * sx) / passo) % 1;
       const onda1 = Math.abs(2 * (t1 < 0 ? t1 + 1 : t1) - 1);
       let tinta = degrau(-0.16, 0.16, escuro * 0.92 - onda1);
