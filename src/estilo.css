@@ -1324,9 +1324,9 @@ a.slot:hover { background: #B4B4D8; }
 .cb-item-texto { display: grid; gap: 2px; align-content: start; }
 /* O ícone do item, recortado do atlas. São três camadas da mesma figura, uma atrás da outra,
  * para ele ter espessura quando gira, como o item largado no chão do jogo. */
-.slot-item { width: 56px; height: 56px; perspective: 260px; }
-.item-icone, .item-icone::before, .item-icone::after { background: url("/arte/itens.png") calc(var(--cx) * -48px) calc(var(--cy) * -48px) / calc(32 * 48px) auto no-repeat; image-rendering: pixelated; }
-.item-icone { position: relative; display: block; width: 48px; height: 48px; transform-style: preserve-3d; }
+.slot-item { --lado: 48px; width: 56px; height: 56px; perspective: 260px; }
+.item-icone, .item-icone::before, .item-icone::after { background: url("/arte/itens.png") calc(var(--cx) * -1 * var(--lado)) calc(var(--cy) * -1 * var(--lado)) / calc(32 * var(--lado)) auto no-repeat; image-rendering: pixelated; }
+.item-icone { position: relative; display: block; width: var(--lado); height: var(--lado); transform-style: preserve-3d; }
 .item-icone::before, .item-icone::after { content: ""; position: absolute; inset: 0; }
 .item-icone::before { transform: translateZ(-1.5px); }
 .item-icone::after { transform: translateZ(1.5px); }
@@ -1338,6 +1338,20 @@ a.slot:hover { background: #B4B4D8; }
 .cb-itens-lista strong { font-family: var(--pixel); font-size: 1.14rem; font-weight: 600; }
 .cb-itens-lista span { font-size: var(--t-pequeno); line-height: 1.4; }
 .cb-receita { color: var(--tinta-suave); }
+/* A receita como na bancada do jogo: grade 3×3, seta, o que sai. */
+.bancada { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; padding: 8px; width: fit-content; background: var(--papel); border: 2px solid var(--preto); box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--sombra); }
+.bancada-grade { display: grid; grid-template-columns: repeat(3, 36px); gap: 2px; }
+.bancada-casa { --lado: 32px; width: 36px; height: 36px; padding: 2px; }
+.bancada .item-icone::before, .bancada .item-icone::after { display: none; }
+.bancada .item-bloco { width: 32px; height: 32px; }
+.ing-icone { display: block; width: var(--lado); height: var(--lado); background: url("/arte/ingredientes.png") calc(var(--cx) * -1 * var(--lado)) calc(var(--cy) * -1 * var(--lado)) / calc(16 * var(--lado)) auto no-repeat; image-rendering: pixelated; }
+.bancada-letra { font-family: var(--pixel); font-size: 1.1rem; line-height: 32px; }
+.bancada-seta { width: 30px; height: 22px; background: var(--sombra); clip-path: polygon(0 32%, 58% 32%, 58% 0, 100% 50%, 58% 100%, 58% 68%, 0 68%); }
+.bancada-saida { position: relative; }
+.bancada-saida .slot-item { --lado: 40px; width: 48px; height: 48px; }
+.bancada-rende { position: absolute; right: 3px; bottom: 1px; font-family: var(--pixel); font-size: 1.1rem !important; font-weight: 600; line-height: 1; color: #fff; text-shadow: 2px 2px 0 #3F3F3F; }
+.bancada-nota { flex-basis: 100%; font-size: 0.78rem !important; color: var(--tinta-suave); }
+.cb-itens-lista li:hover .bancada .item-icone, .cb-itens-lista li:hover .bancada .item-bloco { animation: none; }
 .cb-deixado { display: grid; gap: 4px; margin-top: 6px; }
 .cb-deixado-rotulo { font-size: 0.78rem; color: var(--tinta-suave); }
 .cb-deixado .slot img { width: 40px; height: 40px; }

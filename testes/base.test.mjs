@@ -25,3 +25,20 @@ test("quem deixa cair: o avesso das quedas de cada espécie", async () => {
     for (const n of especies) assert.ok(COBBLEMON.especies[n].drops.some(([item]) => item === nome), `${n} não deixa ${nome}`);
   }
 });
+
+test("toda receita cabe na bancada e toda casa tem nome e figura", () => {
+  const comReceita = COBBLEMON.itens.filter((i) => i.receita);
+  assert.ok(comReceita.length >= 200);
+  for (const item of comReceita) {
+    const { grade, forma, ingredientes } = item.receita;
+    assert.equal(grade.length, 9, item.id);
+    assert.ok(["grade", "livre"].includes(forma) && ingredientes.length > 0, item.id);
+    for (const casa of grade.filter(Boolean)) {
+      const [id, nome] = casa, [espaco, curto] = id.split(":");
+      assert.ok(typeof nome === "string" && nome.length > 1, `${item.id}: casa sem nome`);
+      assert.ok((espaco === "cobblemon" && (curto in ITENS_ARTE.itens || ITENS_ARTE.blocos.includes(curto))) || id in ITENS_ARTE.ingredientes, `${item.id}: ${id} sem figura`);
+    }
+  }
+  const pc = COBBLEMON.itens.find((i) => i.id === "pc").receita;
+  assert.ok(pc.ingredientes.includes("Lingote de Ferro"), "o PC leva ferro: as etiquetas de convenção são resolvidas");
+});

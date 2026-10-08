@@ -12,7 +12,7 @@
  * Sem --minecraft, a tradução do Minecraft é baixada dos servidores da Mojang.
  * O arquivo gerado fica no repositório; o build não acessa a rede.
  */
-import { readFile, writeFile, readdir } from "node:fs/promises";
+import { readFile, writeFile, readdir, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, dirname, relative, basename, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -486,24 +486,69 @@ const GRUPOS = [
 const grupoDe = {};
 for (const [grupo, , tags] of GRUPOS) for (const t of tags) for (const id of (await tag("item", t)).valores) grupoDe[id] ??= grupo;
 
-/* Receitas de bancada: item -> ingredientes, sem repetir. */
+/* Os itens de uma etiqueta, para representá-la numa receita. As do mod estão nos dados dele; as do
+ * Minecraft, no pacote do jogo (.mod/minecraft, se houver); as de convenção entre mods ("c:lingotes/ferro")
+ * são baixadas do repositório público do NeoForge e guardadas em .mod/etiquetas-c para a próxima vez.
+ * Devolve todos os itens da etiqueta, abrindo as etiquetas que ela cita. */
+const etiquetasSemItem = new Set();
+async function valoresDaEtiqueta(id) {
+  const [espaco, caminho] = id.split(":");
+  if (espaco === "cobblemon") { const t = await tag("item", caminho); return [...t.valores, ...t.externas]; }
+  if (espaco === "minecraft") {
+    const arquivo = join(FONTE, "minecraft", "data", "minecraft", "tags", "item", ...`${caminho}.json`.split("/"));
+    return existsSync(arquivo) ? (await json(arquivo)).values : [];
+  }
+  if (espaco === "c") {
+    const local = join(FONTE, "etiquetas-c", `${caminho.replace(/\//g, "__")}.json`);
+    if (!existsSync(local)) {
+      const resposta = await fetch(`https://raw.githubusercontent.com/neoforged/NeoForge/1.21.1/src/generated/resources/data/c/tags/item/${caminho}.json`);
+      await mkdir(dirname(local), { recursive: true });
+      await writeFile(local, resposta.ok ? await resposta.text() : '{"values":[]}');
+    }
+    return (await json(local)).values;
+  }
+  return [];
+}
+async function itensDaEtiqueta(id, nivel = 0) {
+  const itens = [];
+  for (const bruto of nivel > 4 ? [] : await valoresDaEtiqueta(id)) {
+    const v = typeof bruto === "string" ? bruto : bruto.id;
+    if (v.startsWith("#")) itens.push(...await itensDaEtiqueta(v.slice(1), nivel + 1));
+    else if (/^(minecraft|cobblemon):/.test(v)) itens.push(v);
+  }
+  return [...new Set(itens)];
+}
+
+/* Receitas de bancada: item -> a grade 3×3 como aparece no jogo, os ingredientes por nome e quanto rende.
+ * Cada casa da grade é null (vazia) ou [id do item que aparece nela, nome a mostrar]. Para etiquetas, o item é o
+ * primeiro da etiqueta e o nome é o do grupo. */
 const receitas = {};
 for (const caminho of await arquivos(join(DADOS, "recipe"))) {
   const r = await json(caminho);
   const feito = r.result?.id ?? r.result?.item;
   if (!feito || !/crafting_(shaped|shapeless)/.test(r.type || "") || receitas[feito]) continue;
-  const brutos = r.key ? Object.values(r.key) : r.ingredients || [];
-  const nomes = [];
-  for (const ing of brutos.flat()) {
-    if (ing.item) nomes.push(nomeDoItem(ing.item));
-    else if (ing.tag) {
-      const curto = ing.tag.replace(":", ".").replace(/\//g, ".");
-      nomes.push(texto(`tag.item.${curto}`) ?? MC[`tag.item.${curto}`] ?? lista((await tag("item", ing.tag.split(":")[1])).valores.slice(0, 3).map(nomeDoItem).filter(Boolean)) ?? null);
+  const casa = async (bruto) => {
+    const ing = Array.isArray(bruto) ? bruto[0] : bruto;                 // com alternativas, vale a primeira
+    if (ing?.item) return nomeDoItem(ing.item) ? [ing.item, nomeDoItem(ing.item)] : null;
+    if (!ing?.tag) return null;
+    const curto = ing.tag.replace(":", ".").replace(/\//g, ".");
+    const membros = await itensDaEtiqueta(ing.tag), representante = membros.find((m) => nomeDoItem(m));
+    if (!representante) { etiquetasSemItem.add(ing.tag); return null; }
+    // etiqueta com nome na tradução usa o nome; sem nome e com vários itens, vale "o primeiro ou equivalente"
+    const grupo = texto(`tag.item.${curto}`) ?? MC[`tag.item.${curto}`] ?? (membros.length > 1 ? `${nomeDoItem(representante)} ou equivalente` : null);
+    return [representante, grupo ?? nomeDoItem(representante)];
+  };
+  const grade = Array(9).fill(null);
+  if (r.pattern) {
+    for (let y = 0; y < Math.min(3, r.pattern.length); y++) for (let x = 0; x < Math.min(3, r.pattern[y].length); x++) {
+      const letra = r.pattern[y][x];
+      if (letra !== " " && r.key[letra]) grade[y * 3 + x] = await casa(r.key[letra]);
     }
-  }
-  const limpos = [...new Set(nomes.filter(Boolean))];
-  if (limpos.length) receitas[feito] = { ingredientes: limpos, rende: r.result.count ?? 1 };
+  } else for (const [k, ing] of (r.ingredients || []).slice(0, 9).entries()) grade[k] = await casa(ing);
+  const nomes = [...new Set(grade.filter(Boolean).map(([, nome]) => nome))];
+  if (nomes.length) receitas[feito] = { ingredientes: nomes, rende: r.result.count ?? 1, forma: r.pattern ? "grade" : "livre", grade };
 }
+if (etiquetasSemItem.size) console.warn(`Etiquetas de receita sem item conhecido (a casa ficou vazia): ${[...etiquetasSemItem].join(", ")}`);
 
 const itens = [];
 const idsDeItem = new Set([...Object.keys(EN).filter((k) => /^item\.cobblemon\.[a-z0-9_]+$/.test(k)).map((k) => `cobblemon:${k.split(".")[2]}`),

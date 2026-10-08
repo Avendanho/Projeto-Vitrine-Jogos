@@ -3,9 +3,11 @@
  * próprio mod (gitlab.com/cable-mc/cobblemon, licença MPL 2.0):
  *   src/arte/itens.png        todos os ícones de 16 px, lado a lado
  *   src/arte/item/<id>.png    os itens que são blocos com modelo próprio (PC, máquina de cura...), desenhados em 3D
- *   dados/itens-arte.json     { colunas, celula, itens: { id: posição no atlas }, blocos: [id, ...] }
+ *   src/arte/ingredientes.png os ingredientes de receita que não são itens do atlas: blocos do mod, em cor, e itens
+ *                             do Minecraft, em tinta de mapa (quatro tons, como os Pokémon das listas), não com a textura do jogo
+ *   dados/itens-arte.json     { colunas, celula, itens: { id: posição no atlas }, blocos: [id, ...], ingredientes: { id: posição } }
  *
- * Uso: node scripts/itens-arte.mjs --ativos <pasta assets/cobblemon do mod>
+ * Uso: node scripts/itens-arte.mjs --ativos <pasta assets/cobblemon do mod> --minecraft <pasta assets/minecraft do jogo>
  * O arquivo gerado fica no repositório; o build não depende deste script.
  */
 import { readFile, writeFile, readdir, mkdir } from "node:fs/promises";
@@ -17,7 +19,8 @@ import sharp from "sharp";
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const ATIVOS = args[args.indexOf("--ativos") + 1];
-if (!ATIVOS || !existsSync(ATIVOS)) { console.error("Uso: node scripts/itens-arte.mjs --ativos <pasta assets/cobblemon do mod>"); process.exit(1); }
+const MINECRAFT = args.includes("--minecraft") ? args[args.indexOf("--minecraft") + 1] : "";
+if (!ATIVOS || !existsSync(ATIVOS) || !existsSync(MINECRAFT)) { console.error("Uso: node scripts/itens-arte.mjs --ativos <pasta assets/cobblemon do mod> --minecraft <pasta assets/minecraft do jogo>"); process.exit(1); }
 
 const CELULA = 16, COLUNAS = 32;
 const { itens } = JSON.parse(await readFile(join(RAIZ, "dados", "cobblemon.json"), "utf8"));
@@ -131,8 +134,65 @@ for (const item of itens) {
   posicoes[item.id] = i;
   pecas.push({ input: icone, left: (i % COLUNAS) * CELULA, top: Math.floor(i / COLUNAS) * CELULA });
 }
+/* ---------- ingredientes de receita que não são itens do atlas ---------- */
+
+const PASTA = { cobblemon: ATIVOS, minecraft: MINECRAFT };
+const partes = (ref) => (ref.includes(":") ? ref.split(":") : ["minecraft", ref]);
+/* A textura que representa um item ou bloco: a camada do modelo de item ou, se ele herda de um bloco, uma face do bloco. */
+async function texturaDe(id) {
+  const [espaco, nome] = partes(id);
+  let texturas = {}, ref = `${espaco}:item/${nome}`;
+  for (let nivel = 0; nivel < 5 && ref; nivel++) {
+    const [e, caminho] = partes(ref), arquivo = join(PASTA[e] ?? "", "models", `${caminho}.json`);
+    if (!existsSync(arquivo)) break;
+    const m = JSON.parse(await readFile(arquivo, "utf8"));
+    texturas = { ...(m.textures || {}), ...texturas };
+    ref = m.parent;
+  }
+  const abrir = (v, n = 0) => (typeof v === "string" && v.startsWith("#") && n < 5 ? abrir(texturas[v.slice(1)], n + 1) : v);
+  for (const chave of ["layer0", "all", "front", "side", "top", "texture", "cross", "end", "particle", ...Object.keys(texturas)]) {
+    const alvo = abrir(texturas[chave]);
+    if (!alvo) continue;
+    const [e, caminho] = partes(alvo), arquivo = join(PASTA[e] ?? "", "textures", `${caminho}.png`);
+    if (existsSync(arquivo)) return arquivo;
+  }
+  return null;
+}
+/* Em tinta de mapa: os quatro tons das listas de Pokémon, do nanquim ao pergaminho, pela luz de cada ponto. */
+const TONS = [[35, 31, 26], [92, 79, 60], [156, 139, 99], [230, 218, 180]];
+async function emTinta(arquivo) {
+  const { width } = await sharp(arquivo).metadata();
+  const { data } = await sharp(arquivo).extract({ left: 0, top: 0, width, height: width }).resize(CELULA, CELULA, { kernel: "nearest" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const luz = (i) => (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255, luzes = [];
+  for (let i = 0; i < data.length; i += 4) if (data[i + 3] > 110) luzes.push(luz(i));
+  luzes.sort((a, b) => a - b);
+  const baixo = luzes[Math.floor(luzes.length * 0.05)] ?? 0, faixa = Math.max(0.12, (luzes[Math.floor(luzes.length * 0.95)] ?? 1) - baixo);
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] <= 110) { data[i + 3] = 0; continue; }
+    const t = TONS[Math.min(3, Math.max(0, Math.floor(((luz(i) - baixo) / faixa) * 3.4 + 0.45)))];
+    data[i] = t[0]; data[i + 1] = t[1]; data[i + 2] = t[2]; data[i + 3] = 255;
+  }
+  return sharp(data, { raw: { width: CELULA, height: CELULA, channels: 4 } }).png().toBuffer();
+}
+const COLUNAS_ING = 16, ingredientes = {}, pecasIng = [], semFigura = [];
+const usados = [...new Set(itens.flatMap((i) => (i.receita?.grade ?? []).filter(Boolean).map((c) => c[0])))].sort();
+for (const id of usados) {
+  const [espaco, nome] = partes(id);
+  if (espaco === "cobblemon" && (nome in posicoes || blocos.includes(nome))) continue;      // já tem ícone no atlas de itens
+  const arquivo = await texturaDe(id);
+  if (!arquivo) { semFigura.push(id); continue; }
+  const figura = espaco === "minecraft" ? await emTinta(arquivo) : await sharp(arquivo).extract({ left: 0, top: 0, width: (await sharp(arquivo).metadata()).width, height: (await sharp(arquivo).metadata()).width }).resize(CELULA, CELULA, { kernel: "nearest" }).ensureAlpha().png().toBuffer();
+  const k = pecasIng.length;
+  ingredientes[id] = k;
+  pecasIng.push({ input: figura, left: (k % COLUNAS_ING) * CELULA, top: Math.floor(k / COLUNAS_ING) * CELULA });
+}
+const linhasIng = Math.ceil(pecasIng.length / COLUNAS_ING);
+await sharp({ create: { width: COLUNAS_ING * CELULA, height: linhasIng * CELULA, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+  .composite(pecasIng).png({ compressionLevel: 9 }).toFile(join(RAIZ, "src", "arte", "ingredientes.png"));
+
 const linhas = Math.ceil(pecas.length / COLUNAS);
 await sharp({ create: { width: COLUNAS * CELULA, height: linhas * CELULA, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
   .composite(pecas).png({ compressionLevel: 9 }).toFile(join(RAIZ, "src", "arte", "itens.png"));
-await writeFile(join(RAIZ, "dados", "itens-arte.json"), JSON.stringify({ colunas: COLUNAS, linhas, celula: CELULA, itens: posicoes, blocos }));
+await writeFile(join(RAIZ, "dados", "itens-arte.json"), JSON.stringify({ colunas: COLUNAS, linhas, celula: CELULA, itens: posicoes, blocos, ingredientes, colunasDeIngredientes: COLUNAS_ING }));
 console.log(`Itens: ${pecas.length} ícones em src/arte/itens.png (${COLUNAS}×${linhas}), ${blocos.length} blocos em src/arte/item/${faltam.length ? `; sem modelo nem textura no mod: ${faltam.join(", ")}` : ""}`);
+console.log(`Ingredientes: ${pecasIng.length} figuras em src/arte/ingredientes.png${semFigura.length ? `; sem figura: ${semFigura.join(", ")}` : ""}`);

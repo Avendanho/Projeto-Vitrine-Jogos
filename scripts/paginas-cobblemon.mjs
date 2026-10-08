@@ -39,6 +39,24 @@ function icone(id) {
     ? `<span class="slot slot-item" aria-hidden="true"><img class="item-bloco" src="/arte/item/${id}.png" alt="" width="48" height="48" loading="lazy" decoding="async"></span>`
     : `<span class="slot slot-item" aria-hidden="true"><span class="item-icone" style="--cx:${i % ITENS_ARTE.colunas};--cy:${Math.floor(i / ITENS_ARTE.colunas)}"></span></span>`;
 }
+/* A receita como aparece na bancada do jogo: grade 3×3, seta e o que sai. Item do mod usa o ícone dele;
+ * ingrediente do Minecraft vem em tinta de mapa (src/arte/ingredientes.png). O nome de cada casa fica na dica. */
+function casaDaBancada(c) {
+  if (!c) return `<span class="slot bancada-casa"></span>`;
+  const [id, rotulo] = c, [espaco, nome] = id.split(":"), i = espaco === "cobblemon" ? ITENS_ARTE.itens[nome] : undefined, k = ITENS_ARTE.ingredientes[id];
+  const figura = i !== undefined ? `<span class="item-icone" style="--cx:${i % ITENS_ARTE.colunas};--cy:${Math.floor(i / ITENS_ARTE.colunas)}"></span>`
+    : espaco === "cobblemon" && ITENS_ARTE.blocos.includes(nome) ? `<img class="item-bloco" src="/arte/item/${nome}.png" alt="" width="32" height="32" loading="lazy" decoding="async">`
+    : k !== undefined ? `<span class="ing-icone" style="--cx:${k % ITENS_ARTE.colunasDeIngredientes};--cy:${Math.floor(k / ITENS_ARTE.colunasDeIngredientes)}"></span>`
+    : `<span class="bancada-letra">${esc(rotulo[0])}</span>`;
+  return `<span class="slot bancada-casa" title="${esc(rotulo)}">${figura}</span>`;
+}
+function bancada(item) {
+  const r = item.receita;
+  if (!r?.grade) return "";
+  return `<span class="bancada" role="img" aria-label="Receita de bancada${r.forma === "livre" ? ", em qualquer posição" : ""}: ${esc(enumerar(r.ingredientes))}${r.rende > 1 ? `. Rende ${r.rende}` : ""}">
+    <span class="bancada-grade">${r.grade.map(casaDaBancada).join("")}</span><span class="bancada-seta"></span><span class="bancada-saida">${icone(item.id)}${r.rende > 1 ? `<span class="bancada-rende">${r.rende}</span>` : ""}</span>${r.forma === "livre" ? '<span class="bancada-nota">em qualquer posição</span>' : ""}
+  </span>`;
+}
 /* Uma maquete de blocos: a imagem parada e o botão que a troca pelo modelo que gira (src/js/maquete.js). */
 function maquete(info, legenda, { auto = false, preguica = true } = {}) {
   return `<figure class="maquete"${auto ? " data-maquete-auto" : ""} data-maquete="/maquetes/${info.nome}.json">
@@ -327,7 +345,7 @@ export function paginaCobblemonItens() {
   const corpo = `
 <section class="cabecalho">
   <h1>Itens</h1>
-  <p class="prosa">${NUMEROS.itens} itens e blocos do Cobblemon ${esc(C.versao)}, com o ícone, o nome e a descrição do próprio mod. Onde há receita de bancada, ela vem junto. Cada item mostra também os Pokémon que o deixam cair, e a busca acha por eles. Aponte para um item e ele gira, como quando cai no chão.</p>
+  <p class="prosa">${NUMEROS.itens} itens e blocos do Cobblemon ${esc(C.versao)}, com o ícone, o nome e a descrição do próprio mod. Onde há receita, ela vem desenhada como na bancada do jogo; passe o ponteiro numa casa para ver o nome do ingrediente. Cada item mostra também os Pokémon que o deixam cair, e a busca acha por eles. Aponte para um item e ele gira, como quando cai no chão.</p>
 </section>
 <section class="cb-itens" data-cb-itens>
   <form class="dex-controles" role="search" aria-label="Procurar item">
@@ -342,7 +360,7 @@ export function paginaCobblemonItens() {
     <h2 id="t-${g.id}">${esc(g.nome)}</h2>
     ${NOTAS[g.id] ? `<p class="nota-editorial">${NOTAS[g.id]}</p>` : ""}
     <ul class="cb-itens-lista">
-      ${g.itens.map((i) => `<li data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>` : ""}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
+      ${g.itens.map((i) => `<li data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>${bancada(i)}` : ""}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
     </ul>
   </section>`).join("\n  ")}
   <section class="cb-grupo cb-grupo-jogo" id="g-minecraft" aria-labelledby="t-minecraft">
