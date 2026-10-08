@@ -497,6 +497,7 @@ export function paginaComparar() {
 <section class="cabecalho">
   <h1>Comparar</h1>
   <p class="prosa">Escolha dois jogos, ou três, e veja as ilhas uma sobre a outra. Onde as costas coincidem, eles se parecem.</p>
+  <p><a class="ligacao" href="/comparar/pokemon/">Comparar dois Pokémon, atributo por atributo</a></p>
 </section>
 <section class="comparar">
   <noscript><p class="prosa">A comparação precisa de JavaScript para sobrepor as ilhas. Sem ele, cada página de jogo, a partir da <a href="/linha-do-tempo/">linha do tempo</a>, traz as mesmas notas.</p></noscript>

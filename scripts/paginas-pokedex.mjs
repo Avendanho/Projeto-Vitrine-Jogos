@@ -261,6 +261,7 @@ export function paginaEspecie(id) {
       ${f.atributos.map((v, k) => `<li><span class="atributo-nome">${ATRIBUTOS[k]}</span><span class="atributo-trilho" aria-hidden="true"><span class="atributo-barra faixa-${faixaDoAtributo(v)}" style="width:${((v / TETO_ATRIBUTO) * 100).toFixed(1)}%"></span></span><span class="atributo-valor">${v}</span></li>`).join("\n      ")}
       <li class="atributo-total"><span class="atributo-nome">Total</span><span></span><span class="atributo-valor">${total}</span></li>
     </ul>
+    <p class="atributos-mais"><a class="ligacao" href="/comparar/pokemon/?a=${f.slug}">Comparar ${esc(f.nome)} com outro Pokémon</a></p>
   </section>
 
   <section class="especie-ficha" aria-labelledby="t-ficha">
