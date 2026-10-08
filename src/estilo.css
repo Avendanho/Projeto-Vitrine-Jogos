@@ -1543,7 +1543,7 @@ a.slot:hover { background: #B4B4D8; }
 .quiz-palpite { display: flex; flex-wrap: wrap; align-items: end; gap: var(--e3); margin-top: var(--e4); }
 .quiz-palpite[hidden] { display: none; }
 .quiz-palpite .dex-busca { flex: 1 1 16rem; }
-.quiz-aviso { flex-basis: 100%; min-height: 1.4em; font-size: var(--t-pequeno); font-weight: 600; color: var(--rota); }
+.quiz-aviso, .time-aviso { flex-basis: 100%; min-height: 1.4em; font-size: var(--t-pequeno); font-weight: 600; color: var(--rota); }
 .quiz-fim { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--e4); align-items: center; margin-top: var(--e4); padding: var(--e3); background: var(--papel); border: 1.5px solid var(--tinta); }
 .quiz-fim[hidden] { display: none; }
 .quiz-fim img { width: min(34vw, 160px); height: auto; }
@@ -1570,6 +1570,43 @@ a.slot:hover { background: #B4B4D8; }
 .quiz-palpites .acerto { background: var(--tinta); color: var(--mar); }
 .quiz .nota-editorial { margin-top: var(--e4); max-width: 60ch; }
 @media (max-width: 560px) { .quiz-fim { grid-template-columns: minmax(0, 1fr); justify-items: start; } }
+
+/* ---------- montador de time ---------- */
+
+.time { padding: var(--e3) var(--margem) var(--e7); }
+.time-controles { display: flex; flex-wrap: wrap; align-items: end; gap: var(--e3); }
+.time-controles .dex-busca { flex: 1 1 14rem; }
+.time-vagas { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--e2); margin-top: var(--e4); padding: var(--e3) 0; border-block: 1.5px solid currentColor; }
+.time-vaga { display: grid; justify-items: center; align-content: start; gap: 4px; text-align: center; line-height: 1.2; }
+.time-vaga a { display: grid; justify-items: center; text-decoration: none; }
+.time-vaga .dex-arte { width: min(100%, 120px); height: auto; aspect-ratio: 1; }
+.time-vaga a:is(:hover, :focus-visible) .cor { opacity: 1; }
+.time-vaga a:is(:hover, :focus-visible) img:not(.cor) { opacity: 0; }
+.time-vaga-vazia { min-height: 8.5rem; place-content: center; border: 1.5px dashed color-mix(in srgb, currentColor 45%, transparent); font-size: var(--t-pequeno); color: var(--tinta-suave); }
+.time-fora { font-size: 0.78rem; font-weight: 600; color: var(--rota); }
+.time-vaga .ligacao { font-size: 0.78rem; }
+.time-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--e4); margin-top: var(--e4); }
+.time-resumo h2 { font-size: var(--t-destaque); font-weight: 800; font-stretch: 114%; }
+.time-resumo p { margin-top: 4px; font-size: var(--t-pequeno); }
+.time-vazio { font-family: var(--caderno); font-style: italic; font-size: 1.3rem !important; }
+.time-fichas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--e2); }
+.time-tabela-caixa { position: relative; max-width: calc(100vw - 2 * var(--margem)); margin-top: var(--e5); overflow-x: auto; }
+.time-tabela { width: 100%; min-width: 52rem; table-layout: fixed; border-collapse: collapse; font-size: var(--t-pequeno); font-variant-numeric: tabular-nums; }
+.time-tabela :is(th, td) { padding: 9px 4px; text-align: center; border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent); }
+.time-tabela thead th { font-size: 0.78rem; font-weight: 660; color: var(--tinta-suave); }
+.time-tabela abbr { text-decoration: none; }
+.time-tabela :is(thead, tbody, tfoot) th:first-child { text-align: left; padding-right: var(--e2); overflow-wrap: anywhere; }
+.time-tabela thead th:first-child { width: 12rem; }
+.time-tabela td { font-weight: 700; }
+.time-tabela .f-fraco { background: color-mix(in srgb, var(--rota) 22%, transparent); }
+.time-tabela .f-quadruplo { background: var(--rota); color: #fff; }
+.time-tabela .f-resiste { background: color-mix(in srgb, var(--tinta) 14%, transparent); }
+.time-tabela .f-imune { background: var(--tinta); color: var(--mar); }
+.time-tabela tfoot :is(th, td) { border-bottom: 0; border-top: 1.5px solid currentColor; }
+.time-tabela tfoot tr + tr :is(th, td) { border-top: 0; }
+.time-tabela tfoot .buraco { outline: 2px solid var(--rota); outline-offset: -3px; color: var(--rota); }
+.time .nota-editorial { margin-top: var(--e3); max-width: 70ch; }
+@media (max-width: 760px) { .time-vagas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* ---------- movimento reduzido ---------- */
 

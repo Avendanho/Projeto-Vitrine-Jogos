@@ -1,6 +1,8 @@
 /* As ferramentas da edição Pokémon: comparar dois Pokémon, o quiz diário, o montador de time e o diário
  * de desafio. Aqui só nasce a moldura de cada página; quem a faz funcionar é o módulo de mesmo nome em src/js/. */
 import { moldura } from "./paginas.mjs";
+import { esc, TIPOS_E_FATORES } from "./base.mjs";
+import { jogosParaONavegador } from "./dados-navegador.mjs";
 
 export const ATRIBUTOS = ["PS", "Ataque", "Defesa", "Ataque Especial", "Defesa Especial", "Velocidade"];
 const semJs = (texto) => `<noscript><p class="prosa">${texto}</p></noscript>`;
@@ -77,5 +79,42 @@ export function paginaQuiz() {
   return moldura({
     titulo: "Quem é esse Pokémon? O quiz diário", caminho: "/quiz/", classe: "pagina-quiz", corpo, modulo: "quiz",
     descricao: "Dois enigmas de Pokémon por dia, iguais para todo mundo: adivinhe pela ficha ou pela gravura que se revela aos poucos."
+  });
+}
+
+/* ---------- montador de time ---------- */
+
+export function paginaTime() {
+  const jogos = jogosParaONavegador();
+  const corpo = `
+<section class="cabecalho">
+  <h1>Montar um time</h1>
+  <p class="prosa">Escolha até seis Pokémon e veja de que o time apanha, a que ele resiste e o que ele não consegue atingir com vantagem. Se você escolher um jogo, as sugestões ficam só com o que existe na Pokédex dele.</p>
+</section>
+<section class="time" data-time>
+  ${semJs('O montador de time precisa de JavaScript. A <a href="/pokedex/">Pokédex</a> mostra os tipos de cada espécie sem ele.')}
+  <form class="time-controles" aria-label="Montar o time">
+    <label class="escolha"><span>Jogo</span><select name="jogo"><option value="">Qualquer jogo</option>${jogos.map((j) => `<option value="${j.slug}">${esc(j.nome)}</option>`).join("")}</select></label>
+    <div class="dex-busca"><label for="time-campo">Pôr no time</label><input id="time-campo" type="search" list="lista-time" placeholder="Nome ou número" autocomplete="off" spellcheck="false"></div>
+    <button type="submit" class="botao">Adicionar</button>
+    <button type="button" class="ligacao" data-limpar hidden>Esvaziar o time</button>
+    <p class="time-aviso" data-aviso aria-live="polite"></p>
+    <datalist id="lista-time"></datalist>
+  </form>
+  <ol class="time-vagas" data-vagas aria-label="O time"></ol>
+  <div class="time-resumo" data-resumo aria-live="polite"></div>
+  <div class="time-tabela-caixa">
+    <table class="time-tabela" data-tabela hidden>
+      <caption class="so-leitor">Quanto cada Pokémon do time recebe de golpes de cada tipo</caption>
+      <thead><tr><th scope="col">Recebendo golpe de</th>${TIPOS_E_FATORES.tipos.map((t) => `<th scope="col"><abbr title="${t}">${t.slice(0, 3)}</abbr></th>`).join("")}</tr></thead>
+      <tbody></tbody>
+      <tfoot></tfoot>
+    </table>
+  </div>
+  <p class="nota-editorial">Cada coluna é o tipo de um golpe recebido. 2 e 4: apanha em dobro ou em quádruplo. ½ e ¼: resiste. 0: é imune. Casa vazia: dano normal. A conta olha só os tipos; habilidades e itens ficam de fora.</p>
+</section>`;
+  return moldura({
+    titulo: "Montar um time de Pokémon", caminho: "/time/", classe: "pagina-time", corpo, modulo: "time",
+    descricao: "Monte um time de até seis Pokémon e veja fraquezas, resistências e o que falta cobrir, com filtro pela Pokédex de cada jogo."
   });
 }

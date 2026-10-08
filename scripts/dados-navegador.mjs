@@ -1,6 +1,8 @@
 /* Os módulos de dados que o navegador importa, gerados no build em dist/js/dados/.
  * Cada função devolve o texto de um módulo. As páginas só baixam o que usam. */
-import { FICHAS, POKEDEX } from "./base.mjs";
+import { FICHAS, POKEDEX, TIPOS_E_FATORES } from "./base.mjs";
+import { JOGOS } from "../dados/jogos.mjs";
+import { REGIOES, ROTAS } from "../dados/atlas.mjs";
 
 const cabecalho = "/* Gerado por scripts/build.mjs a partir de dados/. Não edite à mão. */\n";
 
@@ -14,3 +16,17 @@ export function especiesParaONavegador() {
   });
 }
 export const moduloEspecies = () => `${cabecalho}export const ESPECIES = ${JSON.stringify(especiesParaONavegador())};\n`;
+
+/* Os 18 tipos e o fator de cada atacante contra cada defensor. */
+export const moduloTipos = () => `${cabecalho}export const TIPOS = ${JSON.stringify(TIPOS_E_FATORES.tipos)};\nexport const TABELA = ${JSON.stringify(TIPOS_E_FATORES.tabela)};\n`;
+
+/* As campanhas (jogos da série principal, remakes e Legends com Pokédex no atlas): que espécies cada uma
+ * tem e as rotas numeradas da região dela. Serve ao montador de time e ao diário de desafio. */
+export function jogosParaONavegador() {
+  return JOGOS.filter((j) => j.pokedex && j.tipo !== "derivado").map((j) => ({
+    slug: j.slug, nome: j.curto, regiao: REGIOES.find((r) => r.id === j.regiao).nome,
+    especies: [...new Set(j.pokedex.flatMap(([lista]) => POKEDEX.dex[lista].map(([, e]) => e)))].filter((id) => FICHAS[id]),
+    rotas: (ROTAS[j.regiao] || []).map((r) => [r.n, r.de, r.para])
+  }));
+}
+export const moduloJogos = () => `${cabecalho}export const JOGOS = ${JSON.stringify(jogosParaONavegador())};\n`;
