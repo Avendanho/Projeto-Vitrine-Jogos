@@ -864,10 +864,19 @@ html:not(.js) .topo-busca { display: none; }
 /* o botão de som: um alto-falante em bloco, verde quando o som está ligado */
 html:not(.js) :is(.topo-som, .especie-grito) { display: none; }
 .topo-som { flex: none; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; color: var(--preto); background: var(--papel); border: 2px solid var(--preto); box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 var(--sombra); cursor: pointer; }
-.topo-som[aria-pressed="true"] { background: var(--rota); color: #fff; box-shadow: inset 2px 2px 0 rgb(255 255 255 / 0.35), inset -2px -2px 0 rgb(0 0 0 / 0.3); }
+.topo-som[data-ligado="true"] { background: var(--rota); color: #fff; box-shadow: inset 2px 2px 0 rgb(255 255 255 / 0.35), inset -2px -2px 0 rgb(0 0 0 / 0.3); }
 .topo-som svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; }
 .topo-som .som-caixa { fill: currentColor; }
-[aria-pressed="true"] .som-mudo, [aria-pressed="false"] .som-ondas { display: none; }
+[data-ligado="true"] .som-mudo, [data-ligado="false"] .som-ondas { display: none; }
+/* o painel de som: a chave e os dois volumes, num painel de inventário preso ao canto do alto */
+.som-painel { width: min(92vw, 21rem); margin: 64px clamp(12px, 3vw, 40px) auto auto; padding: var(--e3); color: var(--tinta); background: var(--papel); border: 3px solid var(--preto); box-shadow: inset 3px 3px 0 #fff, inset -3px -3px 0 var(--sombra), 0 18px 50px rgb(0 0 0 / 0.35); }
+.som-painel[open] { display: grid; gap: var(--e2); }
+.som-painel::backdrop { background: rgb(0 0 0 / 0.3); }
+.som-painel h2 { font-family: var(--pixel); font-size: var(--t-subtitulo); font-weight: 500; }
+.som-painel .botao, .som-painel .ligacao { justify-self: start; }
+.som-volume { display: grid; gap: 4px; font-family: var(--pixel); font-size: 1.05rem; }
+.som-volume input { width: 100%; height: 28px; margin: 0; accent-color: var(--rota); cursor: pointer; }
+@media (max-width: 600px) { .som-painel { margin-inline: auto; } }
 .topo-nav-som { display: none; }
 .especie-grito { display: flex; flex-wrap: wrap; align-items: center; gap: 8px var(--e2); margin-top: var(--e3); }
 [data-grito].tocando { background: var(--rota); color: #fff; }
@@ -878,8 +887,8 @@ html:not(.js) :is(.topo-som, .especie-grito) { display: none; }
   .topo-som { display: none; }
   .js .topo-nav-som { display: block; width: 100%; margin: 0 0 4px; padding: 13px; font-family: var(--pixel); font-size: var(--t-destaque); font-weight: 500; color: inherit; background: var(--papel); border: 2px solid var(--preto); border-radius: 0; cursor: pointer; }
   .js .topo-nav-som::after { content: " desligados"; }
-  .js .topo-nav-som[aria-pressed="true"] { background: var(--rota); color: #fff; }
-  .js .topo-nav-som[aria-pressed="true"]::after { content: " ligados"; }
+  .js .topo-nav-som[data-ligado="true"] { background: var(--rota); color: #fff; }
+  .js .topo-nav-som[data-ligado="true"]::after { content: " ligados"; }
   .js .topo-nav-busca { display: block; width: 100%; margin: var(--e2) 0 4px; padding: 13px; font: inherit; font-size: var(--t-destaque); font-weight: 600; color: inherit; background: transparent; border: 1.5px solid currentColor; border-radius: 2px; cursor: pointer; }
   .edicao-cobblemon.js .topo-nav-busca, .js .edicao-cobblemon .topo-nav-busca { font-family: var(--pixel); border: 2px solid var(--preto); border-radius: 0; background: var(--papel); }
 }

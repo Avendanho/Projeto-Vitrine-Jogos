@@ -1,6 +1,10 @@
 /* O que todos os modelos de página compartilham: cores, dados gerados e pequenas utilidades de texto. */
 import { readFileSync } from "node:fs";
 
+/* O endereço público do atlas, para o que precisa de endereço inteiro: a imagem de prévia dos links, o
+ * endereço canônico de cada página e o mapa do site. ATLAS_SITE troca o padrão (uma cópia em outro domínio). */
+export const SITE = (process.env.ATLAS_SITE || "https://pokeatlas-eight.vercel.app").replace(/\/$/, "");
+
 /* As cores da edição Pokémon que os modelos precisam conhecer: a tela clara do aparelho, a tinta dela, a tela
  * apagada (a cena escura da abertura) e o texto claro sobre ela. O resto está em src/pokedex.css. */
 export const MAR = "#F1F5EA", TINTA = "#20232B", NOITE = "#171A21", PAPEL = "#F1F5EA", VERMELHO = "#DC0A2D", AMARELO = "#FFCB05";

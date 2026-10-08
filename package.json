@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "PokéAtlas — guia visual para descobrir qual jogo de Pokémon combina com você. Projeto de fã, não oficial.",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -19,6 +20,7 @@
     "tipos": "node scripts/tipos.mjs",
     "encontros": "node scripts/encontros.mjs",
     "gritos": "node scripts/gritos.mjs",
+    "vitrine": "node scripts/vitrine.mjs",
     "verificar": "node scripts/verificar-paginas.mjs",
     "mod": "node scripts/baixar-mod.mjs",
     "test": "node --test testes/*.test.mjs",

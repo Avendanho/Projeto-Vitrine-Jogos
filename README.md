@@ -19,6 +19,20 @@
   <img src="https://img.shields.io/badge/P%C3%A1ginas%20Geradas-1.986%20est%C3%A1ticas-blue?style=flat-square" alt="Páginas" />
   <img src="https://img.shields.io/badge/Dados-Pok%C3%A9API-red?style=flat-square" alt="PokéAPI" />
   <img src="https://img.shields.io/badge/Tipo-Projeto%20de%20F%C3%A3%20(N%C3%A3o%20Oficial)-lightgrey?style=flat-square" alt="Não Oficial" />
+  <img src="https://img.shields.io/badge/Licen%C3%A7a-MIT%20(c%C3%B3digo)-green?style=flat-square" alt="Licença MIT" />
+</p>
+
+<p align="center">
+  <img src="docs/imagens/inicio.webp" alt="A página inicial: a ficha de um jogo, com o hexágono de atributos e o teclado azul de perfis" width="49%" />
+  <img src="docs/imagens/pico.webp" alt="A cena em que o hexágono responde a cada pedido, com os trinta perfis em volta" width="49%" />
+</p>
+<p align="center">
+  <img src="docs/imagens/bussola.webp" alt="A bússola: uma pergunta com quatro respostas e o perfil de quem responde" width="49%" />
+  <img src="docs/imagens/time.webp" alt="O montador de time, no formato da tela de equipe dos jogos" width="49%" />
+</p>
+<p align="center">
+  <img src="docs/imagens/regiao.webp" alt="A carta de Kanto, com rotas e cidades numeradas" width="49%" />
+  <img src="docs/imagens/cobblemon.webp" alt="A edição Cobblemon: a página do Wooper, com o modelo do mod" width="49%" />
 </p>
 
 ---
@@ -287,6 +301,7 @@ O projeto é configurado nativamente para publicação contínua na **Vercel** a
 
 ## ⚖️ Avisos Legais e Créditos
 
+- **Código:** o código-fonte deste repositório está sob a [licença MIT](LICENSE). Ela não alcança o material de terceiros listado abaixo.
 - **Pokémon:** Pokémon, nomes dos jogos, criaturas e insígnias são marcas registradas e propriedades intelectuais da **Nintendo**, **Game Freak**, **Creatures Inc.** e **The Pokémon Company**. Este é um projeto de fã, não oficial, de caráter artístico e informativo, sem fins lucrativos e sem qualquer vínculo comercial.
 - **Dados e Sprites:** Nomes, estatísticas e ilustrações oficiais foram obtidos por meio da [PokéAPI](https://pokeapi.co/) e tratados artisticamente em formato de gravura.
 - **Som:** a música e os sons das teclas são originais do projeto, gerados no navegador. Os gritos dos Pokémon são os dos jogos, obtidos do repositório público [PokeAPI/cries](https://github.com/PokeAPI/cries), e pertencem à The Pokémon Company.

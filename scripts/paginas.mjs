@@ -6,7 +6,7 @@ import { REGIOES, CONSOLES, ESTILOS, TIPOS, PEDIDOS, MARCOS, HORIZONTE, ROMANOS,
 import { PERGUNTAS } from "../dados/quiz.mjs";
 import { EIXOS, valoresDe, encaixe } from "../src/js/hexagono.js";
 import { perfilRegiao, posicoesDosEixos, reguaDeAnos } from "./cenario.mjs";
-import { MAR, TINTA, NOITE, PAPEL, VERMELHO, AMARELO, POKEDEX, FICHAS, CARTAS, ORDEM_TIPOS, esc, semAcento, maiuscula, extenso, numero, enderecoEspecie, selo } from "./base.mjs";
+import { SITE, MAR, TINTA, NOITE, PAPEL, VERMELHO, AMARELO, POKEDEX, FICHAS, CARTAS, ORDEM_TIPOS, esc, semAcento, maiuscula, extenso, numero, enderecoEspecie, selo } from "./base.mjs";
 import { rotasDaCarta, lugaresDaCarta, tracosDaCarta, caixaCarta } from "./carta.mjs";
 
 /* ---------- utilidades ---------- */
@@ -109,6 +109,7 @@ export const EDICOES = {
  * espelho  endereço da página equivalente na outra edição (sem ele, o seletor leva ao início dela) */
 export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, extra = null, rolagem = false, edicao = "pokemon", espelho = null }) {
   const ed = EDICOES[edicao];
+  const existe = caminho.endsWith("/");               // a página de "não encontrado" não tem endereço próprio
   const tituloCompleto = caminho === ed.inicio ? titulo : `${titulo} — ${ed.sufixo}`;
   // dentro de uma seção (a página de uma espécie, de uma região), a aba da seção continua marcada
   const link = (n) => `<a href="${n.href}"${caminho.startsWith(n.href) ? ' aria-current="page"' : ""}>${n.texto}</a>`;
@@ -127,8 +128,16 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
 <meta property="og:description" content="${esc(descricao)}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="PokéAtlas">
+<meta property="og:image" content="${SITE}/arte/cartao-${edicao}.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+${existe ? `<meta property="og:url" content="${SITE}${caminho}">\n<link rel="canonical" href="${SITE}${caminho}">` : '<meta name="robots" content="noindex">'}
 <script>${ANTES_DE_APARECER}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/arte/icone-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
 ${ed.fontes.map((f) => `<link rel="preload" href="/fontes/${f}.woff2" as="font" type="font/woff2" crossorigin>`).join("\n")}
 <link rel="stylesheet" href="/${ed.estilo}.css">
 </head>
@@ -138,11 +147,11 @@ ${ed.fontes.map((f) => `<link rel="preload" href="/fontes/${f}.woff2" as="font" 
   <a class="marca" href="${ed.inicio}"${caminho === ed.inicio ? ' aria-current="page"' : ""}>PokéAtlas</a>
   <div class="edicoes" role="group" aria-label="Edição do atlas">${seletor}</div>
   <button type="button" class="topo-busca" data-busca-abrir aria-haspopup="dialog" aria-keyshortcuts="/ Control+K">Buscar</button>
-  <button type="button" class="topo-som" data-som aria-pressed="false" aria-label="Som" title="Música e sons do atlas">${ICONE_DO_SOM}</button>
+  <button type="button" class="topo-som" data-som data-ligado="false" aria-haspopup="dialog" aria-label="Som: desligado" title="Música e sons do atlas">${ICONE_DO_SOM}</button>
   <button type="button" class="topo-menu" aria-expanded="false" aria-controls="menu">Menu</button>
   <nav class="topo-nav" id="menu" aria-label="Seções">
     <button type="button" class="topo-nav-busca" data-busca-abrir aria-haspopup="dialog">Buscar no atlas</button>
-    <button type="button" class="topo-nav-som" data-som aria-pressed="false">Música e sons</button>
+    <button type="button" class="topo-nav-som" data-som data-ligado="false" aria-haspopup="dialog">Música e sons</button>
     ${ed.nav.map(link).join("\n    ")}
     <a class="botao botao-pequeno" href="${ed.acao.href}"${caminho === ed.acao.href ? ' aria-current="page"' : ""}>${ed.acao.texto}</a>
   </nav>

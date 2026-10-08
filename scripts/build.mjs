@@ -7,7 +7,8 @@ import { JOGOS } from "../dados/jogos.mjs";
 import { ESPECIES } from "../dados/especies.mjs";
 import { REGIOES, CONSOLES, ESTILOS, PEDIDOS, MAPAS, ROTAS } from "../dados/atlas.mjs";
 import { terrenoSVG } from "./cenario.mjs";
-import { POKEDEX, FICHAS, CARTAS, COBBLEMON } from "./base.mjs";
+import { POKEDEX, FICHAS, CARTAS, COBBLEMON, SITE, VERMELHO } from "./base.mjs";
+import { FAVICON } from "./icone.mjs";
 import { paginaPokedex, paginaEspecie, TODAS_AS_ESPECIES } from "./paginas-pokedex.mjs";
 import {
   paginaCobblemonInicio, paginaCobblemonPokemon, paginaCobblemonEspecie, paginaCobblemonItens,
@@ -86,15 +87,17 @@ function conferir() {
 }
 
 let paginas = 0;                                    // conta as páginas de verdade, para o resumo do fim não depender de soma feita à mão
+const enderecos = [];                               // e guarda o endereço de cada uma, para o mapa do site
 async function escrever(caminho, conteudo) {
-  if (caminho.endsWith(".html")) paginas++;
+  if (caminho.endsWith(".html")) {
+    paginas++;
+    if (caminho.endsWith("index.html")) enderecos.push(`/${caminho.slice(0, -"index.html".length)}`);
+  }
   const destino = join(DIST, caminho);
   await mkdir(dirname(destino), { recursive: true });
   await writeFile(destino, conteudo, "utf8");
 }
 
-/* O ícone da aba: o canto do aparelho, com a lente azul e duas luzes. */
-const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#DC0A2D"/><path d="M0 46h30l10-9h24v13a14 14 0 0 1-14 14H14A14 14 0 0 1 0 50Z" fill="#9C0A22"/><circle cx="24" cy="23" r="15" fill="#fff" stroke="#20232B" stroke-width="3"/><circle cx="24" cy="23" r="10.5" fill="#29AAFD"/><circle cx="20" cy="19" r="3.4" fill="#C9ECFF"/><circle cx="48" cy="13" r="4.5" fill="#FFCB05" stroke="#20232B" stroke-width="2"/><circle cx="48" cy="27" r="4.5" fill="#45B25D" stroke="#20232B" stroke-width="2"/></svg>`;
 
 /* ---------- build ---------- */
 
@@ -163,6 +166,22 @@ for (const edicao of ["pokemon", "cobblemon"]) {
   await escrever(`js/roleta-${edicao}.js`, dadosDaRoleta(edicao));
 }
 for (const d of TODOS_OS_DESAFIOS) await escrever(`${enderecoDoDesafio(d).slice(1)}index.html`, paginaDesafio(d));
+
+/* O mapa do site e o aviso aos buscadores de onde ele está. */
+await escrever("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${enderecos.sort().map((e) => `<url><loc>${SITE}${e}</loc></url>`).join("\n")}\n</urlset>\n`);
+await escrever("robots.txt", `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`);
+
+/* O que o celular precisa para instalar o atlas na tela inicial. Os ícones são feitos por scripts/vitrine.mjs. */
+await escrever("manifest.webmanifest", JSON.stringify({
+  name: "PokéAtlas", short_name: "PokéAtlas", lang: "pt-BR", dir: "ltr",
+  description: "Um guia visual para descobrir qual jogo de Pokémon combina com você. Projeto de fã, não oficial.",
+  start_url: "/", scope: "/", display: "standalone", background_color: VERMELHO, theme_color: VERMELHO,
+  icons: [
+    { src: "/arte/icone-192.png", sizes: "192x192", type: "image/png" },
+    { src: "/arte/icone-512.png", sizes: "512x512", type: "image/png" },
+    { src: "/arte/icone-cheio-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" }
+  ]
+}, null, 1));
 
 console.log(`PokéAtlas: ${JOGOS.length} jogos, ${REGIOES.length} regiões, ${TODAS_AS_ESPECIES.length} espécies, ` +
   `${ESPECIES_DO_COBBLEMON.length} do Cobblemon, ${TODOS_OS_DESAFIOS.length} desafios; ${paginas} páginas em dist/ (${Date.now() - inicio} ms)`);

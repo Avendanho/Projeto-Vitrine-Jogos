@@ -1,27 +1,40 @@
 /* O som do atlas: uma música de fundo por edição, os sons das teclas e o grito de cada Pokémon.
  *
- * Tudo começa desligado. Quem liga é o botão de som do cabeçalho, e a escolha fica guardada no navegador.
+ * Tudo começa desligado. O botão de som do cabeçalho abre um painel pequeno, com a chave que liga e desliga
+ * e um volume para a música e outro para as teclas; as escolhas ficam guardadas no navegador.
  * A música e os sons das teclas são feitos na hora, com osciladores (as partituras estão em som-logica.js);
  * só os gritos são arquivos, um por espécie, em /gritos/. O grito toca quando alguém pede, com o som do
  * atlas ligado ou não.
  */
 import { MUSICAS, partitura } from "./som-logica.js";
 
-const CHAVE = "pokeatlas.som", POSICAO = "pokeatlas.som.passo";
+const CHAVE = "pokeatlas.som", VOLUMES = "pokeatlas.som.volumes", POSICAO = "pokeatlas.som.passo";
+const PADRAO = 80;                                   // onde os dois volumes começam, de 0 a 100
 const edicao = document.body.classList.contains("edicao-cobblemon") ? "cobblemon" : "pokemon";
 const musica = MUSICAS[edicao], folha = partitura(musica);
 const botoes = [...document.querySelectorAll("[data-som]")];
 const Contexto = window.AudioContext || window.webkitAudioContext;
 
-let ctx = null, barraMusica = null, barraEfeitos = null, chiado = null;
+let ctx = null, barraMusica = null, nivelMusica = null, barraEfeitos = null, chiado = null, painel = null;
 let ligado = false, tocando = false, relogio = 0, passo = 0, proximo = 0;
+const volumes = { musica: PADRAO, teclas: PADRAO };
+try {
+  const lidos = JSON.parse(localStorage.getItem(VOLUMES) || "{}");
+  for (const k of Object.keys(volumes)) if (Number.isFinite(lidos[k])) volumes[k] = Math.min(100, Math.max(0, Math.round(lidos[k])));
+} catch { /* sem armazenamento ou com lixo guardado, valem os volumes de saída */ }
+const ganho = (qual) => volumes[qual] / PADRAO;       // no volume de saída o ganho é 1
 
 const guardado = () => { try { return localStorage.getItem(CHAVE) === "1"; } catch { return false; } };
 const guardar = (v) => { try { localStorage.setItem(CHAVE, v ? "1" : "0"); } catch { /* sem armazenamento, a escolha vale só nesta página */ } };
 
 function mostrar() {
   document.documentElement.dataset.som = ligado ? "ligado" : "desligado";
-  for (const b of botoes) b.setAttribute("aria-pressed", String(ligado));
+  for (const b of botoes) {
+    b.dataset.ligado = String(ligado);
+    if (b.hasAttribute("aria-label")) b.setAttribute("aria-label", `Som: ${ligado ? "ligado" : "desligado"}`);
+  }
+  const chave = painel?.querySelector("[data-som-chave]");
+  if (chave) chave.textContent = ligado ? "Desligar o som" : "Ligar o som";
 }
 
 function preparar() {
@@ -30,15 +43,19 @@ function preparar() {
   const saida = ctx.createGain();
   saida.gain.value = 0.9;
   saida.connect(ctx.destination);
-  barraMusica = ctx.createGain();
+  barraMusica = ctx.createGain();                    // a entrada e a saída suaves da música
+  nivelMusica = ctx.createGain();                    // o volume que o visitante escolheu para ela
   barraEfeitos = ctx.createGain();
-  barraMusica.connect(saida);
+  nivelMusica.gain.value = ganho("musica");
+  barraEfeitos.gain.value = ganho("teclas");
+  barraMusica.connect(nivelMusica);
+  nivelMusica.connect(saida);
   barraEfeitos.connect(saida);
   if (musica.eco) {                                   // o eco que deixa as notas soltas no ar
     const atraso = ctx.createDelay(1), volta = ctx.createGain();
     atraso.delayTime.value = folha.duracao * 1.5;
     volta.gain.value = musica.eco;
-    barraMusica.connect(atraso); atraso.connect(volta); volta.connect(atraso); volta.connect(saida);
+    barraMusica.connect(atraso); atraso.connect(volta); volta.connect(atraso); volta.connect(nivelMusica);
   }
   const amostras = ctx.sampleRate * 0.25, dados = new Float32Array(amostras);
   for (let i = 0; i < amostras; i++) dados[i] = Math.random() * 2 - 1;
@@ -137,20 +154,51 @@ export function efeito(nome) {
 document.addEventListener("click", (e) => {
   if (!ligado) return;
   const alvo = e.target.closest?.("a, button, summary, select, [role='button']");
-  if (!alvo || alvo.matches("[data-som], [data-grito]")) return;
+  if (!alvo || alvo.matches("[data-som], [data-som-chave], [data-grito]")) return;
   efeito(edicao === "cobblemon" ? "estalo" : alvo.matches(".botao, .abertura-teclas button, .opcao") ? "tecla" : "toque");
 });
 
-/* ---------- o botão de som ---------- */
+/* ---------- o painel de som ---------- */
 
-for (const b of botoes) b.addEventListener("click", () => {
+function alternar() {
   ligado = !ligado;
   guardar(ligado);
   mostrar();
   if (!ligado) { parar(); return; }
   if (!preparar()) return;
   ctx.resume().then(() => { efeito(edicao === "cobblemon" ? "estalo" : "ligar"); comecar(); }).catch(() => {});
-});
+}
+function mudarVolume(qual, valor) {
+  volumes[qual] = valor;
+  try { localStorage.setItem(VOLUMES, JSON.stringify(volumes)); } catch { /* idem */ }
+  if (ctx) (qual === "musica" ? nivelMusica : barraEfeitos).gain.setTargetAtTime(ganho(qual), ctx.currentTime, 0.03);
+}
+function abrirPainel() {
+  if (!painel) {
+    painel = document.createElement("dialog");
+    painel.className = "som-painel";
+    painel.setAttribute("aria-labelledby", "som-titulo");
+    painel.innerHTML = `<h2 id="som-titulo">Som</h2>
+      <button type="button" class="botao" data-som-chave></button>
+      <label class="som-volume"><span>Música</span><input type="range" min="0" max="100" step="5" value="${volumes.musica}" data-volume="musica"></label>
+      <label class="som-volume"><span>Sons das teclas</span><input type="range" min="0" max="100" step="5" value="${volumes.teclas}" data-volume="teclas"></label>
+      <p class="nota-editorial">O grito de cada Pokémon toca quando você pede, com o som ligado ou não.</p>
+      <button type="button" class="ligacao" data-som-fechar>Fechar</button>`;
+    document.body.append(painel);
+    painel.querySelector("[data-som-chave]").addEventListener("click", alternar);
+    painel.querySelector("[data-som-fechar]").addEventListener("click", () => painel.close());
+    painel.addEventListener("click", (e) => { if (e.target === painel) painel.close(); });   // o toque fora da caixa fecha
+    for (const campo of painel.querySelectorAll("[data-volume]")) {
+      campo.addEventListener("input", () => mudarVolume(campo.dataset.volume, Number(campo.value)));
+      // ao soltar o volume das teclas, uma tecla soa para dar a medida
+      if (campo.dataset.volume === "teclas") campo.addEventListener("change", () => efeito(edicao === "cobblemon" ? "estalo" : "tecla"));
+    }
+    mostrar();
+  }
+  document.getElementById("menu")?.classList.remove("aberto");      // no celular o botão fica dentro do menu
+  if (painel.showModal) painel.showModal(); else painel.setAttribute("open", "");
+}
+for (const b of botoes) b.addEventListener("click", abrirPainel);
 
 /* ---------- gritos ---------- */
 

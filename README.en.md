@@ -19,9 +19,23 @@
   <img src="https://img.shields.io/badge/Generated%20Pages-1%2C986%20static-blue?style=flat-square" alt="Pages" />
   <img src="https://img.shields.io/badge/Data-Pok%C3%A9API-red?style=flat-square" alt="PokéAPI" />
   <img src="https://img.shields.io/badge/Kind-Fan%20Project%20(Unofficial)-lightgrey?style=flat-square" alt="Unofficial" />
+  <img src="https://img.shields.io/badge/License-MIT%20(code)-green?style=flat-square" alt="MIT License" />
 </p>
 
 > The site itself is written in Brazilian Portuguese. This file explains the project in English.
+
+<p align="center">
+  <img src="docs/imagens/inicio.webp" alt="The home page: a game's entry, with the attribute hexagon and the blue profile keypad" width="49%" />
+  <img src="docs/imagens/pico.webp" alt="The scene where the hexagon answers each request, with the thirty profiles around it" width="49%" />
+</p>
+<p align="center">
+  <img src="docs/imagens/bussola.webp" alt="The compass: a question with four answers and the visitor's profile" width="49%" />
+  <img src="docs/imagens/time.webp" alt="The team builder, laid out like the games' party screen" width="49%" />
+</p>
+<p align="center">
+  <img src="docs/imagens/regiao.webp" alt="The map of Kanto, with numbered routes and cities" width="49%" />
+  <img src="docs/imagens/cobblemon.webp" alt="The Cobblemon edition: Wooper's page, with the mod's model" width="49%" />
+</p>
 
 ---
 
@@ -109,6 +123,7 @@ A ruler from **1996 to 2027**, split by console, which also works as the full in
 
 ### 7. ⛏️ Cobblemon Edition (`/cobblemon/`)
 A second edition of the atlas, about the [Cobblemon](https://cobblemon.com/) mod for Minecraft, chosen in the selector at the top. It has its own theme (map parchment, inventory panels, pixel type) and draws the Pokémon from the mod's own models.
+- **Code:** the source code in this repository is under the [MIT License](LICENSE). It does not cover the third-party material listed below.
 - **Pokémon:** the 888 implemented species, with the biomes where they spawn, rarity, conditions, drops, mounts and evolutions inside the mod. **Rotate in 3D** swaps the portrait for the mod's model (zoom and fullscreen), and **Shiny** swaps the texture.
 - **Items:** 490 items and blocks, with icon, recipes drawn as in the game (crafting table, campfire pot, brewing stand, furnace, smithing), who drops each one and, for berries, the pairs that produce them by mutation.
 - **Structures:** the 65 structures the mod generates, as 3D block models with zoom.
