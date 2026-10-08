@@ -1,4 +1,5 @@
 /* Comparar dois Pokémon: os atributos de base frente a frente. O par escolhido fica no endereço. */
+import { b, rota, numero } from "./lingua.js";
 import { ESPECIES } from "./dados/especies.js";
 import { especie, porSlug, porNome, procurarEspecie, selo } from "./especies-logica.js";
 import { colorirAoApontar } from "./gaveta.js";
@@ -9,7 +10,6 @@ const raiz = document.querySelector("[data-duelo]");
 const campos = { a: raiz.querySelector("#duelo-a"), b: raiz.querySelector("#duelo-b") };
 const lados = { a: raiz.querySelector('[data-lado="a"]'), b: raiz.querySelector('[data-lado="b"]') };
 const linhas = [...raiz.querySelectorAll(".duelo-atributos li")];
-const numero = (v, casas = 0) => v.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: 1 });
 
 raiz.querySelector("#lista-especies").innerHTML = ESPECIES.map((l) => `<option value="${l[2]}">`).join("");
 
@@ -18,11 +18,11 @@ const estado = { a: porSlug(ESPECIES, inicial.get("a") ?? ""), b: porSlug(ESPECI
 if (!inicial.has("a") && !inicial.has("b")) { estado.a = porSlug(ESPECIES, "charizard"); estado.b = porSlug(ESPECIES, "blastoise"); }   // um par de exemplo, para a página não abrir vazia
 
 function lado(l) {
-  if (!l) return '<p class="duelo-vazio">Escolha um Pokémon no campo acima.</p>';
+  if (!l) return `<p class="duelo-vazio">${b("Escolha um Pokémon no campo acima.", "Pick a Pokémon in the field above.")}</p>`;
   const e = especie(l);
-  return `<a href="/pokedex/${e.slug}/"><span class="dex-arte"><img src="/arte/mini/${e.id}.webp" data-cor="/arte/mini/${e.id}-cor.webp" alt="" width="184" height="184"></span><span class="dex-numero">Nº ${String(e.id).padStart(4, "0")}</span><h2>${e.nome}</h2></a>
+  return `<a href="${rota(`/pokedex/${e.slug}/`)}"><span class="dex-arte"><img src="/arte/mini/${e.id}.webp" data-cor="/arte/mini/${e.id}-cor.webp" alt="" width="184" height="184"></span><span class="dex-numero">${b("Nº", "No.")} ${String(e.id).padStart(4, "0")}</span><h2>${e.nome}</h2></a>
     <p class="duelo-tipos">${e.tipos.map((t) => selo(t)).join(" ")}</p>
-    <dl class="duelo-ficha"><div><dt>Altura</dt><dd>${numero(e.altura, 1)} m</dd></div><div><dt>Peso</dt><dd>${numero(e.peso, 1)} kg</dd></div><div><dt>Geração</dt><dd>${ROMANOS[e.geracao]}</dd></div></dl>`;
+    <dl class="duelo-ficha"><div><dt>${b("Altura", "Height")}</dt><dd>${numero(e.altura, 1)} m</dd></div><div><dt>${b("Peso", "Weight")}</dt><dd>${numero(e.peso, 1)} kg</dd></div><div><dt>${b("Geração", "Generation")}</dt><dd>${ROMANOS[e.geracao]}</dd></div></dl>`;
 }
 
 function desenhar(gravar = true) {

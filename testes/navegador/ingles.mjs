@@ -1,4 +1,4 @@
-/* As páginas que existem em inglês (o início, a bússola e a ficha de cada jogo), e a bússola em português, que divide o código com a outra. */
+/* O atlas em inglês: as mesmas páginas, com os mesmos scripts, em /en/. Confere que o texto saiu em inglês (o da página e o que os scripts escrevem), que os links ficam dentro do inglês e que a bússola em português segue inteira. */
 import { abrir, conferir, fechar, BASE } from "./_comum.mjs";
 
 /* Palavras que só apareceriam se um trecho tivesse ficado sem tradução. */
@@ -32,7 +32,7 @@ conferir("o texto do início está em inglês", inicio.includes("Every Pokémon 
 conferir("os nomes dos eixos, os jogos e a leitura da tela também", (await pagina.textContent('.abertura-hex [data-eixo="exploracao"]')) === "Exploration" && (await pagina.textContent(".abertura-teclas button")) === "HeartGold and SoulSilver" && (await pagina.textContent("[data-leitura-nota]")) === "2009, Nintendo DS");
 await pagina.click(".abertura-teclas button:nth-child(6)");
 conferir("as teclas trocam o perfil, com o nome em inglês", (await pagina.textContent("[data-perfil-atual]")) === "Red, Blue and Yellow");
-conferir("o que leva às seções em português é marcado como tal", (await pagina.getAttribute('.topo-nav a[href="/pokedex/"]', "hreflang")) === "pt-BR" && (await pagina.getAttribute(".pico-final a", "href")) === "/en/compass/");
+conferir("as abas e os links do início em inglês ficam no inglês", (await pagina.$$eval(".topo-nav a:not(.topo-lingua)", (as) => as.every((a) => a.getAttribute("href").startsWith("/en/") || a.getAttribute("href").startsWith("/desafios/")))) && (await pagina.getAttribute(".pico-final a", "href")) === "/en/compass/" && (await pagina.getAttribute(".topo-lingua", "href")) === "/");
 await pagina.click(".topo-som");
 conferir("o painel de som vem em inglês", (await pagina.textContent("[data-som-chave]")) === "Turn sound on" && (await pagina.innerText(".som-painel")).includes("Key sounds"));
 await pagina.keyboard.press("Escape");
@@ -69,8 +69,65 @@ conferir("jogo sem Pokédex e fora das regiões também tem ficha em inglês", (
 await pagina.goto(`${BASE}/jogos/scarlet-violet/`, { waitUntil: "networkidle" });
 conferir("a ficha em português aponta para a versão em inglês", (await pagina.getAttribute(".topo-lingua", "href")) === "/en/games/scarlet-violet/" && (await pagina.textContent("[data-dex-rotulo]")) === "espécies");
 
+// ---------- as outras páginas da edição Pokémon ----------
+const texto = async () => { await pagina.waitForTimeout(350); return pagina.innerText("main"); };   // os scripts terminam de escrever antes da leitura
+const semPortugues = async (nome) => { const t = await texto(); conferir(`${nome}: sem português esquecido`, !PORTUGUES.test(t), (t.match(PORTUGUES) || [""])[0] + " … " + t.slice(Math.max(0, t.search(PORTUGUES) - 40), t.search(PORTUGUES) + 40).replace(/\s+/g, " ")); };
+
+await pagina.goto(`${BASE}/en/pokedex/`, { waitUntil: "networkidle" });
+await pagina.click('.dex-controles [data-tipo="dragao"]');
+conferir("a Pokédex em inglês filtra por tipo e conta em inglês", (await pagina.textContent('.dex-controles [data-tipo="dragao"]')) === "Dragon" && (await pagina.textContent("[data-dex-rotulo]")) === "species" && Number((await pagina.textContent("[data-dex-contagem]")).replace(/\D/g, "")) > 20);
+conferir("as espécies levam às páginas em inglês", (await pagina.getAttribute(".gaveta li:not([hidden]) a", "href")).startsWith("/en/pokedex/"));
+await semPortugues("Pokédex");
+await pagina.goto(`${BASE}/en/pokedex/eevee/`, { waitUntil: "networkidle" });
+const eevee = await texto();
+conferir("a página de uma espécie sai em inglês", eevee.includes("Evolution line") && eevee.includes("with Fire Stone") && eevee.includes("It can evolve into eight different species") && eevee.includes("Growth rate"), eevee.slice(0, 80).replace(/\s+/g, " "));
+await semPortugues("espécie");
+conferir("os vizinhos e a volta para o português", (await pagina.getAttribute(".jogo-passos a", "href")).startsWith("/en/pokedex/") && (await pagina.getAttribute(".topo-lingua", "href")) === "/pokedex/eevee/");
+
+await pagina.goto(`${BASE}/en/regions/kanto/`, { waitUntil: "networkidle" });
+conferir("a carta de uma região em inglês", (await texto()).includes("From Pallet Town to Viridian City") && (await pagina.textContent(".legenda-rotas")) === "Routes");
+await semPortugues("região");
+await pagina.goto(`${BASE}/en/timeline/`, { waitUntil: "networkidle" });
+await semPortugues("linha do tempo");
+
+await pagina.goto(`${BASE}/en/compare/?a=red-blue-yellow&b=scarlet-violet`, { waitUntil: "networkidle" });
+const comparacao = await texto();
+conferir("a comparação em inglês escreve o veredito e a tabela em inglês", comparacao.includes("Goes farther in") && comparacao.includes("Who it is for") && comparacao.includes("Open world") && (await pagina.getAttribute(".veredito a", "href")).startsWith("/en/games/"), comparacao.slice(0, 120).replace(/\s+/g, " "));
+await semPortugues("comparar");
+
+await pagina.goto(`${BASE}/en/compare/pokemon/`, { waitUntil: "networkidle" });
+conferir("comparar Pokémon em inglês", (await texto()).includes("Height") && (await pagina.getAttribute(".duelo-lado a", "href")).startsWith("/en/pokedex/") && (await pagina.textContent(".duelo-lado .tipo")) === "Fire");
+await semPortugues("comparar Pokémon");
+
+await pagina.goto(`${BASE}/en/team/?t=charizard,moltres`, { waitUntil: "networkidle" });
+const time = (await texto()).replace(/\s+/g, " ");
+conferir("o time em inglês lê as fraquezas em inglês", time.includes("Takes 4×") && time.includes("Rock") && time.includes("Holes") && time.includes("Slot 3") && (await pagina.getAttribute(".vaga-quem", "href")) === "/en/pokedex/charizard/", time.slice(0, 120));
+await semPortugues("time");
+
+await pagina.goto(`${BASE}/en/types/#dragao`, { waitUntil: "networkidle" });
+const roda = (await pagina.innerText("[data-leitura]")).replace(/\s+/g, " ");
+conferir("a roda de tipos em inglês", (await pagina.textContent("[data-centro] strong")) === "Dragon" && roda.includes("Has no effect on Fairy") && (await pagina.getAttribute('.roda-tipo[data-tipo="fogo"]', "aria-label")) === "Fire", roda.slice(0, 100));
+await semPortugues("tipos");
+
+await pagina.goto(`${BASE}/en/draw/`, { waitUntil: "networkidle" });
+await pagina.focus('.hex-pega[data-eixo="competitivo"]');
+await pagina.keyboard.press("End");
+conferir("desenhar o perfil em inglês", (await pagina.getAttribute('.hex-pega[data-eixo="competitivo"]', "aria-label")) === "Competitive" && (await pagina.getAttribute('.hex-pega[data-eixo="competitivo"]', "aria-valuetext")) === "5 out of 5" && (await pagina.getAttribute("[data-lista] li a", "href")).startsWith("/en/games/"));
+await semPortugues("desenhar");
+
+// a busca e o número digitado, em inglês
+await pagina.click(".topo-busca");
+await pagina.fill(".busca input", "red");
+await pagina.waitForSelector(".busca-resultados li");
+const busca = await pagina.innerText(".busca");
+conferir("a busca em inglês acha jogos com o nome em inglês e leva às páginas em inglês", busca.includes("Pokémon Red, Blue and Yellow") && busca.includes("Game") && (await pagina.$$eval(".busca-resultados a", (as) => as.every((a) => !/^\/(pokedex|jogos|regioes)\//.test(a.getAttribute("href"))))), busca.slice(0, 100).replace(/\s+/g, " "));
+await pagina.keyboard.press("Escape");
+await pagina.keyboard.type("25", { delay: 60 });
+await pagina.waitForURL(/\/en\/pokedex\/pikachu\/$/, { timeout: 4000 });
+conferir("o número digitado abre a espécie em inglês", pagina.url().endsWith("/en/pokedex/pikachu/"));
+
 const cel = await abrir({ celular: true });
-for (const caminho of ["/en/games/scarlet-violet/", "/en/", "/en/compass/"]) {
+for (const caminho of ["/en/games/scarlet-violet/", "/en/", "/en/compass/", "/en/pokedex/charizard/", "/en/team/", "/en/types/", "/en/regions/galar/"]) {
   await cel.pagina.goto(BASE + caminho, { waitUntil: "networkidle" });
   conferir(`${caminho} cabe na largura do celular`, await cel.pagina.evaluate(() => document.documentElement.scrollWidth) === 390);
 }

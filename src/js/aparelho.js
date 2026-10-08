@@ -1,12 +1,13 @@
 /* O que faz o aparelho funcionar como aparelho, além do que o próprio HTML já faz (os lados do direcional
  * são links): a tecla de baixo abre um Pokémon ao acaso, e digitar um número em qualquer página abre a
  * espécie com aquele número, como na Pokédex dos jogos. A lista de espécies só é pedida quando é usada. */
+import { b, rota } from "./lingua.js";
+
 const cobblemon = document.body.classList.contains("edicao-cobblemon");
-const ingles = document.documentElement.lang === "en";
 let numeros = null;
 const carregar = async () => (numeros ??= (await import("./dados/numeros.js")).NUMEROS);
 /* Na edição Cobblemon, a espécie abre na página dela no mod, se ela existir por lá. */
-const endereco = (linha) => (cobblemon && linha[2]) || linha[0];
+const endereco = (linha) => rota((cobblemon && linha[2]) || linha[0]);
 
 document.querySelector("[data-acaso]")?.addEventListener("click", async () => {
   const lista = await carregar();
@@ -26,7 +27,7 @@ function mostrar(linha) {
     document.body.append(visor);
   }
   visor.hidden = false;
-  visor.innerHTML = `<span>Nº ${digitos.padStart(4, "0")}</span><strong>${linha ? linha[1] : "???"}</strong>`;
+  visor.innerHTML = `<span>${b("Nº", "No.")} ${digitos.padStart(4, "0")}</span><strong>${linha ? linha[1] : "???"}</strong>`;
   visor.classList.toggle("sem-registro", !linha);
 }
 function limpar() {
@@ -51,4 +52,3 @@ document.addEventListener("keydown", async (e) => {
   const abrir = () => { if (linha) location.href = endereco(linha); else limpar(); };
   if (e.key === "Enter") { e.preventDefault(); abrir(); } else espera = setTimeout(abrir, linha ? ESPERA : ESPERA * 1.6);
 });
-if (ingles) document.documentElement.dataset.aparelho = "en";

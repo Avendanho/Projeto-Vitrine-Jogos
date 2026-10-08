@@ -5,6 +5,8 @@
  * A caixa tem sempre a proporção da própria carta (--proporcao): quem decide o
  * tamanho é a página, e a carta nunca é cortada nem ganha faixas vazias. */
 import { MAPAS, ROTAS } from "../dados/atlas.mjs";
+import { b, ingles } from "./lingua.mjs";
+import { CARTAS_EN, lugarEmIngles } from "../dados/en.mjs";
 import { CARTAS, esc } from "./base.mjs";
 
 /* As rotas de uma carta, prontas para desenhar e para listar. O traçado vem
@@ -62,9 +64,9 @@ export function rotasDaCarta(id) {
       ocupado.push(melhor.caixa);
       x = (melhor.cx / L) * 100; y = (melhor.cy / H) * 100;
     }
-    const de = typeof r.de === "string" ? `De ${r.de}` : r.desde.replace(/^A /, "Da ").replace(/^O /, "Do ");
-    const para = typeof r.para === "string" ? `a ${r.para}` : `até ${r.ate}`;
-    return { n: r.n, nome: r.nome, d, x, y, texto: `${de} ${para}${r.por ? `, por ${r.por}` : ""}` };
+    const de = typeof r.de === "string" ? b(`De ${r.de}`, `From ${r.de}`) : b(r.desde.replace(/^A /, "Da ").replace(/^O /, "Do "), `From ${lugarEmIngles(r.desde)}`);
+    const para = typeof r.para === "string" ? b(`a ${r.para}`, `to ${r.para}`) : b(`até ${r.ate}`, `to ${lugarEmIngles(r.ate)}`);
+    return { n: r.n, nome: r.nome && (ingles() ? CARTAS_EN.nomes[r.nome] ?? r.nome : r.nome), d, x, y, texto: `${de} ${para}${r.por ? b(`, por ${r.por}`, `, through ${r.por}`) : ""}` };
   });
 }
 

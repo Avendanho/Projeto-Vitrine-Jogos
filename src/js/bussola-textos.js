@@ -44,7 +44,7 @@ export const TEXTOS = {
     pesa: (eixo, frase) => `${eixo} weighs more here than you asked for. ${frase}`,
     puxou: (eixo, baixo) => `You pulled toward ${eixo}, and here ${baixo}.`,
     ficha: (jogo) => `Open the page of ${jogo}`, comparar: (jogo) => `Compare with ${jogo}`,
-    ajustar: "Adjust this profile by hand (in Portuguese)",
+    ajustar: "Adjust this profile by hand",
     copiado: "Link copied.", copiadoBotao: "Link copied", naoCopiou: "Could not copy. The link is in the address bar."
   }
 };

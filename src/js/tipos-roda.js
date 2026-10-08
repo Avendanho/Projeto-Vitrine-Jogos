@@ -1,6 +1,7 @@
 /* Roda de tipos: escolher um tipo acende quem ele atinge em dobro (linha cheia, saindo dele) e quem o atinge
  * em dobro (linha tracejada, chegando nele); ao lado, as seis listas completas. O tipo escolhido fica no
  * endereço, para mandar a alguém. As contas estão em tipos-logica.js. */
+import { b, nomeDoTipo } from "./lingua.js";
 import { TIPOS, TABELA } from "./dados/tipos.js";
 import { relacoes, lugarNaRoda, trecho } from "./tipos-logica.js";
 import { semAcento, selo } from "./especies-logica.js";
@@ -12,9 +13,9 @@ const lugar = new Map(botoes.map((b, i) => [b.dataset.nome, lugarNaRoda(i, botoe
 const SVG = "http://www.w3.org/2000/svg";
 /* As seis listas, na ordem em que aparecem: chave em relacoes(), título e o que dizer quando está vazia. */
 const GRUPOS = [
-  ["atinge", "Atinge em dobro", "Nenhum tipo."], ["apanha", "Apanha em dobro de", "Nenhum tipo."],
-  ["poucoEfeito", "Atinge pela metade", "Nenhum tipo."], ["resiste", "Resiste a", "Nenhum tipo."],
-  ["naoAfeta", "Não faz efeito em", "Nenhum: atinge todos."], ["imune", "É imune a", "Nenhum tipo."]
+  ["atinge", b("Atinge em dobro", "Hits for double"), b("Nenhum tipo.", "No type.")], ["apanha", b("Apanha em dobro de", "Takes double from"), b("Nenhum tipo.", "No type.")],
+  ["poucoEfeito", b("Atinge pela metade", "Hits for half"), b("Nenhum tipo.", "No type.")], ["resiste", b("Resiste a", "Resists"), b("Nenhum tipo.", "No type.")],
+  ["naoAfeta", b("Não faz efeito em", "Has no effect on"), b("Nenhum: atinge todos.", "None: it hits them all.")], ["imune", b("É imune a", "Is immune to"), b("Nenhum tipo.", "No type.")]
 ];
 
 function linha(de, para, classe, ordem) {
@@ -41,7 +42,7 @@ function escolher(nome, gravar = true) {
     ...r.apanha.filter((n) => n !== nome).map((n, i) => linha(n, nome, "roda-linha roda-linha-apanha", i)),
     ...r.atinge.filter((n) => n !== nome).map((n, i) => linha(nome, n, "roda-linha roda-linha-atinge", i))
   );
-  centro.innerHTML = `<strong>${nome}</strong><span>atinge ${r.atinge.length}</span><span>apanha de ${r.apanha.length}</span>`;
+  centro.innerHTML = `<strong>${nomeDoTipo(nome)}</strong><span>${b("atinge", "hits")} ${r.atinge.length}</span><span>${b("apanha de", "weak to")} ${r.apanha.length}</span>`;
   centro.dataset.tipo = semAcento(nome);
   leitura.innerHTML = GRUPOS.map(([chave, titulo, vazio]) => `<div class="roda-grupo"><h2>${titulo}</h2>${r[chave].length ? `<p class="roda-selos">${r[chave].map((t) => selo(t)).join(" ")}</p>` : `<p class="nota-editorial">${vazio}</p>`}</div>`).join("");
   if (gravar) history.replaceState(null, "", `#${semAcento(nome)}`);

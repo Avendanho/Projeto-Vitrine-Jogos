@@ -1,6 +1,10 @@
 /* Comparar: até três perfis sobrepostos, nota por nota e ficha lado a lado. */
-import { EIXOS } from "./hexagono.js";
-import { JOGOS } from "./dados.js";
+import { EIXOS as EIXOS_BASE } from "./hexagono.js";
+import { b, rota, INGLES, enumerar as lista } from "./lingua.js";
+
+/* A página existe em português e em inglês: os dados dos jogos e os nomes dos eixos vêm na língua dela. */
+const { JOGOS, NOMES_DOS_EIXOS } = await import(INGLES ? "./dados-en.js" : "./dados.js");
+const EIXOS = EIXOS_BASE.map((e) => ({ ...e, nome: NOMES_DOS_EIXOS[e.id] }));
 import { hexVivo } from "./hex-vivo.js";
 
 const SERIES = [
@@ -21,7 +25,6 @@ caixa.classList.add("vivo");
 
 const esc = (t) => String(t ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const porSlug = (s) => JOGOS.find((j) => j.slug === s);
-const lista = (itens) => itens.length <= 1 ? itens.join("") : `${itens.slice(0, -1).join(", ")} e ${itens[itens.length - 1]}`;
 
 /* estado inicial: endereço, ou a dupla padrão */
 const busca = new URLSearchParams(location.search);
@@ -60,27 +63,27 @@ function desenharVeredito(pares) {
       .filter((x) => x.folga >= 1)
       .sort((x, y) => y.folga - x.folga);
     const texto = lidera.length
-      ? `Vai mais longe em ${lista(lidera.map((x) => `${x.e.nome.toLowerCase()} (${jogo.valores[x.i]} contra ${Math.max(...outros.map((o) => o.valores[x.i]))})`))}.`
-      : `Não lidera sozinho em nenhuma direção: ${outros.length > 1 ? "os outros o alcançam ou superam" : "o outro o alcança ou supera"} em todas.`;
+      ? b("Vai mais longe em ", "Goes farther in ") + lista(lidera.map((x) => `${x.e.nome.toLowerCase()} (${jogo.valores[x.i]} ${b("contra", "against")} ${Math.max(...outros.map((o) => o.valores[x.i]))})`)) + "."
+      : b(`Não lidera sozinho em nenhuma direção: ${outros.length > 1 ? "os outros o alcançam ou superam" : "o outro o alcança ou supera"} em todas.`, `It does not lead alone in any direction: ${outros.length > 1 ? "the others match or beat it" : "the other one matches or beats it"} in all of them.`);
     return `<article class="veredito" style="--cor:${serie.cor}">
       <h3>${esc(jogo.curto)}</h3>
       <p>${texto} ${esc(jogo.chamada)}</p>
-      <a href="/jogos/${jogo.slug}/">Abrir a ficha de ${esc(jogo.curto)}</a>
+      <a href="${rota(`/jogos/${jogo.slug}/`)}">${b("Abrir a ficha de", "Open the page of")} ${esc(jogo.curto)}</a>
     </article>`;
   }).join("");
 }
 
 function desenharTabela(pares) {
   const linhas = [
-    ["Lançamento", (j) => j.ano],
+    [b("Lançamento", "Release"), (j) => j.ano],
     ["Console", (j) => esc(j.consoles)],
-    ["Região ou cenário", (j) => esc(j.lugar ?? "Sem região")],
-    ["Geração", (j) => j.geracao ?? "Fora da numeração"],
-    ["Estilo", (j) => esc(j.estilo)],
-    ["Categoria", (j) => esc(j.categoria)],
-    ["Para quem", (j) => esc(j.paraQuem)]
+    [b("Região ou cenário", "Region or setting"), (j) => esc(j.lugar ?? b("Sem região", "No region"))],
+    [b("Geração", "Generation"), (j) => j.geracao ?? b("Fora da numeração", "Outside the numbering")],
+    [b("Estilo", "Style"), (j) => esc(j.estilo)],
+    [b("Categoria", "Category"), (j) => esc(j.categoria)],
+    [b("Para quem", "Who it is for"), (j) => esc(j.paraQuem)]
   ];
-  tabela.innerHTML = `<thead><tr><th scope="col"><span class="so-leitor">Atributo</span></th>${pares.map(({ serie, jogo }) => `<th scope="col"><span class="serie serie-${serie.id}"></span><a href="/jogos/${jogo.slug}/">${esc(jogo.curto)}</a></th>`).join("")}</tr></thead>
+  tabela.innerHTML = `<thead><tr><th scope="col"><span class="so-leitor">${b("Atributo", "Attribute")}</span></th>${pares.map(({ serie, jogo }) => `<th scope="col"><span class="serie serie-${serie.id}"></span><a href="${rota(`/jogos/${jogo.slug}/`)}">${esc(jogo.curto)}</a></th>`).join("")}</tr></thead>
   <tbody>${linhas.map(([titulo, valor]) => `<tr><th scope="row">${titulo}</th>${pares.map(({ jogo }) => `<td>${valor(jogo)}</td>`).join("")}</tr>`).join("")}</tbody>`;
 }
 
@@ -88,7 +91,7 @@ function atualizar(gravar = true) {
   const pares = escolhidos();
   perfis.definir(pares.map(({ serie, jogo }) => ({ valores: jogo.valores, cor: serie.cor, tracejado: serie.tracejado })));
   chave.innerHTML = pares.map(({ serie, jogo }) => `<span><span class="serie serie-${serie.id}"></span>${esc(jogo.curto)}</span>`).join("");
-  caixa.querySelector("canvas").setAttribute("aria-label", `Perfis sobrepostos de ${lista(pares.map((p) => p.jogo.curto))}`);
+  caixa.querySelector("canvas").setAttribute("aria-label", `${b("Perfis sobrepostos de", "Overlaid profiles of")} ${lista(pares.map((p) => p.jogo.curto))}`);
   desenharHastes(pares);
   desenharVeredito(pares);
   desenharTabela(pares);

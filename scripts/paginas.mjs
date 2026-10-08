@@ -6,9 +6,12 @@ import { REGIOES, CONSOLES, ESTILOS, TIPOS, PEDIDOS, MARCOS, HORIZONTE, ROMANOS,
 import { PERGUNTAS } from "../dados/quiz.mjs";
 import { EIXOS, valoresDe, encaixe } from "../src/js/hexagono.js";
 import { perfilRegiao, posicoesDosEixos, reguaDeAnos } from "./cenario.mjs";
-import { SITE, MAR, TINTA, NOITE, PAPEL, VERMELHO, AMARELO, POKEDEX, FICHAS, CARTAS, ORDEM_TIPOS, esc, semAcento, maiuscula, extenso, numero, enderecoEspecie, selo } from "./base.mjs";
+import { SITE, MAR, TINTA, NOITE, PAPEL, VERMELHO, AMARELO, enumerar, POKEDEX, FICHAS, CARTAS, ORDEM_TIPOS, esc, semAcento, maiuscula, extenso, numero, enderecoEspecie, selo } from "./base.mjs";
 import { rotasDaCarta, lugaresDaCarta, tracosDaCarta, caixaCarta } from "./carta.mjs";
 import { LINGUAS, PERGUNTAS_EN } from "./textos.mjs";
+import { linguaAtual, linksEmIngles, b, ingles } from "./lingua.mjs";
+import { MARCOS_EN, HORIZONTE_EN, CARTAS_EN } from "../dados/en.mjs";
+import { rotaEmIngles } from "../src/js/lingua-rotas.js";
 
 /* ---------- utilidades ---------- */
 
@@ -17,7 +20,13 @@ const nome = (lista, id) => lista.find((x) => x.id === id)?.nome ?? id;
 
 export const ORDENADOS = [...JOGOS].sort((a, b) => a.ano - b.ano || (a.tipo === "derivado") - (b.tipo === "derivado"));
 const porSlug = Object.fromEntries(JOGOS.map((j) => [j.slug, j]));
-const consolesDe = (j, L = LINGUAS["pt-BR"]) => j.plataformas.map((p) => L.console(CONSOLES.find((c) => c.id === p))).join(` ${L.e} `);
+const consolesDe = (j, L = LINGUAS[linguaAtual()]) => j.plataformas.map((p) => L.console(CONSOLES.find((c) => c.id === p))).join(` ${L.e} `);
+/* O jogo, a região e o console com os textos na língua da página. */
+const aqui = (j) => LINGUAS[linguaAtual()].jogo(j);
+const regiaoAqui = (r) => LINGUAS[linguaAtual()].regiao(r);
+const eixoAqui = (e) => LINGUAS[linguaAtual()].eixo(e);
+const consoleAqui = (id) => LINGUAS[linguaAtual()].console(CONSOLES.find((c) => c.id === id));
+const categoriaAqui = (id) => LINGUAS[linguaAtual()].categoria(TIPOS.find((c) => c.id === id));
 const lugarDe = (j) => (j.regiao === "outras" ? (j.lugar ? maiuscula(j.lugar) : null) : nome(REGIOES, j.regiao));
 const ANO_ATUAL = Math.max(...JOGOS.map((j) => j.ano));
 
@@ -34,7 +43,7 @@ export function hex(j, opc = {}) {
   return `<img class="hex ${classe}" src="/hex/${j.slug}${noite ? "-noite" : ""}.svg" alt="${esc(alt)}" width="480" height="480"${preguica ? ' loading="lazy" decoding="async"' : ""}>`;
 }
 
-function prancha(id, L = LINGUAS["pt-BR"]) {
+function prancha(id, L = LINGUAS[linguaAtual()]) {
   const n = String(id).padStart(3, "0");
   return `<figure class="prancha" tabindex="0">
   <span class="prancha-arte">
@@ -45,7 +54,7 @@ function prancha(id, L = LINGUAS["pt-BR"]) {
 </figure>`;
 }
 
-function itemHex(original, opc = {}, L = LINGUAS["pt-BR"]) {
+function itemHex(original, opc = {}, L = LINGUAS[linguaAtual()]) {
   const j = L.jogo(original);
   return `<a class="hex-item" href="${L.jogos}${j.slug}/">
   ${hex(j, opc)}
@@ -112,32 +121,33 @@ export const EDICOES = {
 
 /* edicao   "pokemon" ou "cobblemon"
  * espelho  endereço da página equivalente na outra edição (sem ele, o seletor leva ao início dela) */
-export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, extra = null, rolagem = false, edicao = "pokemon", espelho = null, lingua = "pt-BR", versoes = null }) {
-  const L = LINGUAS[lingua], C = L.cromo;
-  const ed = { ...EDICOES[edicao], ...(L.edicao ?? {}) };   // em inglês a moldura tem as suas próprias abas e avisos
+export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, extra = null, rolagem = false, edicao = "pokemon", espelho = null, lingua = linguaAtual() }) {
+  const L = LINGUAS[lingua], C = L.cromo, emIngles = lingua === "en";
+  const ed = { ...EDICOES[edicao], ...(L.edicoes?.[edicao] ?? {}) };   // em inglês cada edição tem os seus rótulos e avisos
   const existe = caminho.endsWith("/");               // a página de "não encontrado" não tem endereço próprio
+  // `caminho` é sempre o endereço em português; em inglês a página mora no par dele
+  const noOutro = rotaEmIngles(caminho), aqui = emIngles ? noOutro : caminho;
+  const versoes = existe && noOutro !== caminho ? { "pt-BR": caminho, en: noOutro } : null;   // a página existe nas duas línguas
   const tituloCompleto = caminho === ed.inicio ? titulo : `${titulo} — ${ed.sufixo}`;
-  // o que leva de uma página em inglês a uma seção que só existe em português é marcado como tal
-  const emPortugues = (href) => (lingua !== "pt-BR" && !href.startsWith(L.inicio) ? ' hreflang="pt-BR"' : "");
   // dentro de uma seção (a página de uma espécie, de uma região), a aba da seção continua marcada
-  const link = (n) => `<a href="${n.href}"${caminho.startsWith(n.href) ? ' aria-current="page"' : ""}${emPortugues(n.href)}>${n.texto}</a>`;
+  const link = (n) => `<a href="${n.href}"${caminho.startsWith(n.href) ? ' aria-current="page"' : ""}>${n.texto}</a>`;
   const seletor = Object.entries(EDICOES).map(([id, e]) => (id === edicao
     ? `<a href="${ed.inicio}" aria-current="true"><span>${e.nome}</span></a>`
-    : `<a href="${espelho ?? e.inicio}"${emPortugues(e.inicio)}><span>${e.nome}</span></a>`)).join("");
-  // a mesma página na outra língua, quando existe (por enquanto, o início e a bússola)
-  const outra = versoes && Object.entries(versoes).find(([l]) => l !== lingua);
+    : `<a href="${espelho ?? e.inicio}"><span>${e.nome}</span></a>`)).join("");
+  // a mesma página na outra língua; o prefixo "pt:" segura o endereço em português na página em inglês
+  const outra = versoes && (emIngles ? ["pt-BR", `pt:${caminho}`] : ["en", noOutro]);
   const NOMES = { "pt-BR": "Português", en: "English" };
   // o direcional do rodapé: para os lados, a seção vizinha na ordem das abas; para cima, o alto da página; para baixo, um Pokémon ao acaso
-  const voltas = [{ href: ed.inicio, texto: "PokéAtlas" }, ...ed.nav], aqui = voltas.findLastIndex((n) => (n.href === ed.inicio ? caminho === n.href : caminho.startsWith(n.href)));
-  const vizinha = (passo) => voltas[(Math.max(aqui, 0) + passo + voltas.length) % voltas.length];
+  const voltas = [{ href: ed.inicio, texto: "PokéAtlas" }, ...ed.nav], onde = voltas.findLastIndex((n) => (n.href === ed.inicio ? caminho === n.href : caminho.startsWith(n.href)));
+  const vizinha = (passo) => voltas[(Math.max(onde, 0) + passo + voltas.length) % voltas.length];
   const direcional = edicao !== "pokemon" ? "" : `<div class="direcional" role="group" aria-label="${C.direcional}">
     <a class="direcional-cima" href="#conteudo" aria-label="${C.alto}" title="${C.alto}"></a>
-    <a class="direcional-esquerda" href="${vizinha(-1).href}" aria-label="${C.anterior(vizinha(-1).texto)}" title="${C.anterior(vizinha(-1).texto)}"${emPortugues(vizinha(-1).href)}></a>
-    <a class="direcional-direita" href="${vizinha(1).href}" aria-label="${C.proxima(vizinha(1).texto)}" title="${C.proxima(vizinha(1).texto)}"${emPortugues(vizinha(1).href)}></a>
+    <a class="direcional-esquerda" href="${vizinha(-1).href}" aria-label="${C.anterior(vizinha(-1).texto)}" title="${C.anterior(vizinha(-1).texto)}"></a>
+    <a class="direcional-direita" href="${vizinha(1).href}" aria-label="${C.proxima(vizinha(1).texto)}" title="${C.proxima(vizinha(1).texto)}"></a>
     <button type="button" class="direcional-baixo" data-acaso aria-label="${C.acaso}" title="${C.acaso}"></button>
   </div>
   `;
-  return `<!doctype html>
+  const html = `<!doctype html>
 <html lang="${L.codigo}">
 <head>
 <meta charset="utf-8">
@@ -154,7 +164,7 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-${existe ? `<meta property="og:url" content="${SITE}${caminho}">\n<link rel="canonical" href="${SITE}${caminho}">` : '<meta name="robots" content="noindex">'}${versoes ? "\n" + Object.entries(versoes).map(([l, href]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${href}">`).join("\n") : ""}
+${existe ? `<meta property="og:url" content="${SITE}${aqui}">\n<link rel="canonical" href="${SITE}${aqui}">` : '<meta name="robots" content="noindex">'}${versoes ? "\n" + Object.entries(versoes).map(([l, href]) => `<link rel="alternate" hreflang="${l}" href="${SITE}${href}">`).join("\n") : ""}
 <script>${ANTES_DE_APARECER}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/arte/icone-180.png">
@@ -167,11 +177,11 @@ ${ed.fontes.map((f) => `<link rel="preload" href="/fontes/${f}.woff2" as="font" 
 <header class="topo">
   <a class="marca" href="${ed.inicio}"${caminho === ed.inicio ? ' aria-current="page"' : ""}>PokéAtlas</a>
   <div class="edicoes" role="group" aria-label="${C.edicoes}">${seletor}</div>
-  ${lingua === "pt-BR" ? `<button type="button" class="topo-busca" data-busca-abrir aria-haspopup="dialog" aria-keyshortcuts="/ Control+K">${C.buscar}</button>` : ""}
+  <button type="button" class="topo-busca" data-busca-abrir aria-haspopup="dialog" aria-keyshortcuts="/ Control+K">${C.buscar}</button>
   <button type="button" class="topo-som" data-som data-ligado="false" aria-haspopup="dialog" aria-label="${C.som}" title="${C.somTitulo}">${ICONE_DO_SOM}</button>
   <button type="button" class="topo-menu" aria-expanded="false" aria-controls="menu">${C.menu}</button>
   <nav class="topo-nav" id="menu" aria-label="${C.secoes}">
-    ${lingua === "pt-BR" ? `<button type="button" class="topo-nav-busca" data-busca-abrir aria-haspopup="dialog">${C.buscarNoAtlas}</button>` : ""}
+    <button type="button" class="topo-nav-busca" data-busca-abrir aria-haspopup="dialog">${C.buscarNoAtlas}</button>
     <button type="button" class="topo-nav-som" data-som data-ligado="false" aria-haspopup="dialog">${C.musicaESons}</button>
     ${ed.nav.map(link).join("\n    ")}${outra ? `\n    <a class="topo-lingua" href="${outra[1]}" hreflang="${outra[0]}" lang="${outra[0]}">${NOMES[outra[0]]}</a>` : ""}
     <a class="botao botao-pequeno" href="${ed.acao.href}"${caminho === ed.acao.href ? ' aria-current="page"' : ""}>${ed.acao.texto}</a>
@@ -187,7 +197,7 @@ ${corpo}
       <p>${ed.lema}</p>
     </div>
     <nav aria-label="${C.rodape}">
-      ${[ed.acao, ...ed.nav].map((n) => `<a href="${n.href.split("#")[0]}"${emPortugues(n.href)}>${n.texto}</a>`).join("\n      ")}${outra ? `\n      <a href="${outra[1]}" hreflang="${outra[0]}" lang="${outra[0]}">${NOMES[outra[0]]}</a>` : ""}
+      ${[ed.acao, ...ed.nav].map((n) => `<a href="${n.href.split("#")[0]}">${n.texto}</a>`).join("\n      ")}${outra ? `\n      <a href="${outra[1]}" hreflang="${outra[0]}" lang="${outra[0]}">${NOMES[outra[0]]}</a>` : ""}
     </nav>
     <div class="rodape-avisos">
       ${ed.avisos.map((t) => `<p>${t}</p>`).join("\n      ")}
@@ -199,6 +209,7 @@ ${[modulo, extra].filter(Boolean).map((m) => `<script type="module" src="/js/${m
 </body>
 </html>
 `;
+  return emIngles ? linksEmIngles(html) : html;
 }
 
 /* ---------- início ---------- */
@@ -209,13 +220,13 @@ export const DEMO_COMPARAR = ["red-blue-yellow", "scarlet-violet"];
 const FAVORITOS = [[6, 0.1], [448, 0.22], [25, 0.06], [94, 0.26], [143, 0.12], [700, 0.18], [248, 0.08], [133, 0.2], [384, 0.14]];
 
 function folhaRegiao(regiao, L) {
-  const r = L.regiao(regiao), T = L.inicio_, pt = L.codigo === "pt-BR" ? "" : ' hreflang="pt-BR"';
+  const r = L.regiao(regiao), T = L.inicio_;
   const jogos = ORDENADOS.filter((j) => j.regiao === r.id).map(L.jogo);
   return `<article class="folha${CARTAS[r.id].proporcao < 0.7 ? " folha-alta" : ""}">
   <div class="folha-texto-coluna">
     <header class="folha-topo">
       <p class="folha-geracao">${T.geracao} ${ROMANOS[r.geracao]}</p>
-      <h3 class="folha-nome"><a href="/regioes/${r.id}/"${pt}>${r.nome}</a></h3>
+      <h3 class="folha-nome"><a href="/regioes/${r.id}/">${r.nome}</a></h3>
       <p class="folha-inspiracao">${esc(r.inspiracao)}</p>
     </header>
     <p class="folha-texto">${esc(r.texto)}</p>
@@ -231,8 +242,8 @@ function folhaRegiao(regiao, L) {
 /* Os nomes dos seis eixos em volta de um hexágono, cada um no seu vértice. */
 const eixosEmVolta = (L, raio = 50) => posicoesDosEixos(raio).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${L.eixo(e)}</span>`).join("");
 
-export function paginaInicio(lingua = "pt-BR") {
-  const L = LINGUAS[lingua], T = L.inicio_, pt = lingua === "pt-BR" ? "" : ' hreflang="pt-BR"';
+export function paginaInicio(lingua = linguaAtual()) {
+  const L = LINGUAS[lingua], T = L.inicio_;
   const jogoDe = (slug) => L.jogo(porSlug[slug]);
   const primeiro = jogoDe(DESTAQUES_ABERTURA[0]);
   const [da, db] = DEMO_COMPARAR.map(jogoDe);
@@ -284,7 +295,7 @@ export function paginaInicio(lingua = "pt-BR") {
     <div class="tempo-texto">
       <h2 id="t-tempo">${T.anos(maiuscula(L.extenso(anos)))}</h2>
       <p class="prosa">${T.anosTexto}</p>
-      <a class="botao botao-contorno" href="/linha-do-tempo/"${pt}>${T.verLinha}</a>
+      <a class="botao botao-contorno" href="/linha-do-tempo/">${T.verLinha}</a>
     </div>
     <dl class="numeros">
       ${[anos, geracoes, REGIOES.length, JOGOS.length].map((n, i) => `<div><dd data-entra="contar" data-ate="${n}">${n}</dd><dt>${T.contas[i]}</dt></div>`).join("\n      ")}
@@ -332,7 +343,7 @@ export function paginaInicio(lingua = "pt-BR") {
 <section class="ferramentas" ${DIA}>
   <div class="ferramenta ferramenta-pokedex">
     <ul class="mosaico mosaico-especies" aria-label="${T.mosaico}">
-      ${FAVORITOS.map(([e, forca]) => `<li class="mosaico-item" data-deriva="${forca}"><a href="${enderecoEspecie(e)}"${pt} aria-label="${esc(FICHAS[e].nome)}"><img src="/arte/mini/${e}.webp" alt="" width="184" height="184" loading="lazy" decoding="async"></a></li>`).join("\n      ")}
+      ${FAVORITOS.map(([e, forca]) => `<li class="mosaico-item" data-deriva="${forca}"><a href="${enderecoEspecie(e)}" aria-label="${esc(FICHAS[e].nome)}"><img src="/arte/mini/${e}.webp" alt="" width="184" height="184" loading="lazy" decoding="async"></a></li>`).join("\n      ")}
     </ul>
     <div class="ferramenta-texto">
       <h2>${T.pokedex}</h2>
@@ -350,7 +361,7 @@ export function paginaInicio(lingua = "pt-BR") {
     <div class="ferramenta-texto">
       <h2>${T.sobrepor}</h2>
       <p class="prosa">${T.sobreporTexto}</p>
-      <a class="botao botao-contorno" href="/comparar/?a=${da.slug}&amp;b=${db.slug}"${pt}>${T.comparar}</a>
+      <a class="botao botao-contorno" href="/comparar/?a=${da.slug}&amp;b=${db.slug}">${T.comparar}</a>
     </div>
     <figure class="sobreposicao">
       <div class="sobreposicao-hex" aria-hidden="true">
@@ -370,8 +381,8 @@ export function paginaInicio(lingua = "pt-BR") {
 </section>`;
 
   return moldura({
-    titulo: T.titulo, descricao: T.descricao, lingua, versoes: { "pt-BR": "/", en: "/en/" },
-    caminho: L.inicio, classe: "pagina-inicio", corpo, modulo: "inicio", rolagem: true
+    titulo: T.titulo, descricao: T.descricao, lingua,
+    caminho: "/", classe: "pagina-inicio", corpo, modulo: "inicio", rolagem: true
   });
 }
 
@@ -381,8 +392,8 @@ function barra(nota) {
   return `<span class="estratos" aria-hidden="true">${[1, 2, 3, 4, 5].map((n) => `<span class="estrato${n <= nota ? ` estrato-${n}` : ""}"></span>`).join("")}</span>`;
 }
 
-export function paginaJogo(original, lingua = "pt-BR") {
-  const L = LINGUAS[lingua], T = L.jogo_, pt = lingua === "pt-BR" ? "" : ' hreflang="pt-BR"';
+export function paginaJogo(original, lingua = linguaAtual()) {
+  const L = LINGUAS[lingua], T = L.jogo_;
   const j = L.jogo(original);
   const i = ORDENADOS.indexOf(original);
   const anterior = ORDENADOS[i - 1] && L.jogo(ORDENADOS[i - 1]), proximo = ORDENADOS[i + 1] && L.jogo(ORDENADOS[i + 1]);
@@ -393,7 +404,7 @@ export function paginaJogo(original, lingua = "pt-BR") {
   const ficha = [
     [T.ficha.lancamento, String(j.ano)],
     [T.ficha.console, esc(consolesDe(j, L))],
-    lugar ? [j.regiao === "outras" ? T.ficha.cenario : T.ficha.regiao, j.regiao === "outras" ? esc(lugar) : `<a href="/regioes/${j.regiao}/"${pt}>${esc(lugar)}</a>`] : null,
+    lugar ? [j.regiao === "outras" ? T.ficha.cenario : T.ficha.regiao, j.regiao === "outras" ? esc(lugar) : `<a href="/regioes/${j.regiao}/">${esc(lugar)}</a>`] : null,
     j.geracao ? [T.ficha.geracao, ROMANOS[j.geracao]] : null,
     [T.ficha.estilo, esc(L.estilo(ESTILOS.find((e) => e.id === j.estilo)))],
     [T.ficha.categoria, esc(L.categoria(TIPOS.find((c) => c.id === j.tipo)))]
@@ -404,7 +415,7 @@ export function paginaJogo(original, lingua = "pt-BR") {
 <article class="jogo" data-slug="${j.slug}">
   <section class="jogo-topo">
     <div class="jogo-texto">
-      <p class="migalha"><a href="/linha-do-tempo/"${pt}>${T.todos}</a></p>
+      <p class="migalha"><a href="/linha-do-tempo/">${T.todos}</a></p>
       <h1>${esc(j.titulo)}</h1>
       <p class="jogo-chamada">${esc(j.chamada)}</p>
       <dl class="ficha-tecnica">
@@ -455,7 +466,7 @@ export function paginaJogo(original, lingua = "pt-BR") {
       <h2 id="t-regiao">${T.onde}</h2>
       <p class="jogo-regiao-nome">${esc(lugar)}</p>
       <p class="prosa">${esc(L.regiao(REGIOES.find((x) => x.id === j.regiao)).texto)}</p>
-      <a class="botao botao-contorno" href="/regioes/${j.regiao}/"${pt}>${esc(T.abrirCarta(lugar))}</a>
+      <a class="botao botao-contorno" href="/regioes/${j.regiao}/">${esc(T.abrirCarta(lugar))}</a>
     </div>
   </section>`}
 
@@ -469,7 +480,7 @@ export function paginaJogo(original, lingua = "pt-BR") {
   <section class="jogo-vizinhas" aria-labelledby="t-vizinhas">
     <h2 id="t-vizinhas">${T.parecidos}</h2>
     <ul class="estante estante-curta">
-      ${perto.map((o) => `<li>${itemHex(o, {}, L)}<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${o.slug}"${pt}>${T.compararOsDois}</a></li>`).join("\n      ")}
+      ${perto.map((o) => `<li>${itemHex(o, {}, L)}<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${o.slug}">${T.compararOsDois}</a></li>`).join("\n      ")}
     </ul>
   </section>
 
@@ -480,8 +491,8 @@ export function paginaJogo(original, lingua = "pt-BR") {
 </article>`;
 
   return moldura({
-    titulo: j.titulo, caminho: `${L.jogos}${j.slug}/`, classe: "pagina-jogo", corpo, modulo: "jogo", extra: j.pokedex ? "pokedex" : null,
-    lingua, versoes: { "pt-BR": `/jogos/${j.slug}/`, en: `/en/games/${j.slug}/` },
+    titulo: j.titulo, caminho: `/jogos/${j.slug}/`, classe: "pagina-jogo", corpo, modulo: "jogo", extra: j.pokedex ? "pokedex" : null,
+    lingua,
     descricao: T.descricao(j.chamada, j.curto)
   });
 }
@@ -496,100 +507,100 @@ export function paginaLinha() {
   const entradas = anos.map((ano, i) => {
     const jogos = ORDENADOS.filter((j) => j.ano === ano);
     const marco = MARCOS.find((m) => m.ano === ano);
-    const estreias = Object.entries(primeiroPorConsole).filter(([, a]) => a === ano).map(([p]) => nome(CONSOLES, p));
+    const estreias = Object.entries(primeiroPorConsole).filter(([, a]) => a === ano).map(([p]) => consoleAqui(p));
     if (estreias.length) consoleAtual = estreias[estreias.length - 1];
     const salto = i ? ano - anos[i - 1] : 0;
     return `<li class="linha-ano" id="ano-${ano}" data-ano="${ano}" data-console="${esc(consoleAtual)}" style="--salto:${salto}">
       <h2 class="linha-rotulo">${ano}</h2>
-      ${marco ? `<p class="linha-marco">${esc(marco.texto)}</p>` : ""}
-      ${estreias.length ? `<p class="linha-estreia">Primeiro jogo do atlas ${estreias.length > 1 ? "nestas plataformas" : "nesta plataforma"}: ${estreias.map(esc).join(" e ")}.</p>` : ""}
-      ${jogos.length ? `<ul class="linha-jogos">${jogos.map((j) => `<li data-tipo="${j.tipo}"><a href="/jogos/${j.slug}/">${hex(j)}<span class="linha-jogo-texto"><span class="hex-nome">${esc(j.curto)}</span><span class="hex-meta">${esc(nome(TIPOS, j.tipo))}, ${esc(consolesDe(j))}</span><span class="linha-chamada">${esc(j.chamada)}</span></span></a></li>`).join("")}</ul>` : ""}
+      ${marco ? `<p class="linha-marco">${esc(b(marco.texto, MARCOS_EN[marco.ano]))}</p>` : ""}
+      ${estreias.length ? `<p class="linha-estreia">${b(`Primeiro jogo do atlas ${estreias.length > 1 ? "nestas plataformas" : "nesta plataforma"}`, `First game in the atlas on ${estreias.length > 1 ? "these platforms" : "this platform"}`)}: ${enumerar(estreias.map(esc))}.</p>` : ""}
+      ${jogos.length ? `<ul class="linha-jogos">${jogos.map(aqui).map((j) => `<li data-tipo="${j.tipo}"><a href="/jogos/${j.slug}/">${hex(j)}<span class="linha-jogo-texto"><span class="hex-nome">${esc(j.curto)}</span><span class="hex-meta">${esc(categoriaAqui(j.tipo))}, ${esc(consolesDe(j))}</span><span class="linha-chamada">${esc(j.chamada)}</span></span></a></li>`).join("")}</ul>` : ""}
     </li>`;
   }).join("\n    ");
 
   const corpo = `
 <section class="cabecalho">
-  <h1>Linha do tempo</h1>
-  <p class="prosa">De ${anos[0]} até hoje, na ordem em que cada jogo chegou. A distância entre dois anos na página acompanha o tempo que passou entre eles.</p>
-  <div class="filtro filtro-linha" role="group" aria-label="Mostrar">
+  <h1>${b("Linha do tempo", "Timeline")}</h1>
+  <p class="prosa">${b(`De ${anos[0]} até hoje, na ordem em que cada jogo chegou. A distância entre dois anos na página acompanha o tempo que passou entre eles.`, `From ${anos[0]} to today, in the order each game arrived. The distance between two years on the page follows the time that passed between them.`)}</p>
+  <div class="filtro filtro-linha" role="group" aria-label="${b("Mostrar", "Show")}">
     <div class="filtro-opcoes">
-      <button type="button" class="ficha" data-tipo="" aria-pressed="true">Tudo</button>
-      <button type="button" class="ficha" data-tipo="principal" aria-pressed="false">Série principal</button>
-      <button type="button" class="ficha" data-tipo="remake legends" aria-pressed="false">Remakes e Legends</button>
-      <button type="button" class="ficha" data-tipo="derivado" aria-pressed="false">Derivados</button>
+      <button type="button" class="ficha" data-tipo="" aria-pressed="true">${b("Tudo", "All")}</button>
+      <button type="button" class="ficha" data-tipo="principal" aria-pressed="false">${b("Série principal", "Main series")}</button>
+      <button type="button" class="ficha" data-tipo="remake legends" aria-pressed="false">${b("Remakes e Legends", "Remakes and Legends")}</button>
+      <button type="button" class="ficha" data-tipo="derivado" aria-pressed="false">${b("Derivados", "Spin-offs")}</button>
     </div>
   </div>
 </section>
 <section class="linha">
   <aside class="linha-marcador" aria-hidden="true">
     <span class="linha-marcador-ano" data-ano-atual>${anos[0]}</span>
-    <span class="linha-marcador-console" data-console-atual>${esc(nome(CONSOLES, ORDENADOS[0].plataformas[0]))}</span>
+    <span class="linha-marcador-console" data-console-atual>${esc(consoleAqui(ORDENADOS[0].plataformas[0]))}</span>
   </aside>
   <ol class="linha-anos">
     ${entradas}
     <li class="linha-ano linha-horizonte" id="ano-${HORIZONTE.ano}" data-ano="${HORIZONTE.ano}" data-console="Nintendo Switch 2" style="--salto:${HORIZONTE.ano - anos[anos.length - 1]}">
       <h2 class="linha-rotulo">${HORIZONTE.ano}</h2>
-      <p class="linha-marco">No horizonte: ${esc(HORIZONTE.titulo)}. ${esc(HORIZONTE.texto)}</p>
+      <p class="linha-marco">${b(`No horizonte: ${esc(HORIZONTE.titulo)}. ${esc(HORIZONTE.texto)}`, `On the horizon: ${esc(HORIZONTE_EN.titulo)}. ${esc(HORIZONTE_EN.texto)}`)}</p>
     </li>
   </ol>
-  <nav class="linha-indice" aria-label="Ir para o ano">
+  <nav class="linha-indice" aria-label="${b("Ir para o ano", "Go to year")}">
     ${[...anos, HORIZONTE.ano].map((a) => `<a href="#ano-${a}" data-ano="${a}">${a}</a>`).join("")}
   </nav>
 </section>`;
 
   return moldura({
-    titulo: "Linha do tempo", caminho: "/linha-do-tempo/", classe: "pagina-linha", corpo, modulo: "linha",
-    descricao: `A franquia Pokémon de ${anos[0]} a ${HORIZONTE.ano}, jogo a jogo e console a console.`
+    titulo: b("Linha do tempo", "Timeline"), caminho: "/linha-do-tempo/", classe: "pagina-linha", corpo, modulo: "linha",
+    descricao: b(`A franquia Pokémon de ${anos[0]} a ${HORIZONTE.ano}, jogo a jogo e console a console.`, `The Pokémon franchise from ${anos[0]} to ${HORIZONTE.ano}, game by game and console by console.`)
   });
 }
 
 /* ---------- comparar ---------- */
 
 export function paginaComparar() {
-  const opcoes = (vazio) => `${vazio ? '<option value="">Nenhum</option>' : ""}${ORDENADOS.map((j) => `<option value="${j.slug}">${esc(j.curto)} (${j.ano})</option>`).join("")}`;
+  const opcoes = (vazio) => `${vazio ? `<option value="">${b("Nenhum", "None")}</option>` : ""}${ORDENADOS.map(aqui).map((j) => `<option value="${j.slug}">${esc(j.curto)} (${j.ano})</option>`).join("")}`;
   const corpo = `
 <section class="cabecalho">
-  <h1>Comparar</h1>
-  <p class="prosa">Escolha dois jogos, ou três, e veja os perfis um sobre o outro. Onde os contornos coincidem, eles se parecem.</p>
-  <p><a class="ligacao" href="/comparar/pokemon/">Comparar dois Pokémon, atributo por atributo</a></p>
+  <h1>${b("Comparar", "Compare")}</h1>
+  <p class="prosa">${b("Escolha dois jogos, ou três, e veja os perfis um sobre o outro. Onde os contornos coincidem, eles se parecem.", "Pick two games, or three, and see the profiles one over the other. Where the outlines match, they are alike.")}</p>
+  <p><a class="ligacao" href="/comparar/pokemon/">${b("Comparar dois Pokémon, atributo por atributo", "Compare two Pokémon, stat by stat")}</a></p>
 </section>
 <section class="comparar">
-  <noscript><p class="prosa">A comparação precisa de JavaScript para sobrepor os perfis. Sem ele, cada página de jogo, a partir da <a href="/linha-do-tempo/">linha do tempo</a>, traz as mesmas notas.</p></noscript>
-  <form class="comparar-escolha" aria-label="Jogos a comparar">
-    <label class="escolha escolha-a"><span><span class="serie serie-a"></span>Primeiro jogo</span><select name="a">${opcoes(false)}</select></label>
-    <label class="escolha escolha-b"><span><span class="serie serie-b"></span>Segundo jogo</span><select name="b">${opcoes(false)}</select></label>
-    <label class="escolha escolha-c"><span><span class="serie serie-c"></span>Terceira, se quiser</span><select name="c">${opcoes(true)}</select></label>
+  <noscript><p class="prosa">${b('A comparação precisa de JavaScript para sobrepor os perfis. Sem ele, cada página de jogo, a partir da <a href="/linha-do-tempo/">linha do tempo</a>, traz as mesmas notas.', 'The comparison needs JavaScript to overlay the profiles. Without it, each game page, starting from the <a href="/linha-do-tempo/">timeline</a>, has the same scores.')}</p></noscript>
+  <form class="comparar-escolha" aria-label="${b("Jogos a comparar", "Games to compare")}">
+    <label class="escolha escolha-a"><span><span class="serie serie-a"></span>${b("Primeiro jogo", "First game")}</span><select name="a">${opcoes(false)}</select></label>
+    <label class="escolha escolha-b"><span><span class="serie serie-b"></span>${b("Segundo jogo", "Second game")}</span><select name="b">${opcoes(false)}</select></label>
+    <label class="escolha escolha-c"><span><span class="serie serie-c"></span>${b("Terceiro, se quiser", "A third, if you like")}</span><select name="c">${opcoes(true)}</select></label>
   </form>
   <div class="comparar-grade">
     <figure class="comparar-hex">
       <div class="hex-vivo">
-        <canvas role="img" aria-label="Perfis dos jogos escolhidos, sobrepostos"></canvas>
-        ${posicoesDosEixos(50).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
+        <canvas role="img" aria-label="${b("Perfis dos jogos escolhidos, sobrepostos", "Profiles of the chosen games, overlaid")}"></canvas>
+        ${eixosEmVolta(LINGUAS[linguaAtual()])}
       </div>
       <figcaption class="comparar-chave" data-chave></figcaption>
     </figure>
     <div class="comparar-dados">
-      <h2>Nota por nota</h2>
+      <h2>${b("Nota por nota", "Score by score")}</h2>
       <div class="hastes" data-hastes></div>
-      <p class="nota-editorial">Notas de 1 a 5, na avaliação do atlas.</p>
+      <p class="nota-editorial">${b("Notas de 1 a 5, na avaliação do atlas.", "Scores from 1 to 5, in the atlas's own assessment.")}</p>
     </div>
   </div>
   <div class="comparar-veredito" data-veredito aria-live="polite"></div>
   <div class="comparar-tabela">
-    <h2>Lado a lado</h2>
+    <h2>${b("Lado a lado", "Side by side")}</h2>
     <div class="tabela-rolagem"><table data-tabela></table></div>
   </div>
 </section>`;
 
   return moldura({
-    titulo: "Comparar", caminho: "/comparar/", classe: "pagina-comparar", corpo, modulo: "comparar",
-    descricao: "Compare dois ou três jogos de Pokémon: perfis sobrepostos, nota por nota e ficha lado a lado."
+    titulo: b("Comparar", "Compare"), caminho: "/comparar/", classe: "pagina-comparar", corpo, modulo: "comparar",
+    descricao: b("Compare dois ou três jogos de Pokémon: perfis sobrepostos, nota por nota e ficha lado a lado.", "Compare two or three Pokémon games: overlaid profiles, score by score and a side-by-side fact sheet.")
   });
 }
 
 /* ---------- bússola ---------- */
 
-export function paginaBussola(lingua = "pt-BR") {
+export function paginaBussola(lingua = linguaAtual()) {
   const L = LINGUAS[lingua], T = L.bussola_;
   const corpo = `
 <section class="bussola" data-estado="perguntas">
@@ -603,7 +614,7 @@ export function paginaBussola(lingua = "pt-BR") {
     </div>
     <div class="bussola-acoes">
       <button type="button" class="ligacao" data-voltar hidden>${T.voltar}</button>
-      <a class="ligacao bussola-atalho" href="/desenhar/"${lingua === "pt-BR" ? "" : ' hreflang="pt-BR"'}>${T.desenhar}</a>
+      <a class="ligacao bussola-atalho" href="/desenhar/">${T.desenhar}</a>
     </div>
   </div>
   <figure class="bussola-hex">
@@ -626,7 +637,7 @@ export function paginaBussola(lingua = "pt-BR") {
 </section>`;
 
   return moldura({
-    titulo: T.titulo, caminho: L.bussola, classe: "pagina-bussola", corpo, modulo: "bussola", lingua, versoes: { "pt-BR": "/bussola/", en: "/en/compass/" },
+    titulo: T.titulo, caminho: "/bussola/", classe: "pagina-bussola", corpo, modulo: "bussola", lingua,
     descricao: T.descricao(maiuscula(L.extenso(PERGUNTAS.length)))
   });
 }
@@ -639,6 +650,7 @@ export function pagina404() {
   <h1>Este registro não está na Pokédex</h1>
   <p class="prosa">O endereço não leva a lugar nenhum do atlas. A linha do tempo mostra todos os jogos que existem.</p>
   <p><a class="botao" href="/linha-do-tempo/">Ver todos os jogos</a></p>
+  <p class="prosa" lang="en">This address leads nowhere in the atlas. <a href="/en/timeline/">The timeline shows every game</a>.</p>
 </section>`;
   return moldura({ titulo: "Página não encontrada", caminho: "/404", classe: "pagina-404", corpo, descricao: "Página não encontrada no PokéAtlas." });
 }
@@ -653,7 +665,7 @@ const REGIAO_DA_LISTA = {
 };
 const NOME_DA_REGIAO = { alola: "Alola", galar: "Galar", hisui: "Hisui", paldea: "Paldea" };
 
-function secaoPokedex(j, L = LINGUAS["pt-BR"]) {
+function secaoPokedex(j, L = LINGUAS[linguaAtual()]) {
   const T = L.jogo_, selo = seloEm(L);
   if (!j.pokedex) {
     return `<section class="jogo-pokedex" aria-labelledby="t-pokedex">
@@ -695,76 +707,79 @@ function secaoPokedex(j, L = LINGUAS["pt-BR"]) {
 
 /* ---------- regiões ---------- */
 
-export function paginaRegiao(r) {
-  const i = REGIOES.indexOf(r);
+export function paginaRegiao(original) {
+  const r = regiaoAqui(original), i = REGIOES.indexOf(original);
   const anterior = REGIOES[i - 1], proxima = REGIOES[i + 1];
   const mapa = MAPAS[r.id], carta = CARTAS[r.id];
   const pontos = lugaresDaCarta(r.id);
   const rotas = rotasDaCarta(r.id);
   const jogos = ORDENADOS.filter((j) => j.regiao === r.id);
   const alta = carta.proporcao < 0.7;
-  const descricao = `Carta de ${r.nome}, com ${mapa.cidades.length} ${mapa.cidades.length === 1 ? "povoado marcado" : "cidades marcadas"}${mapa.marcos.length ? ` e ${mapa.marcos.length} ${mapa.marcos.length === 1 ? "marco" : "marcos"}` : ""}. A lista completa vem logo abaixo.`;
+  const nomeDaCarta = (n) => (ingles() ? CARTAS_EN.nomes[n] ?? n : n);
+  const descricao = b(`Carta de ${r.nome}, com ${mapa.cidades.length} ${mapa.cidades.length === 1 ? "povoado marcado" : "cidades marcadas"}${mapa.marcos.length ? ` e ${mapa.marcos.length} ${mapa.marcos.length === 1 ? "marco" : "marcos"}` : ""}. A lista completa vem logo abaixo.`,
+    `Map of ${r.nome}, with ${mapa.cidades.length} ${mapa.cidades.length === 1 ? "settlement" : "cities"} marked${mapa.marcos.length ? ` and ${mapa.marcos.length} ${mapa.marcos.length === 1 ? "landmark" : "landmarks"}` : ""}. The full list comes right below.`);
 
   const corpo = `
 <article class="regiao${alta ? " regiao-alta" : ""}">
   <header class="cabecalho">
-    <p class="migalha"><a href="/regioes/">Regiões</a></p>
+    <p class="migalha"><a href="/regioes/">${b("Regiões", "Regions")}</a></p>
     <h1>${r.nome}</h1>
-    <p class="regiao-meta">Geração ${ROMANOS[r.geracao]}. ${esc(r.inspiracao)}.</p>
+    <p class="regiao-meta">${b("Geração", "Generation")} ${ROMANOS[r.geracao]}. ${esc(r.inspiracao)}.</p>
     <p class="prosa">${esc(r.texto)}</p>
   </header>
 
   <section class="regiao-carta" aria-labelledby="t-carta">
-    <h2 id="t-carta" class="so-leitor">Carta de ${r.nome}</h2>
+    <h2 id="t-carta" class="so-leitor">${b(`Carta de ${r.nome}`, `Map of ${r.nome}`)}</h2>
     <figure class="carta">
       <div class="carta-caixa carta-grande" data-carta="${r.id}" style="--proporcao:${carta.proporcao}">
         <img class="carta-terreno" src="/cartas/${r.id}.svg" alt="${esc(descricao)}" width="1000" height="${carta.altura}">
         ${tracosDaCarta(r.id, { pontos: false, destacavel: true })}
         <ol class="carta-pontos" aria-hidden="true">
           ${pontos.map((p) => `<li class="ponto ponto-${p.tipo} lado-${p.lado}" data-lugar="${p.n}" style="left:${p.x}%;top:${p.y}%"><span class="ponto-marca">${p.n}</span><span class="ponto-nome">${esc(p.nome)}</span></li>`).join("\n          ")}
-          ${(mapa.areas || []).map(([nome, x, y]) => `<li class="ponto-area" style="left:${x}%;top:${y}%">${esc(nome)}</li>`).join("\n          ")}
+          ${(mapa.areas || []).map(([nome, x, y]) => `<li class="ponto-area" style="left:${x}%;top:${y}%">${esc(nomeDaCarta(nome))}</li>`).join("\n          ")}
           ${rotas.map((t, k) => (t.n ? `<li class="rota-numero" data-rota="${k}" style="left:${t.x.toFixed(1)}%;top:${t.y.toFixed(1)}%">${t.n}</li>` : "")).join("")}
         </ol>
       </div>
-      <figcaption>Carta redesenhada pelo atlas a partir do mapa da região nos jogos: a costa segue o original, o relevo é interpretação.${rotas.length ? " As linhas vermelhas são as rotas, cada uma com o seu número." : ""} Aponte ou toque num lugar${rotas.length ? " ou numa rota" : ""} para destacá-lo.${mapa.nota ? ` ${esc(mapa.nota)}` : ""}</figcaption>
+      <figcaption>${b(`Carta redesenhada pelo atlas a partir do mapa da região nos jogos: a costa segue o original, o relevo é interpretação.${rotas.length ? " As linhas vermelhas são as rotas, cada uma com o seu número." : ""} Aponte ou toque num lugar${rotas.length ? " ou numa rota" : ""} para destacá-lo.${mapa.nota ? ` ${esc(mapa.nota)}` : ""}`,
+        `Map redrawn by the atlas from the region's map in the games: the coastline follows the original, the terrain is interpretation.${rotas.length ? " The red lines are the routes, each with its number." : ""} Point at or tap a place${rotas.length ? " or a route" : ""} to highlight it.${mapa.nota ? ` ${esc(CARTAS_EN.nota[r.id])}` : ""}`)}</figcaption>
     </figure>
     <div class="carta-legenda">
-      <h2>Lugares na carta</h2>
+      <h2>${b("Lugares na carta", "Places on the map")}</h2>
       <ol class="legenda-lista">
         ${pontos.map((p) => `<li class="legenda-${p.tipo}" data-lugar="${p.n}"><span class="ponto-marca" aria-hidden="true">${p.n}</span>${esc(p.nome)}</li>`).join("\n        ")}
       </ol>
-      ${(mapa.areas || []).length ? `<p class="nota-editorial">Também na carta, sem número: ${mapa.areas.map(([n]) => esc(n)).join(", ")}.</p>` : ""}
-      <h2 class="legenda-rotas">Rotas</h2>
+      ${(mapa.areas || []).length ? `<p class="nota-editorial">${b("Também na carta, sem número", "Also on the map, with no number")}: ${mapa.areas.map(([n]) => esc(nomeDaCarta(n))).join(", ")}.</p>` : ""}
+      <h2 class="legenda-rotas">${b("Rotas", "Routes")}</h2>
       ${rotas.length ? `<ul class="rotas-lista">
-        ${rotas.map((t, k) => `<li data-rota="${k}"><span class="rota-n${t.n ? "" : " rota-sem"}">${t.n || "sem nº"}</span><span>${t.nome ? `${esc(t.nome)}. ` : ""}${esc(t.texto)}</span></li>`).join("\n        ")}
+        ${rotas.map((t, k) => `<li data-rota="${k}"><span class="rota-n${t.n ? "" : " rota-sem"}">${t.n || b("sem nº", "no number")}</span><span>${t.nome ? `${esc(t.nome)}. ` : ""}${esc(t.texto)}</span></li>`).join("\n        ")}
       </ul>
-      <p class="nota-editorial">Rotas vizinhas que formam um só caminho aparecem juntas, como “3–4”. Trechos sem número são pontes, túneis e travessias que os jogos não numeram.</p>` : `<p class="prosa">${esc(mapa.semRotas)}</p>`}
+      <p class="nota-editorial">${b("Rotas vizinhas que formam um só caminho aparecem juntas, como “3–4”. Trechos sem número são pontes, túneis e travessias que os jogos não numeram.", "Neighboring routes that form a single path appear together, as in “3–4”. Stretches with no number are bridges, tunnels and crossings that the games do not number.")}</p>` : `<p class="prosa">${esc(b(mapa.semRotas, CARTAS_EN.semRotas[r.id]))}</p>`}
     </div>
   </section>
 
   <section class="regiao-iniciais" aria-labelledby="t-iniciais">
-    <h2 id="t-iniciais">Primeiros companheiros</h2>
+    <h2 id="t-iniciais">${b("Primeiros companheiros", "First partners")}</h2>
     <div class="pranchas">${r.iniciais.map((id) => prancha(id)).join("")}</div>
   </section>
 
   <section class="regiao-jogos" aria-labelledby="t-jogos">
-    <h2 id="t-jogos">${jogos.length === 1 ? "O jogo que se passa aqui" : "Jogos que se passam aqui"}</h2>
+    <h2 id="t-jogos">${jogos.length === 1 ? b("O jogo que se passa aqui", "The game set here") : b("Jogos que se passam aqui", "Games set here")}</h2>
     <ul class="estante estante-curta">
-      ${jogos.map((j) => `<li>${itemHex(j)}${j.pokedex ? `<a class="ligacao" href="/jogos/${j.slug}/#t-pokedex">Ver a Pokédex</a>` : ""}</li>`).join("\n      ")}
+      ${jogos.map((j) => `<li>${itemHex(j)}${j.pokedex ? `<a class="ligacao" href="/jogos/${j.slug}/#t-pokedex">${b("Ver a Pokédex", "See the Pokédex")}</a>` : ""}</li>`).join("\n      ")}
     </ul>
   </section>
 
   <div class="regiao-perfil" aria-hidden="true">${perfilRegiao(r.cenario)}</div>
 
-  <nav class="jogo-passos" aria-label="Outras regiões">
-    ${anterior ? `<a href="/regioes/${anterior.id}/"><span>Carta anterior</span>${anterior.nome}</a>` : "<span></span>"}
-    ${proxima ? `<a href="/regioes/${proxima.id}/"><span>Próxima carta</span>${proxima.nome}</a>` : "<span></span>"}
+  <nav class="jogo-passos" aria-label="${b("Outras regiões", "Other regions")}">
+    ${anterior ? `<a href="/regioes/${anterior.id}/"><span>${b("Carta anterior", "Previous map")}</span>${anterior.nome}</a>` : "<span></span>"}
+    ${proxima ? `<a href="/regioes/${proxima.id}/"><span>${b("Próxima carta", "Next map")}</span>${proxima.nome}</a>` : "<span></span>"}
   </nav>
 </article>`;
 
   return moldura({
-    titulo: `${r.nome}, a carta da região`, caminho: `/regioes/${r.id}/`, classe: "pagina-regiao", corpo, modulo: "regiao",
-    descricao: `${r.texto} Veja a carta de ${r.nome}, as cidades, os iniciais e os jogos que se passam nela.`
+    titulo: b(`${r.nome}, a carta da região`, `${r.nome}, the map of the region`), caminho: `/regioes/${r.id}/`, classe: "pagina-regiao", corpo, modulo: "regiao",
+    descricao: b(`${r.texto} Veja a carta de ${r.nome}, as cidades, os iniciais e os jogos que se passam nela.`, `${r.texto} See the map of ${r.nome}, its cities, its first partners and the games set in it.`)
   });
 }
 
@@ -772,48 +787,47 @@ export function paginaRegiao(r) {
 function chaveDasCartas() {
   const faixas = [1, 2, 3, 4, 5].map((n) => `<span style="background:var(--terra-${n})"></span>`).join("");
   return `<li class="regioes-chave">
-      <h2>Como ler as cartas</h2>
+      <h2>${b("Como ler as cartas", "How to read the maps")}</h2>
       <dl>
-        <div><dt><span class="chave-faixas" aria-hidden="true">${faixas}</span></dt><dd>Altitude, da costa ao cume</dd></div>
-        <div><dt><svg viewBox="0 0 44 14" aria-hidden="true"><path d="M2 7H42" class="chave-rota"/></svg></dt><dd>Rota</dd></div>
-        <div><dt><svg viewBox="0 0 44 14" aria-hidden="true"><circle cx="22" cy="7" r="4.5" class="chave-cidade"/></svg></dt><dd>Cidade ou vila</dd></div>
-        <div><dt><svg viewBox="0 0 44 14" aria-hidden="true"><rect x="18" y="3" width="8" height="8" transform="rotate(45 22 7)" class="chave-marco"/></svg></dt><dd>Caverna, lago, torre ou outro marco</dd></div>
+        <div><dt><span class="chave-faixas" aria-hidden="true">${faixas}</span></dt><dd>${b("Altitude, da costa ao cume", "Elevation, from coast to summit")}</dd></div>
+        <div><dt><svg viewBox="0 0 44 14" aria-hidden="true"><path d="M2 7H42" class="chave-rota"/></svg></dt><dd>${b("Rota", "Route")}</dd></div>
+        <div><dt><svg viewBox="0 0 44 14" aria-hidden="true"><circle cx="22" cy="7" r="4.5" class="chave-cidade"/></svg></dt><dd>${b("Cidade ou vila", "City or town")}</dd></div>
+        <div><dt><svg viewBox="0 0 44 14" aria-hidden="true"><rect x="18" y="3" width="8" height="8" transform="rotate(45 22 7)" class="chave-marco"/></svg></dt><dd>${b("Caverna, lago, torre ou outro marco", "Cave, lake, tower or other landmark")}</dd></div>
       </dl>
-      <p>A costa de cada carta segue o mapa dos jogos. O relevo é interpretação do atlas.</p>
+      <p>${b("A costa de cada carta segue o mapa dos jogos. O relevo é interpretação do atlas.", "The coastline of each map follows the map from the games. The terrain is the atlas's interpretation.")}</p>
     </li>`;
 }
 
 export function paginaRegioes() {
   const corpo = `
 <section class="cabecalho">
-  <h1>Regiões</h1>
-  <p class="prosa">${maiuscula(extenso(REGIOES.length))} cartas, redesenhadas a partir dos mapas dos jogos. Abra uma para ver os nomes das cidades, as rotas numeradas e os jogos que se passam ali.</p>
+  <h1>${b("Regiões", "Regions")}</h1>
+  <p class="prosa">${b(`${maiuscula(extenso(REGIOES.length))} cartas, redesenhadas a partir dos mapas dos jogos. Abra uma para ver os nomes das cidades, as rotas numeradas e os jogos que se passam ali.`, `${maiuscula(extenso(REGIOES.length))} maps, redrawn from the maps in the games. Open one to see the names of the cities, the numbered routes and the games set there.`)}</p>
 </section>
 <section class="regioes">
   <ul class="regioes-lista">
-    ${REGIOES.map((r) => `<li${CARTAS[r.id].proporcao < 0.7 ? ' class="regioes-alta"' : ""}>
-      ${caixaCarta(r.id, { ligacao: `/regioes/${r.id}/`, rotulo: `Carta de ${r.nome}` })}
+    ${REGIOES.map(regiaoAqui).map((r) => `<li${CARTAS[r.id].proporcao < 0.7 ? ' class="regioes-alta"' : ""}>
+      ${caixaCarta(r.id, { ligacao: `/regioes/${r.id}/`, rotulo: b(`Carta de ${r.nome}`, `Map of ${r.nome}`) })}
       <a class="regioes-nome" href="/regioes/${r.id}/">${r.nome}</a>
-      <span class="hex-meta">Geração ${ROMANOS[r.geracao]}. ${esc(r.inspiracao)}</span>
+      <span class="hex-meta">${b("Geração", "Generation")} ${ROMANOS[r.geracao]}. ${esc(r.inspiracao)}</span>
     </li>`).join("\n    ")}
     ${chaveDasCartas()}
   </ul>
 </section>`;
   return moldura({
-    titulo: "Regiões", caminho: "/regioes/", classe: "pagina-regioes", corpo,
-    descricao: `As ${REGIOES.length} regiões de Pokémon em cartas redesenhadas, de Kanto a Paldea, com cidades, rotas e os jogos de cada uma.`
+    titulo: b("Regiões", "Regions"), caminho: "/regioes/", classe: "pagina-regioes", corpo,
+    descricao: b(`As ${REGIOES.length} regiões de Pokémon em cartas redesenhadas, de Kanto a Paldea, com cidades, rotas e os jogos de cada uma.`, `The ${REGIOES.length} Pokémon regions as redrawn maps, from Kanto to Paldea, with cities, routes and the games of each one.`)
   });
 }
 
 /* ---------- dados enviados ao navegador ---------- */
 
-export function dadosDoNavegador(lingua = "pt-BR") {
+export function dadosDoNavegador(lingua = linguaAtual()) {
   const L = LINGUAS[lingua], ingles = lingua === "en";
   const jogos = ORDENADOS.map(L.jogo).map((j) => ({
     slug: j.slug, titulo: j.titulo, curto: j.curto, ano: j.ano, tipo: j.tipo,
     plataformas: j.plataformas, consoles: j.plataformas.map((p) => L.console(CONSOLES.find((c) => c.id === p))).join(` ${L.e} `),
-    // estilo, categoria e lugar só aparecem nas páginas em português (comparar e ficha do jogo)
-    ...(ingles ? {} : { estilo: nome(ESTILOS, j.estilo), categoria: nome(TIPOS, j.tipo), lugar: lugarDe(j), geracao: j.geracao ? ROMANOS[j.geracao] : null, paraQuem: j.paraQuem[0] }),
+    estilo: L.estilo(ESTILOS.find((e) => e.id === j.estilo)), categoria: L.categoria(TIPOS.find((c) => c.id === j.tipo)), lugar: lugarDe(j), geracao: j.geracao ? ROMANOS[j.geracao] : null, paraQuem: j.paraQuem[0],
     valores: valoresDe(j.atributos), chamada: j.chamada, notas: j.notas
   }));
   const pedidos = Object.fromEntries(Object.entries(PEDIDOS).map(([id, p]) => [id, L.pedido(p, id)]));

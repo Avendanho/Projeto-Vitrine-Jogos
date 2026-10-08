@@ -3,12 +3,12 @@
 import { EIXOS as EIXOS_BASE, encaixe } from "./hexagono.js";
 import { hexVivo } from "./hex-vivo.js";
 import { textosDaPagina } from "./bussola-textos.js";
+import { rota } from "./lingua.js";
 
 /* A página existe em português e em inglês: os textos e os dados vêm na língua dela. */
 const T = textosDaPagina();
 const { JOGOS, PEDIDOS, PERGUNTAS, NOMES_DOS_EIXOS } = await import(T.dados);
 const EIXOS = EIXOS_BASE.map((e) => ({ ...e, nome: NOMES_DOS_EIXOS[e.id] }));
-const emPortugues = document.documentElement.lang === "pt-BR" ? "" : ' hreflang="pt-BR"';
 
 const secao = document.querySelector(".bussola");
 const passo = secao.querySelector("[data-passo]");
@@ -132,7 +132,7 @@ function concluir(rolar) {
         <p class="resultado-chamada">${esc(j.chamada)}</p>
         <div class="resultado-porque"><h4>${T.porque}</h4><ul class="lista-marcada">${porque}</ul></div>
         ${atencao ? `<p class="resultado-atencao"><strong>${T.atencao}</strong> ${esc(atencao)}</p>` : ""}
-        <p class="resultado-ligacoes"><a class="botao botao-contorno" href="${T.fichas}${j.slug}/">${esc(T.ficha(j.curto))}</a>${outro ? `<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${outro.slug}"${emPortugues}>${esc(T.comparar(outro.curto))}</a>` : ""}</p>
+        <p class="resultado-ligacoes"><a class="botao botao-contorno" href="${T.fichas}${j.slug}/">${esc(T.ficha(j.curto))}</a>${outro ? `<a class="ligacao" href="${rota("/comparar/")}?a=${j.slug}&amp;b=${outro.slug}">${esc(T.comparar(outro.curto))}</a>` : ""}</p>
       </div>
     </li>`;
   }).join("");
@@ -149,10 +149,9 @@ function concluir(rolar) {
   if (!ajuste) {
     ajuste = Object.assign(document.createElement("a"), { className: "ligacao", textContent: T.ajustar });
     ajuste.dataset.ajustar = "";
-    if (emPortugues) ajuste.hreflang = "pt-BR";
     resultado.querySelector(".resultado-acoes").insertBefore(ajuste, resultado.querySelector("[data-copiar]"));
   }
-  ajuste.href = `/desenhar/#p=${u.map((v) => Math.round(v * 10)).join(",")}`;
+  ajuste.href = `${rota("/desenhar/")}#p=${u.map((v) => Math.round(v * 10)).join(",")}`;
 
   resultado.hidden = false;
   if (rolar) {

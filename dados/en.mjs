@@ -304,3 +304,76 @@ export const FICHAS_EN = {
     naoSe: ["You want to explore or follow a story", "You are still learning the basics of battling"],
     pokedexNota: "Roster recorded in the public database in October 2026, with each species' national number. The game gets new species through updates." }
 };
+
+/* ---------- a ficha de cada espécie ---------- */
+
+/* O vocabulário da ficha, que em dados/fichas.json está em português. */
+export const FICHA_EN = {
+  habitat: { Campo: "Grassland", Montanha: "Mountain", "Beira d'água": "Water's edge", Floresta: "Forest", "Terreno acidentado": "Rough terrain", Caverna: "Cave", Cidade: "Urban", Mar: "Sea", Raro: "Rare" },
+  cor: { Verde: "Green", Vermelho: "Red", Azul: "Blue", Branco: "White", Marrom: "Brown", Amarelo: "Yellow", Roxo: "Purple", Rosa: "Pink", Cinza: "Gray", Preto: "Black" },
+  crescimento: { "Médio-lento": "Medium Slow", "Médio": "Medium Fast", "Rápido": "Fast", Lento: "Slow", Flutuante: "Fluctuating", "Errático": "Erratic" },
+  ovos: { Monstro: "Monster", Planta: "Grass", "Dragão": "Dragon", "Água 1": "Water 1", Inseto: "Bug", Voador: "Flying", Campo: "Field", Fada: "Fairy", "Sem ovos": "No Eggs Discovered",
+    Humanoide: "Human-Like", "Água 3": "Water 3", Mineral: "Mineral", Amorfo: "Amorphous", "Água 2": "Water 2", Ditto: "Ditto" }
+};
+
+/* Como uma espécie evolui: as frases de fichas.json são montadas de poucos pedaços, e cada pedaço tem o seu
+ * par em inglês. A ordem importa (os pedaços mais específicos vêm antes). O build confere se não sobrou nada
+ * em português. */
+const PEDACOS_DA_EVOLUCAO = [
+  [/^no nível (\d+)/, "at level $1"],
+  [/^com amizade alta/, "with high friendship"],
+  [/^por troca com uma espécie específica/, "by trade with a specific species"],
+  [/^por troca/, "by trade"],
+  [/^subindo de nível segurando /, "leveling up while holding "],
+  [/^subindo de nível sabendo certo golpe/, "leveling up while knowing a certain move"],
+  [/^subindo de nível/, "leveling up"],
+  [/^em condição especial/, "under a special condition"],
+  [/^com /, "with "],
+  [/, segurando /, ", holding "],
+  [/, conforme o Ataque e a Defesa/, ", depending on Attack and Defense"],
+  [/, com certo companheiro na equipe/, ", with a certain partner in the team"],
+  [/, com o console de cabeça para baixo/, ", with the console upside down"],
+  [/, sabendo um golpe de certo tipo/, ", knowing a move of a certain type"],
+  [/, com chuva/, ", in the rain"],
+  [/, de dia/, ", during the day"],
+  [/, à noite/, ", at night"],
+  [/ \(só fêmeas\)/, " (females only)"],
+  [/ \(só machos\)/, " (males only)"]
+];
+export const evolucaoEmIngles = (como) => PEDACOS_DA_EVOLUCAO.reduce((texto, [de, para]) => texto.replace(de, para), como);
+
+/* ---------- linha do tempo e cartas ---------- */
+
+/* Os marcos da linha do tempo, pelo ano. */
+export const MARCOS_EN = {
+  1996: "On February 27, Pocket Monsters Red and Green reach stores in Japan for the Game Boy.",
+  1998: "Red and Blue land in North America, and the craze goes worldwide.",
+  2013: "X and Y come out worldwide on the same day, for the first time in the main series.",
+  2016: "Pokémon GO takes the franchise to the streets.",
+  2019: "Sword and Shield debut a whole generation on a console that also plugs into the TV.",
+  2022: "Legends: Arceus and Scarlet and Violet come out in the same year, and the formula opens up.",
+  2026: "The franchise turns thirty."
+};
+export const HORIZONTE_EN = { titulo: "Pokémon Winds and Pokémon Waves", texto: "The tenth generation, announced on February 27, 2026 for the Nintendo Switch 2. No date set yet; so it has no profile in this atlas yet." };
+
+/* O que as cartas dizem além dos nomes próprios: a frase das regiões sem rotas numeradas, a nota de uma
+ * carta, os trechos com nome e os lugares citados nas pontas das rotas. */
+export const CARTAS_EN = {
+  semRotas: {
+    alola: "Alola's routes, from 1 to 17, run inside the islands and do not show on a map at this scale.",
+    hisui: "Hisui has no routes: the land is divided into five large areas, all reached from Jubilife Village.",
+    paldea: "Paldea has no numbered routes: the map is continuous and divided into four provinces, each with its own areas."
+  },
+  nota: { unova: "This map follows the one from Black 2 and White 2, which includes the southwest of the region." },
+  nomes: {
+    "Travessia de barco": "Boat crossing", "Acesso à fábrica": "Factory access", "Wild Area, parte sul": "Wild Area, southern part",
+    "Wild Area, parte norte": "Wild Area, northern part", "Túnel da Rota 9": "Route 9 Tunnel",
+    "Fullmoon e Newmoon": "Fullmoon and Newmoon", "Grande Cratera": "Great Crater"
+  },
+  lugares: {
+    "o Sea Cottage": "the Sea Cottage", "o Mt. Silver": "Mt. Silver", "a Safari Zone": "the Safari Zone", "o Pal Park": "Pal Park", "O Mt. Coronet": "Mt. Coronet",
+    "a casa da professora": "the professor's house", "A estação ao norte de Hammerlocke": "the station north of Hammerlocke"
+  }
+};
+/* Um lugar citado na ponta de uma rota ("a Rota 12", "Johto"), em inglês. */
+export const lugarEmIngles = (lugar) => CARTAS_EN.lugares[lugar] ?? lugar.replace(/^[AaOo] /, "").replace(/^Rota /, "Route ");

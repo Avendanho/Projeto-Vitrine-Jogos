@@ -3,11 +3,9 @@
  * estão em dados/en.mjs; aqui ficam as frases da interface. */
 import { EIXOS_EN, CONSOLES_EN, JOGOS_EN, FICHAS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN, ESTILOS_EN, CATEGORIAS_EN, TIPOS_EN, LISTAS_EN } from "../dados/en.mjs";
 import { extenso, numero } from "./base.mjs";
+import { emIngles } from "./lingua.mjs";
 
-const UNIDADES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
-const DEZENAS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
-/* Um número de 0 a 99 por extenso, em inglês. */
-export const emIngles = (n) => (n < 20 ? UNIDADES[n] : DEZENAS[Math.floor(n / 10)] + (n % 10 ? `-${UNIDADES[n % 10]}` : ""));
+export { emIngles };
 const eEmIngles = (t) => t.replace(/ e /g, " and ");   // "Red, Blue e Yellow": os nomes dos jogos já são os originais
 
 export const LINGUAS = {
@@ -87,7 +85,7 @@ export const LINGUAS = {
     codigo: "en", og: "en_US", inicio: "/en/", bussola: "/en/compass/", jogos: "/en/games/",
     estilo: (e) => ESTILOS_EN[e.id], categoria: (c) => CATEGORIAS_EN[c.id], tipo: (t) => TIPOS_EN[t], lista: (rotulo) => LISTAS_EN[rotulo] ?? rotulo,
     jogo_: {
-      todos: "All games (timeline, in Portuguese)",
+      todos: "All games",
       ficha: { lancamento: "Release", console: "Console", regiao: "Region", cenario: "Setting", geracao: "Generation", estilo: "Style", categoria: "Category" },
       hexAlt: (jogo, notas) => `Attribute hexagon of ${jogo}. Scores: ${notas}.`,
       leitura: "Reading the profile", notas: "Scores from 1 to 5, in the atlas's own assessment.", nota: ["score ", " out of 5"], media: "sits at the average of the games in the atlas",
@@ -99,7 +97,7 @@ export const LINGUAS = {
       pokedex: "Pokédex", elenco: "Pokémon roster", pokedexDe: (lista) => `${lista} Pokédex`,
       formaNativa: "When a species has a regional form native to this game, that is the one shown, with its types. ",
       formaPadrao: "The art and types are those of each species' standard form. ",
-      escolha: "Pick a species to open its page (in Portuguese).",
+      escolha: "Pick a species to open its page.",
       lista: "List", procurar: "Search this list", nomeOuNumero: "Name or number", tipo: "Type",
       especie: "species", especies: "species", mostrarTodas: "Show all", mostrar: "Show all {n} species",
       vazio: "No species with that name or type in this list.", formaDe: (regiao) => `${regiao} form`
@@ -116,11 +114,11 @@ export const LINGUAS = {
       direcional: "D-pad", alto: "Back to the top of the page", acaso: "Open a random Pokémon", anterior: (secao) => `Previous section: ${secao}`, proxima: (secao) => `Next section: ${secao}`
     },
     prancha: { arte: (nome) => `Official art of ${nome}`, numero: "No." },
-    /* A moldura das páginas em inglês: as abas levam às seções em português, e o rodapé avisa disso. */
-    edicao: {
-      nome: "Pokémon", inicio: "/en/", sufixo: "PokéAtlas",
-      lema: "A guide to find out which Pokémon game suits you. The home page, the compass and the page of each game are in English; the other sections are in Portuguese.",
-      acao: { href: "/en/compass/", texto: "Open the compass" },
+    /* A moldura das páginas em inglês, por edição. Os endereços ficam em português e são trocados no fim. */
+    edicoes: { pokemon: {
+      sufixo: "PokéAtlas",
+      lema: "A guide to find out which Pokémon game suits you.",
+      acao: { href: "/bussola/", texto: "Open the compass" },
       nav: [
         { href: "/pokedex/", texto: "Pokédex" },
         { href: "/regioes/", texto: "Regions" },
@@ -133,7 +131,7 @@ export const LINGUAS = {
         "Fan project, non-profit and not affiliated with Nintendo, Game Freak, Creatures or The Pokémon Company. Pokémon and the names of the games belong to their owners.",
         "The scores of each game are the atlas's own editorial reading, not official data. The Pokémon art is the official one, taken from the public PokeAPI/sprites repository and reprinted as engravings; the Pokédex lists come from PokéAPI. The region maps are redrawn by the atlas over the maps from the games. The music and the key sounds are the atlas's own, made in the browser; the cries are those of the games, from the public PokeAPI/cries repository. Fonts: M PLUS Rounded 1c and DotGothic16."
       ]
-    },
+    } },
     inicio_: {
       titulo: "PokéAtlas — find out which Pokémon game suits you",
       descricao: "A visual atlas of the Pokémon games. Explore the regions and the Pokédex, compare titles and use the compass to find the game that has your profile.",
@@ -142,7 +140,7 @@ export const LINGUAS = {
       vertices: "Six vertices, six qualities. The farther from the center, the higher the score.",
       teclas: "Put another profile on screen", de: "of",
       cartas: (n) => `${n} maps, from Kanto to Paldea`,
-      cartasTexto: "Each region has its map, its three first partners and the games set in it. Tap a map to open it with names and routes (the map pages are in Portuguese).",
+      cartasTexto: "Each region has its map, its three first partners and the games set in it. Tap a map to open it with names and routes.",
       geracao: "Generation", abrirCarta: (nome) => `Open the map of ${nome}`,
       anos: (n) => `${n} years on the road`,
       anosTexto: "From a gray cartridge in 1996 to open worlds for four players. Each dot on the ruler is a game in this atlas, and no two play the same way.",
@@ -167,8 +165,8 @@ export const LINGUAS = {
       titulo: "Compass", h1: "Compass",
       descricao: (n) => `${n} questions to find out which Pokémon game suits you, with the reason behind each recommendation.`,
       passo: (total) => `Question 1 of ${total}`,
-      semJs: 'The compass needs JavaScript to draw your profile. Meanwhile, the <a href="/linha-do-tempo/" hreflang="pt-BR">timeline</a> (in Portuguese) shows every game.',
-      voltar: "Go back one question", desenhar: "Rather draw the profile by hand? (in Portuguese)", perfil: "Your profile, which grows with each answer",
+      semJs: 'The compass needs JavaScript to draw your profile. Meanwhile, the <a href="/linha-do-tempo/">timeline</a> shows every game.',
+      voltar: "Go back one question", desenhar: "Rather draw the profile by hand?", perfil: "Your profile, which grows with each answer",
       legenda: "Your profile is still blank. Each answer pulls a vertex.",
       resultado: "The games with your profile", refazer: "Retake the compass", copiar: "Copy the link to this result"
     }

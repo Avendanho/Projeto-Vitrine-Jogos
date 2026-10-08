@@ -9,8 +9,10 @@ import { REGIOES, CONSOLES, ESTILOS, PEDIDOS, MAPAS, ROTAS } from "../dados/atla
 import { terrenoSVG } from "./cenario.mjs";
 import { POKEDEX, FICHAS, CARTAS, COBBLEMON, SITE, VERMELHO } from "./base.mjs";
 import { FAVICON } from "./icone.mjs";
+import { emLingua } from "./lingua.mjs";
+import { rotaEmIngles } from "../src/js/lingua-rotas.js";
 import { PERGUNTAS } from "../dados/quiz.mjs";
-import { EIXOS_EN, JOGOS_EN, FICHAS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN, ESTILOS_EN, CATEGORIAS_EN, TIPOS_EN } from "../dados/en.mjs";
+import { FICHA_EN, evolucaoEmIngles, EIXOS_EN, JOGOS_EN, FICHAS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN, ESTILOS_EN, CATEGORIAS_EN, TIPOS_EN } from "../dados/en.mjs";
 import { TIPOS as CATEGORIAS } from "../dados/atlas.mjs";
 import { ORDEM_TIPOS } from "./base.mjs";
 import { paginaPokedex, paginaEspecie, TODAS_AS_ESPECIES } from "./paginas-pokedex.mjs";
@@ -96,6 +98,11 @@ function conferir() {
     for (const campo of ["texto", "paraQuem", "naoSe"]) if (ficha[campo]?.length !== j[campo].length) erros.push(`inglês: "${campo}" de ${j.slug} tem outro tamanho`);
     for (const campo of ["pokedexNota", "semPokedex", "lugar"]) if (Boolean(j[campo]) !== Boolean(ficha[campo])) erros.push(`inglês: "${campo}" de ${j.slug} não acompanha o original`);
   }
+  for (const [id, f] of Object.entries(FICHAS)) {
+    for (const campo of ["habitat", "cor", "crescimento"]) if (f[campo] && !FICHA_EN[campo][f[campo]]) erros.push(`inglês: falta "${f[campo]}" (${campo}) da espécie ${id}`);
+    for (const o of f.ovos) if (!FICHA_EN.ovos[o]) erros.push(`inglês: falta o grupo de ovos "${o}"`);
+    if (f.como && /[áàâãéêíóôõúç]|\b(com|no|na|de|do|da|por|em|só|nível|segurando|sabendo|subindo|troca)\b/i.test(evolucaoEmIngles(f.como))) erros.push(`inglês: a evolução de ${f.nome} ficou com português: "${evolucaoEmIngles(f.como)}"`);
+  }
   for (const e of ESTILOS) if (!ESTILOS_EN[e.id]) erros.push(`inglês: falta o estilo ${e.id}`);
   for (const c of CATEGORIAS) if (!CATEGORIAS_EN[c.id]) erros.push(`inglês: falta a categoria ${c.id}`);
   for (const tipo of ORDEM_TIPOS) if (!TIPOS_EN[tipo]) erros.push(`inglês: falta o tipo ${tipo}`);
@@ -121,6 +128,12 @@ async function escrever(caminho, conteudo) {
   await writeFile(destino, conteudo, "utf8");
 }
 
+
+/* Escreve uma página nas duas línguas: em português no endereço dado e em inglês no par dele. */
+async function nasDuas(caminho, pagina) {
+  await escrever(`${caminho.slice(1)}index.html`, pagina());
+  await escrever(`${rotaEmIngles(caminho).slice(1)}index.html`, emLingua("en", pagina));
+}
 
 /* ---------- build ---------- */
 
@@ -154,32 +167,27 @@ await escrever("hex/demo-b.svg", svgHexagono(valoresDe(demoB.atributos), "#DC0A2
 for (const r of REGIOES) await escrever(`cartas/${r.id}.svg`, terrenoSVG(CARTAS[r.id]));
 
 await escrever("js/dados.js", dadosDoNavegador());
-await escrever("js/dados-en.js", dadosDoNavegador("en"));
-await escrever("regioes/index.html", paginaRegioes());
-for (const r of REGIOES) await escrever(`regioes/${r.id}/index.html`, paginaRegiao(r));
+await escrever("js/dados-en.js", emLingua("en", () => dadosDoNavegador()));
+await nasDuas("/regioes/", () => paginaRegioes());
+for (const r of REGIOES) await nasDuas(`/regioes/${r.id}/`, () => paginaRegiao(r));
 await escrever("favicon.svg", FAVICON);
-await escrever("index.html", paginaInicio());
-await escrever("en/index.html", paginaInicio("en"));
-await escrever("pokedex/index.html", paginaPokedex());
-for (const id of TODAS_AS_ESPECIES) await escrever(`pokedex/${FICHAS[id].slug}/index.html`, paginaEspecie(id));
-await escrever("linha-do-tempo/index.html", paginaLinha());
-await escrever("comparar/index.html", paginaComparar());
-await escrever("comparar/pokemon/index.html", paginaCompararPokemon());
+await nasDuas("/", () => paginaInicio());
+await nasDuas("/pokedex/", () => paginaPokedex());
+for (const id of TODAS_AS_ESPECIES) await nasDuas(`/pokedex/${FICHAS[id].slug}/`, () => paginaEspecie(id));
+await nasDuas("/linha-do-tempo/", () => paginaLinha());
+await nasDuas("/comparar/", () => paginaComparar());
+await nasDuas("/comparar/pokemon/", () => paginaCompararPokemon());
 await escrever("js/dados/especies.js", moduloEspecies());
-await escrever("time/index.html", paginaTime());
-await escrever("tipos/index.html", paginaTipos());
-await escrever("desenhar/index.html", paginaDesenhar());
+await nasDuas("/time/", () => paginaTime());
+await nasDuas("/tipos/", () => paginaTipos());
+await nasDuas("/desenhar/", () => paginaDesenhar());
 await escrever("js/dados/numeros.js", moduloNumeros());
 await escrever("diario/index.html", paginaDiario());
 await escrever("js/dados/tipos.js", moduloTipos());
 await escrever("js/dados/jogos.js", moduloJogos());
-await escrever("bussola/index.html", paginaBussola());
-await escrever("en/compass/index.html", paginaBussola("en"));
+await nasDuas("/bussola/", () => paginaBussola());
 await escrever("404.html", pagina404());
-for (const j of JOGOS) {
-  await escrever(`jogos/${j.slug}/index.html`, paginaJogo(j));
-  await escrever(`en/games/${j.slug}/index.html`, paginaJogo(j, "en"));
-}
+for (const j of JOGOS) await nasDuas(`/jogos/${j.slug}/`, () => paginaJogo(j));
 
 // edição Cobblemon
 await escrever("cobblemon/index.html", paginaCobblemonInicio());
@@ -191,6 +199,7 @@ await escrever("cobblemon/biomas/index.html", paginaCobblemonBiomas());
 await escrever("cobblemon/cacada/index.html", paginaCobblemonCacada());
 await escrever("js/dados/spawns.js", moduloSpawns());
 await escrever("js/dados/busca.js", moduloBusca());
+await escrever("js/dados/busca-en.js", emLingua("en", () => moduloBusca()));
 
 // desafios, nas duas edições
 for (const edicao of ["pokemon", "cobblemon"]) {

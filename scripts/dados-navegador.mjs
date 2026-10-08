@@ -1,5 +1,6 @@
 /* Os módulos de dados que o navegador importa, gerados no build em dist/js/dados/.
  * Cada função devolve o texto de um módulo. As páginas só baixam o que usam. */
+import { b } from "./lingua.mjs";
 import { FICHAS, POKEDEX, TIPOS_E_FATORES, ENCONTROS, COBBLEMON, enderecoCobblemon, enderecoEspecie } from "./base.mjs";
 import { DESAFIOS } from "../dados/desafios.mjs";
 import { JOGOS } from "../dados/jogos.mjs";
@@ -54,11 +55,11 @@ export function moduloSpawns() {
 export function indiceDaBusca() {
   const P = "pokemon", C = "cobblemon", ancora = (id) => id.split(":").pop().replace(/\//g, "-");
   return [
-    ...[["Abrir a bússola", "/bussola/"], ["Pokédex", "/pokedex/"], ["Regiões", "/regioes/"], ["Linha do tempo", "/linha-do-tempo/"], ["Comparar jogos", "/comparar/"], ["Comparar Pokémon", "/comparar/pokemon/"],
-      ["Desafios", "/desafios/"], ["Montar um time", "/time/"], ["Diário de desafio", "/diario/"], ["Roda de tipos", "/tipos/"], ["Desenhar o perfil", "/desenhar/"]].map(([nome, url]) => ["Ferramenta", nome, url, P]),
+    ...[[b("Abrir a bússola", "Open the compass"), "/bussola/"], ["Pokédex", "/pokedex/"], [b("Regiões", "Regions"), "/regioes/"], [b("Linha do tempo", "Timeline"), "/linha-do-tempo/"], [b("Comparar jogos", "Compare games"), "/comparar/"], [b("Comparar Pokémon", "Compare Pokémon"), "/comparar/pokemon/"],
+      [b("Desafios", "Challenges"), "/desafios/"], [b("Montar um time", "Build a team"), "/time/"], [b("Diário de desafio", "Challenge journal"), "/diario/"], [b("Roda de tipos", "Type wheel"), "/tipos/"], [b("Desenhar o perfil", "Draw your profile"), "/desenhar/"]].map(([nome, url]) => ["Ferramenta", nome, url, P]),
     ...[["Pokémon do Cobblemon", "/cobblemon/pokemon/"], ["Itens do Cobblemon", "/cobblemon/itens/"], ["Estruturas do Cobblemon", "/cobblemon/estruturas/"], ["Biomas do Cobblemon", "/cobblemon/biomas/"],
       ["Plano de caçada", "/cobblemon/cacada/"], ["Desafios de Cobblemon", "/cobblemon/desafios/"]].map(([nome, url]) => ["Ferramenta", nome, url, C]),
-    ...JOGOS.map((j) => ["Jogo", j.titulo ?? j.curto, `/jogos/${j.slug}/`, P]),
+    ...JOGOS.map((j) => ["Jogo", b(j.titulo ?? j.curto, (j.titulo ?? j.curto).replace(/ e /g, " and ")), `/jogos/${j.slug}/`, P]),
     ...REGIOES.map((r) => ["Região", r.nome, `/regioes/${r.id}/`, P]),
     ...Object.keys(FICHAS).map(Number).sort((a, b) => a - b).map((id) => ["Pokémon", FICHAS[id].nome, enderecoEspecie(id), P, id]),
     ...DESAFIOS.map((d) => ["Desafio", d.nome, `${d.edicao === C ? "/cobblemon/desafios/" : "/desafios/"}${d.slug}/`, d.edicao]),

@@ -1,5 +1,6 @@
 /* A Pokédex inteira: busca por nome ou número, filtro por geração e por tipo.
  * O que está escolhido fica no endereço, para o link poder ser guardado. */
+import { b, numero as formatar } from "./lingua.js";
 import { colorirAoApontar, semAcento } from "./gaveta.js";
 
 const secao = document.querySelector("[data-pokedex-geral]");
@@ -51,8 +52,8 @@ function aplicar(gravar = true) {
   }
   for (const b of botoesGeracao) b.setAttribute("aria-pressed", String(b.dataset.geracao === estado.g));
   for (const b of botoesTipo) b.setAttribute("aria-pressed", String(b.dataset.tipo === estado.tipo));
-  contagem.textContent = visiveis.toLocaleString("pt-BR");
-  rotulo.textContent = visiveis === 1 ? "espécie" : "espécies";
+  contagem.textContent = formatar(visiveis);
+  rotulo.textContent = visiveis === 1 ? b("espécie", "species") : b("espécies", "species");
   limpar.hidden = !(estado.q || estado.g || estado.tipo);
   vazio.hidden = visiveis > 0;
 

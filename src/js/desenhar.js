@@ -3,7 +3,8 @@
  * endereço, para mandar a alguém. */
 import { EIXOS, alcance, notaDoAlcance, encaixe, NOTA_MAXIMA } from "./hexagono.js";
 import { hexVivo, REDUZIDO } from "./hex-vivo.js";
-import { JOGOS } from "./dados.js";
+import { b, INGLES } from "./lingua.js";
+const { JOGOS } = await import(INGLES ? "./dados-en.js" : "./dados.js");
 
 const INICIAL = 3, RAIO = 0.44;                      // a nota de partida de todos os eixos; o raio do hexágono dentro da caixa
 const raiz = document.querySelector("[data-desenhar]");
@@ -27,7 +28,7 @@ function mostrar(gravar = true) {
     alca.style.left = `${(50 + Math.cos(a) * r).toFixed(2)}%`;
     alca.style.top = `${(50 + Math.sin(a) * r).toFixed(2)}%`;
     alca.setAttribute("aria-valuenow", String(v));
-    alca.setAttribute("aria-valuetext", `${String(v).replace(".", ",")} de ${NOTA_MAXIMA}`);
+    alca.setAttribute("aria-valuetext", b(`${String(v).replace(".", ",")} de ${NOTA_MAXIMA}`, `${v} out of ${NOTA_MAXIMA}`));
   });
   ordenar();
   if (gravar) history.replaceState(null, "", `#p=${valores.map((v) => Math.round(v * 10)).join(",")}`);
@@ -83,14 +84,14 @@ mostrar(false);
 });
 raiz.querySelector("[data-copiar]").addEventListener("click", async () => {
   mostrar();
-  try { await navigator.clipboard.writeText(location.href); aviso.textContent = "Link copiado."; }
-  catch { aviso.textContent = "Não foi possível copiar. O link está na barra de endereço."; }
+  try { await navigator.clipboard.writeText(location.href); aviso.textContent = b("Link copiado.", "Link copied."); }
+  catch { aviso.textContent = b("Não foi possível copiar. O link está na barra de endereço.", "Could not copy. The link is in the address bar."); }
 });
 const todos = raiz.querySelector("[data-todos]");
 todos.addEventListener("click", () => {
   const abertos = lista.classList.toggle("inteira");
   todos.setAttribute("aria-expanded", String(abertos));
-  todos.textContent = abertos ? "Ver só os oito primeiros" : `Ver os ${JOGOS.length} jogos`;
+  todos.textContent = abertos ? b("Ver só os oito primeiros", "See only the first eight") : b(`Ver os ${JOGOS.length} jogos`, `See all ${JOGOS.length} games`);
 });
 
 mostrar(false);

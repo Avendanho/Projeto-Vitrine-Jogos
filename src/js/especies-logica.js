@@ -1,9 +1,10 @@
 /* Regras sobre a lista de espécies que o navegador recebe (js/dados/especies.js), sem tocar na página:
  * servem ao comparador, ao time e ao diário, e rodam igual no Node, para os testes. */
+import { nomeDoTipo } from "./lingua.js";
 
 export const semAcento = (texto) => String(texto).normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 /* O selo de um tipo, na cor dele. `extra` entra depois do nome (uma contagem, por exemplo). */
-export const selo = (tipo, extra = "") => `<span class="tipo" data-tipo="${semAcento(tipo)}">${tipo}${extra}</span>`;
+export const selo = (tipo, extra = "") => `<span class="tipo" data-tipo="${semAcento(tipo)}">${nomeDoTipo(tipo)}${extra}</span>`;
 
 /* Cada espécie chega como uma linha enxuta; aqui ela ganha nomes. */
 export const especie = (l) => l && ({ id: l[0], slug: l[1], nome: l[2], tipos: l[3], atributos: l[4], altura: l[5], peso: l[6], geracao: l[7], cor: l[8], estagio: l[9], familia: l[10] });

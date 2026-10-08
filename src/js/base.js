@@ -1,6 +1,9 @@
 /* Comportamentos comuns a todas as páginas.
  * (A classe "js" já foi posta em <html> por um script no cabeçalho, antes de a página aparecer.) */
 
+import { rotaEmIngles, rotaEmPortugues } from "./lingua-rotas.js";
+const rotaDaPagina = (caminho) => (document.documentElement.lang === "en" ? rotaEmIngles(caminho) : caminho);
+
 /* O som (música, teclas e gritos) vem à parte: se o módulo não carregar, o resto da página segue igual. */
 import("./som.js").catch(() => {});
 /* O mesmo vale para as teclas do aparelho (o Pokémon ao acaso e o número digitado). */
@@ -60,7 +63,7 @@ if (cartas.length) {
 document.addEventListener("click", (e) => {
   const ligacao = e.target.closest?.("a[href]");
   if (!ligacao) return;
-  const destino = ligacao.getAttribute("href");
+  const destino = rotaEmPortugues(ligacao.getAttribute("href"));   // o mesmo teste vale para as páginas em inglês
   if (destino.startsWith("/pokedex/")) {
     const arte = ligacao.querySelector(".dex-arte") || ligacao.querySelector('img[src^="/arte/mini/"]');
     if (arte) arte.style.viewTransitionName = "especie";
@@ -108,7 +111,7 @@ if (document.body.classList.contains("edicao-cobblemon")) {
 
 /* Busca global: o botão do cabeçalho e os atalhos "/" e Ctrl+K (ou ⌘K). O módulo da busca e o índice só são
  * baixados na primeira vez que alguém abre. */
-const abrirBusca = () => import("./busca.js").then((m) => m.abrirBusca()).catch(() => { location.href = document.body.classList.contains("edicao-cobblemon") ? "/cobblemon/pokemon/" : "/pokedex/"; });
+const abrirBusca = () => import("./busca.js").then((m) => m.abrirBusca()).catch(() => { location.href = rotaDaPagina(document.body.classList.contains("edicao-cobblemon") ? "/cobblemon/pokemon/" : "/pokedex/"); });
 document.addEventListener("click", (e) => {
   if (!e.target.closest?.("[data-busca-abrir]")) return;
   menu?.classList.remove("aberto");                // no celular o botão fica dentro do menu: ele fecha antes de a busca abrir
