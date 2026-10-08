@@ -13,6 +13,7 @@ export const MAQUETES = lerDados("maquetes.json");                           // 
 export const ITENS_ARTE = lerDados("itens-arte.json");                       // gerado por scripts/itens-arte.mjs: posição de cada ícone no atlas
 export const TIPOS_E_FATORES = lerDados("tipos.json");                       // gerado por scripts/tipos.mjs: efetividade dos 18 tipos
 export const MODELOS = new Set(lerDados("modelos.json"));
+export const MODELOS_3D = lerDados("modelos3d.json");                        // gerado por scripts/modelos.mjs --3d: quem gira no visor e quem tem shiny
 /* Só entra no atlas o que o mod realmente traz nesta versão: estruturas que ele gera (as que não têm
  * peça inicial ficam sem maquete) e itens que têm textura ou modelo. O resto está nos arquivos de dados
  * e de tradução, mas não existe no jogo. */

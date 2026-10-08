@@ -1,7 +1,7 @@
 /* A edição Cobblemon do atlas: início, lista de Pokémon, página de cada espécie,
  * itens, estruturas e guia. Tudo sai de dados/cobblemon.json, que é extraído dos
  * arquivos do próprio mod; as curiosidades e os números são calculados aqui. */
-import { MODELOS, MAQUETES, ITENS_ARTE, COBBLEMON, FICHAS, ORDEM_TIPOS, esc, semAcento, numero, extenso, maiuscula, enumerar, enderecoEspecie, enderecoCobblemon } from "./base.mjs";
+import { MODELOS, MODELOS_3D, MAQUETES, ITENS_ARTE, COBBLEMON, FICHAS, ORDEM_TIPOS, esc, semAcento, numero, extenso, maiuscula, enumerar, enderecoEspecie, enderecoCobblemon } from "./base.mjs";
 import { moldura } from "./paginas.mjs";
 
 const C = COBBLEMON;
@@ -283,9 +283,10 @@ export function paginaCobblemonEspecie(n) {
       ${e.spawns.length ? `<p class="cb-cacar"><button type="button" class="botao botao-contorno botao-pequeno" data-cacar="${n}" hidden>Pôr na caçada</button> <a class="ligacao" href="/cobblemon/cacada/" data-cacada-link hidden>Ver o plano de caçada</a></p>` : ""}
     </div>
     ${MODELOS.has(n)
-      ? `<figure class="cb-retrato painel" data-retrato="${n}">
+      ? `<figure class="cb-retrato painel" data-retrato="${n}"${MODELOS_3D.modelos.includes(n) ? ` data-modelo3d="/modelos3d/${n}.json" data-textura="/modelos3d/${n}.png"${MODELOS_3D.shiny.includes(n) ? ` data-shiny="/modelos3d/${n}-shiny.png"` : ""}` : ""}>
       <img class="cb-modelo" src="/arte/modelo/${n}.webp" alt="${esc(e.nome)}, o modelo do Cobblemon" width="400" height="400">
       <canvas class="cb-revela" width="400" height="400" data-tinta="/arte/modelo/${n}-tinta.png" aria-hidden="true"></canvas>
+      ${MODELOS_3D.modelos.includes(n) ? `<button type="button" class="maquete-girar">Girar em 3D</button>${MODELOS_3D.shiny.includes(n) ? '<button type="button" class="modelo-shiny" data-shiny-botao aria-pressed="false">Shiny</button>' : ""}<span class="maquete-dica" aria-hidden="true">Arraste para girar, role para aproximar</span>` : ""}
     </figure>`
       : `<figure class="cb-retrato painel"><img class="pixel" src="/arte/pixel/${n}.png" alt="${esc(e.nome)}, em pixel" width="288" height="288"></figure>`}
   </section>
@@ -322,7 +323,7 @@ export function paginaCobblemonEspecie(n) {
 
   const onde = e.ambientes.filter((a) => a !== "qualquer").map((a) => AMBIENTE[a].toLowerCase());
   return moldura({
-    ...base, titulo: `${e.nome} no Cobblemon`, caminho: enderecoCobblemon(n), classe: "pagina-cb-especie", corpo, modulo: "cobblemon-especie", espelho: enderecoEspecie(n),
+    ...base, titulo: `${e.nome} no Cobblemon`, caminho: enderecoCobblemon(n), classe: "pagina-cb-especie", corpo, modulo: "cobblemon-especie", extra: "modelo3d", espelho: enderecoEspecie(n),
     descricao: `${e.nome} no Cobblemon ${C.versao}: ${nasce(e) ? `nasce em ${onde.length ? enumerar(onde.slice(0, 3)) : "qualquer bioma da Superfície"}` : "não nasce no mundo"}. Veja raridade, condições, o que deixa cair e como evolui no mod.`
   });
 }

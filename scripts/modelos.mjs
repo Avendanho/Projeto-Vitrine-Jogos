@@ -10,6 +10,10 @@
  * a hierarquia, projeta sem perspectiva e pinta com um z-buffer. Não usa GPU.
  *
  * Uso: node scripts/modelos.mjs --fonte <pasta do repositório do Cobblemon> [--previa arquivo.png] [número ...]
+ *      node scripts/modelos.mjs --fonte <pasta> --3d [número ...]
+ * Com --3d não mexe nas imagens: grava em src/modelos3d/ o que o visor do navegador precisa para girar cada
+ * modelo (<n>.json com os cubos já na pose, <n>.png com a textura e <n>-shiny.png quando o mod tem a variação)
+ * e dados/modelos3d.json com a lista.
  * Os arquivos gerados ficam no repositório; o build não depende deste script.
  */
 import { readFile, writeFile, readdir, mkdir } from "node:fs/promises";
@@ -17,6 +21,7 @@ import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { identidade, vezes, mover, girar, emTorno, aplicar, pivoDe, giroDe, facesDoCubo } from "../src/js/modelo-malha.js";
 
 const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -40,76 +45,6 @@ const json = async (c) => JSON.parse(await readFile(c, "utf8"));
 
 /* ---------- matrizes 4x4, em linha ---------- */
 
-const identidade = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-function vezes(a, b) {
-  const r = new Array(16);
-  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) r[i * 4 + j] = a[i * 4] * b[j] + a[i * 4 + 1] * b[4 + j] + a[i * 4 + 2] * b[8 + j] + a[i * 4 + 3] * b[12 + j];
-  return r;
-}
-const mover = (x, y, z) => [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1];
-function girar([gx, gy, gz]) {                   // ordem ZYX, como no editor em que os modelos são feitos
-  const [x, y, z] = [gx, gy, gz].map((g) => (g * Math.PI) / 180);
-  const cx = Math.cos(x), sx = Math.sin(x), cy = Math.cos(y), sy = Math.sin(y), cz = Math.cos(z), sz = Math.sin(z);
-  const rx = [1, 0, 0, 0, 0, cx, -sx, 0, 0, sx, cx, 0, 0, 0, 0, 1];
-  const ry = [cy, 0, sy, 0, 0, 1, 0, 0, -sy, 0, cy, 0, 0, 0, 0, 1];
-  const rz = [cz, -sz, 0, 0, sz, cz, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-  return vezes(rz, vezes(ry, rx));
-}
-/* girar em torno de um ponto */
-const emTorno = (pivo, giro) => vezes(mover(...pivo), vezes(girar(giro), mover(-pivo[0], -pivo[1], -pivo[2])));
-const aplicar = (m, [x, y, z]) => [m[0] * x + m[1] * y + m[2] * z + m[3], m[4] * x + m[5] * y + m[6] * z + m[7], m[8] * x + m[9] * y + m[10] * z + m[11]];
-
-/* ---------- da geometria Bedrock a uma lista de faces ---------- */
-
-/* O formato guarda X ao contrário do espaço em que se desenha: X e as rotações em X e Y trocam de sinal. */
-const pivoDe = (p = [0, 0, 0]) => [-p[0], p[1], p[2]];
-const giroDe = (r = [0, 0, 0]) => [-r[0], -r[1], r[2]];
-
-/* As seis faces de um cubo: os quatro cantos (em ordem de UV: alto-esq, alto-dir, baixo-dir, baixo-esq) e a normal. */
-function facesDoCubo(cubo, largura, altura) {
-  const inflar = cubo.inflate || 0;
-  const [ox, oy, oz] = cubo.origin, [w, h, d] = cubo.size;
-  const x0 = -(ox + w) - inflar, x1 = -ox + inflar, y0 = oy - inflar, y1 = oy + h + inflar, z0 = oz - inflar, z1 = oz + d + inflar;
-  // retângulos de textura por face
-  let uv;
-  if (Array.isArray(cubo.uv)) {
-    const [u, v] = cubo.uv, W = Math.floor(w), H = Math.floor(h), D = Math.floor(d);
-    uv = {
-      east: [u, v + D, D, H], north: [u + D, v + D, W, H], west: [u + D + W, v + D, D, H], south: [u + D + W + D, v + D, W, H],
-      up: [u + D, v, W, D], down: [u + D + W, v + D, W, -D]
-    };
-    if (cubo.mirror) {
-      for (const f of ["north", "south", "up", "down"]) { uv[f][0] += uv[f][2]; uv[f][2] *= -1; }
-      const leste = uv.east; uv.east = [uv.west[0] + uv.west[2], uv.west[1], -uv.west[2], uv.west[3]]; uv.west = [leste[0] + leste[2], leste[1], -leste[2], leste[3]];
-    }
-  } else if (cubo.uv) {
-    uv = {};
-    for (const [face, def] of Object.entries(cubo.uv)) if (def?.uv) uv[face] = [def.uv[0], def.uv[1], def.uv_size?.[0] ?? 0, def.uv_size?.[1] ?? 0];
-  } else return [];
-
-  // no espaço de desenho, o leste do formato (+X dele) fica em -X
-  const cantos = {
-    north: [[x1, y1, z0], [x0, y1, z0], [x0, y0, z0], [x1, y0, z0], [0, 0, -1]],
-    south: [[x0, y1, z1], [x1, y1, z1], [x1, y0, z1], [x0, y0, z1], [0, 0, 1]],
-    east: [[x0, y1, z0], [x0, y1, z1], [x0, y0, z1], [x0, y0, z0], [-1, 0, 0]],
-    west: [[x1, y1, z1], [x1, y1, z0], [x1, y0, z0], [x1, y0, z1], [1, 0, 0]],
-    up: [[x1, y1, z1], [x0, y1, z1], [x0, y1, z0], [x1, y1, z0], [0, 1, 0]],
-    down: [[x1, y0, z0], [x0, y0, z0], [x0, y0, z1], [x1, y0, z1], [0, -1, 0]]
-  };
-  // tamanho negativo espelha o cubo: com um ou três eixos espelhados ele fica do avesso e só se vê por dentro
-  const espelhado = [w < 0, h < 0, d < 0], quantos = espelhado.filter(Boolean).length;
-  const faces = [];
-  for (const [face, r] of Object.entries(uv)) {
-    if (!cantos[face] || (r[2] === 0 && r[3] === 0)) continue;
-    const [a, b, c, d2, nominal] = cantos[face];
-    const sinal = (quantos + (espelhado[nominal.findIndex((v) => v !== 0)] ? 1 : 0)) % 2 ? -1 : 1;
-    const normal = nominal.map((v) => v * sinal);
-    const [u, v, uw, vh] = r;
-    faces.push({ pontos: [a, b, c, d2], normal, uvs: [[u, v], [u + uw, v], [u + uw, v + vh], [u, v + vh]].map(([s, t]) => [s / largura, t / altura]) });
-  }
-  return faces;
-}
-
 /* pose: por osso, o que a animação parada acrescenta: { giro, mover, escala, oculto } */
 function facesDoModelo(geo, pose = {}) {
   const g = geo["minecraft:geometry"]?.[0];
@@ -131,6 +66,8 @@ function facesDoModelo(geo, pose = {}) {
     return (mundo[nome] = pai ? vezes(matriz(pai), local) : local);
   }
   const todas = [];
+  todas.cubos = [];                                  // os mesmos cubos, com a matriz de cada um: é o que vai para o navegador
+  todas.textura = [largura, altura];
   for (const o of g.bones) {
     const base = matriz(o.name);
     if (o.neverRender || some[o.name]) continue;
@@ -138,10 +75,25 @@ function facesDoModelo(geo, pose = {}) {
       if (!cubo.size || !cubo.origin) continue;
       const m = cubo.rotation ? vezes(base, emTorno(pivoDe(cubo.pivot), giroDe(cubo.rotation))) : base;
       const semTranslacao = [...m]; semTranslacao[3] = semTranslacao[7] = semTranslacao[11] = 0;
-      for (const f of facesDoCubo(cubo, largura, altura)) todas.push({ pontos: f.pontos.map((p) => aplicar(m, p)), normal: aplicar(semTranslacao, f.normal), uvs: f.uvs });
+      const faces = facesDoCubo(cubo, largura, altura);
+      if (faces.length) todas.cubos.push({ m, cubo });
+      for (const f of faces) todas.push({ pontos: f.pontos.map((p) => aplicar(m, p)), normal: aplicar(semTranslacao, f.normal), uvs: f.uvs });
     }
   }
   return todas;
+}
+
+/* O arquivo enxuto de um modelo, no formato que src/js/modelo-malha.js remonta (facesDoExportado). */
+function exportado(faces) {
+  const curto = (v) => Math.round(v * 10000) / 10000, matrizes = [], indice = new Map();
+  const c = faces.cubos.map(({ m, cubo }) => {
+    const doze = m.slice(0, 12).map(curto), chave = doze.join(",");
+    if (!indice.has(chave)) { indice.set(chave, matrizes.length); matrizes.push(doze); }
+    const uv = Array.isArray(cubo.uv) ? (cubo.mirror ? [cubo.uv[0], cubo.uv[1], 1] : [cubo.uv[0], cubo.uv[1]])
+      : Object.fromEntries(Object.entries(cubo.uv).filter(([, d]) => d?.uv).map(([face, d]) => [face, [d.uv[0], d.uv[1], d.uv_size?.[0] ?? 0, d.uv_size?.[1] ?? 0].map(curto)]));
+    return [indice.get(chave), ...cubo.origin.map(curto), ...cubo.size.map(curto), curto(cubo.inflate || 0), uv];
+  });
+  return { t: faces.textura, m: matrizes, c };
 }
 
 /* ---------- desenho ---------- */
@@ -336,10 +288,32 @@ for (const caminho of (await arquivos(join(ATIVOS, "bedrock", "pokemon", "resolv
   const sim = (v) => String(v).toLowerCase() === "true";
   const camadas = (base.layers || []).map((c) => ({ textura: typeof c.texture === "string" ? c.texture : c.texture?.frames?.[0], brilha: sim(c.emissive), vidro: sim(c.translucent), semCorte: sim(c.translucent) && !sim(c.translucent_cull) }))
     .filter((c) => c.textura).map((c) => ({ ...c, textura: join(ATIVOS, c.textura.split(":").pop()) }));
-  if (textura) escolhas[n] = { modelo: base.model.split(":").pop().replace(".geo", ""), textura: join(ATIVOS, textura.split(":").pop()), poser, camadas };
+  // a variação shiny troca a textura (e às vezes as camadas) do mesmo modelo
+  const shiny = (r.variations || []).find((v) => (v.aspects || []).length === 1 && v.aspects[0] === "shiny" && v.texture);
+  const texturaShiny = shiny && (typeof shiny.texture === "string" ? shiny.texture : shiny.texture?.frames?.[0]);
+  const camadasDe = (v) => (v.layers || []).map((c) => ({ textura: typeof c.texture === "string" ? c.texture : c.texture?.frames?.[0], nome: c.name })).filter((c) => c.textura).map((c) => ({ ...c, textura: join(ATIVOS, c.textura.split(":").pop()) }));
+  if (textura) escolhas[n] = {
+    modelo: base.model.split(":").pop().replace(".geo", ""), textura: join(ATIVOS, textura.split(":").pop()), poser, camadas,
+    shiny: texturaShiny ? { textura: join(ATIVOS, texturaShiny.split(":").pop()), camadas: camadasDe(shiny) } : null
+  };
 }
 
 /* ---------- execução ---------- */
+
+/* A textura como vai para o navegador: a de base com as camadas do mod assentadas por cima. Onde a base é
+ * vazia e a camada é translúcida (a gelatina do Solosis), o ponto continua translúcido, e o visor o desenha assim. */
+async function composta(base, camadas) {
+  // a textura de base é recortada, não translúcida: no jogo, ponto com alguma opacidade aparece inteiro e o resto some
+  const { data, info } = await sharp(base).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let i = 3; i < data.length; i += 4) data[i] = data[i] >= 26 ? 255 : 0;
+  const { width, height } = info, recortada = sharp(data, { raw: { width, height, channels: 4 } });
+  const por = [];
+  for (const c of camadas) if (existsSync(c.textura)) por.push({ input: await sharp(c.textura).ensureAlpha().resize(width, height, { kernel: "nearest", fit: "fill" }).png().toBuffer() });
+  return recortada.composite(por).png({ compressionLevel: 9 }).toBuffer();
+}
+const TRES_D = args.includes("--3d");
+if (TRES_D) args.splice(args.indexOf("--3d"), 1);
+const SAIDA_3D = join(RAIZ, "src", "modelos3d"), comShiny = [];
 
 const pedidos = args.map(Number).filter(Boolean);
 const numeros = (pedidos.length ? pedidos : Object.keys(escolhas).map(Number)).sort((a, b) => a - b);
@@ -351,6 +325,18 @@ for (const n of numeros) {
     if (!e || !modelos[e.modelo] || !existsSync(e.textura)) throw new Error(e ? `sem ${modelos[e.modelo] ? "textura" : "modelo"}` : "sem resolvedor");
     const faces = facesDoModelo(await json(modelos[e.modelo]), await poseDeExibicao(e.poser));
     if (!faces.length) throw new Error("modelo sem cubos");
+    if (TRES_D) {
+      await mkdir(SAIDA_3D, { recursive: true });
+      await writeFile(join(SAIDA_3D, `${n}.json`), JSON.stringify(exportado(faces)));
+      await writeFile(join(SAIDA_3D, `${n}.png`), await composta(e.textura, e.camadas));
+      if (e.shiny && existsSync(e.shiny.textura)) {
+        // as camadas da variação shiny, quando ela tem as dela; senão, as de base (brilhos e olhos são os mesmos)
+        await writeFile(join(SAIDA_3D, `${n}-shiny.png`), await composta(e.shiny.textura, e.shiny.camadas.length ? e.shiny.camadas : e.camadas));
+        comShiny.push(n);
+      }
+      feitos.push(n);
+      continue;
+    }
     const ler = (c) => sharp(c).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     const texturas = [await ler(e.textura)];
     for (const c of e.camadas) if (existsSync(c.textura)) texturas.push({ ...(await ler(c.textura)), brilha: c.brilha, vidro: c.vidro, semCorte: c.semCorte });
@@ -364,10 +350,11 @@ for (const n of numeros) {
   }
 }
 // o build só oferece o modelo das espécies que deram certo
-if (!pedidos.length) await writeFile(join(RAIZ, "dados", "modelos.json"), JSON.stringify(feitos), "utf8");
+if (!pedidos.length && !TRES_D) await writeFile(join(RAIZ, "dados", "modelos.json"), JSON.stringify(feitos), "utf8");
+if (!pedidos.length && TRES_D) await writeFile(join(RAIZ, "dados", "modelos3d.json"), JSON.stringify({ modelos: feitos, shiny: comShiny }), "utf8");
 if (PREVIA && previas.length) {
   const colunas = Math.min(8, previas.length), linhas = Math.ceil(previas.length / colunas);
   await sharp({ create: { width: colunas * 204, height: linhas * 204, channels: 3, background: "#C6C6C6" } })
     .composite(previas.map((input, i) => ({ input, left: (i % colunas) * 204 + 2, top: Math.floor(i / colunas) * 204 + 2 }))).png().toFile(PREVIA);
 }
-console.log(`Modelos: ${feitos.length} desenhados em src/arte/modelo/${falhas.length ? `; ${falhas.length} sem desenho: ${falhas.slice(0, 30).join(", ")}${falhas.length > 30 ? "..." : ""}` : ""}`);
+console.log(`Modelos: ${feitos.length} ${TRES_D ? `exportados para src/modelos3d/ (${comShiny.length} com shiny)` : "desenhados em src/arte/modelo/"}${falhas.length ? `; ${falhas.length} sem desenho: ${falhas.slice(0, 30).join(", ")}${falhas.length > 30 ? "..." : ""}` : ""}`);
