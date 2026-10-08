@@ -1529,6 +1529,48 @@ a.slot:hover { background: #B4B4D8; }
   .duelo-nome { font-size: 0.78rem; }
 }
 
+/* ---------- quiz diário ---------- */
+
+.quiz { padding: var(--e3) var(--margem) var(--e7); max-width: 76rem; }
+.quiz-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--e3); padding-bottom: var(--e3); border-bottom: 1.5px solid currentColor; }
+.quiz-modos { display: flex; gap: 8px; }
+.quiz-modos .ficha { cursor: pointer; font: inherit; font-size: var(--t-pequeno); font-weight: 600; }
+.quiz-modos .ficha[aria-pressed="true"] { background: var(--tinta); color: var(--mar); border-color: var(--tinta); }
+.quiz-dia { display: flex; flex-wrap: wrap; gap: 4px var(--e3); font-size: var(--t-pequeno); }
+.quiz-dia strong { font-weight: 800; font-stretch: 118%; }
+.quiz-gravura { width: min(100%, 420px); margin: var(--e4) auto 0; aspect-ratio: 1; }
+.quiz-gravura canvas { display: block; width: 100%; height: 100%; }
+.quiz-palpite { display: flex; flex-wrap: wrap; align-items: end; gap: var(--e3); margin-top: var(--e4); }
+.quiz-palpite[hidden] { display: none; }
+.quiz-palpite .dex-busca { flex: 1 1 16rem; }
+.quiz-aviso { flex-basis: 100%; min-height: 1.4em; font-size: var(--t-pequeno); font-weight: 600; color: var(--rota); }
+.quiz-fim { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--e4); align-items: center; margin-top: var(--e4); padding: var(--e3); background: var(--papel); border: 1.5px solid var(--tinta); }
+.quiz-fim[hidden] { display: none; }
+.quiz-fim img { width: min(34vw, 160px); height: auto; }
+.quiz-fim h2 { font-size: clamp(1.4rem, 2.8vw, 2.2rem); font-weight: 800; font-stretch: 114%; letter-spacing: -0.02em; line-height: 1.05; }
+.quiz-fim p { margin-top: var(--e2); }
+.quiz-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e3); }
+.quiz-proximo { font-size: var(--t-pequeno); color: var(--tinta-suave); }
+.quiz-texto { width: 100%; margin-top: var(--e2); font: inherit; font-size: var(--t-pequeno); }
+/* position: relative para os textos de leitor de tela (posicionados fora do fluxo) rolarem junto com a tabela, em vez de alargar a página */
+.quiz-tabela-caixa { position: relative; max-width: calc(100vw - 2 * var(--margem)); margin-top: var(--e4); overflow-x: auto; }
+.quiz-tabela { width: 100%; min-width: 46rem; table-layout: fixed; border-collapse: separate; border-spacing: 4px; font-size: var(--t-pequeno); }
+.quiz-tabela thead th { padding: 4px 6px; font-size: 0.78rem; font-weight: 660; text-align: center; color: var(--tinta-suave); }
+.quiz-tabela thead th:first-child, .quiz-tabela tbody th { text-align: left; }
+.quiz-tabela thead th:first-child { width: 24%; }
+.quiz-tabela tbody th { font-weight: 700; }
+.quiz-quem { display: flex; align-items: center; gap: 8px; }
+.pista { position: relative; padding: 10px 4px; text-align: center; font-weight: 600; border: 1.5px solid var(--tinta); overflow-wrap: anywhere; }
+.pista-certo { background: var(--tinta); color: var(--mar); }
+.pista-parcial { background: repeating-linear-gradient(135deg, transparent 0 5px, color-mix(in srgb, var(--tinta) 34%, transparent) 5px 7px); }
+.pista-seta { margin-left: 4px; font-weight: 800; color: var(--rota); }
+.quiz-palpites { display: flex; flex-wrap: wrap; gap: 8px; margin-top: var(--e3); justify-content: center; }
+.quiz-palpites li { padding: 6px 12px; border: 1.5px solid var(--tinta); font-size: var(--t-pequeno); font-weight: 600; }
+.quiz-palpites .erro { text-decoration: line-through; text-decoration-color: var(--rota); text-decoration-thickness: 2px; opacity: 0.75; }
+.quiz-palpites .acerto { background: var(--tinta); color: var(--mar); }
+.quiz .nota-editorial { margin-top: var(--e4); max-width: 60ch; }
+@media (max-width: 560px) { .quiz-fim { grid-template-columns: minmax(0, 1fr); justify-items: start; } }
+
 /* ---------- movimento reduzido ---------- */
 
 @media (prefers-reduced-motion: reduce) {

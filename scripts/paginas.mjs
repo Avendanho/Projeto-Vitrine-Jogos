@@ -71,7 +71,8 @@ export const EDICOES = {
       { href: "/regioes/", texto: "Regiões" },
       { href: "/linha-do-tempo/", texto: "Linha do tempo" },
       { href: "/comparar/", texto: "Comparar" },
-      { href: "/desafios/", texto: "Desafios" }
+      { href: "/desafios/", texto: "Desafios" },
+      { href: "/quiz/", texto: "Quiz" }
     ],
     avisos: [
       "Projeto de fã, sem fins lucrativos e sem vínculo com Nintendo, Game Freak, Creatures ou The Pokémon Company. Pokémon e os nomes dos jogos pertencem aos seus donos.",

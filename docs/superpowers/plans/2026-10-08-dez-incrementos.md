@@ -198,6 +198,15 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 - [ ] Implementar, roteiro de navegador (abrir por atalho e por botão, navegar por teclado, fechar com Esc, celular).
 - [ ] Atualizar `scripts/verificar-paginas.mjs` com as páginas novas, rodar `npm run verificar`, atualizar BRIEF e README. Commit.
 
+### Tarefa 11: conferência geral e arrumação do repositório (pedido feito durante a execução)
+
+**Arquivos:** os que a conferência apontar; `README.md`, `.gitignore`, `package.json`.
+
+- [ ] Rodar tudo: `npm test`, todos os roteiros de `testes/navegador/`, `npm run verificar`, e ler as folhas de contato das páginas novas em desktop e celular.
+- [ ] Listar o que não é mais usado por nenhuma página nem script (arte em pixel das espécies que saíram, scripts e dados órfãos, restos de rodadas anteriores) e remover.
+- [ ] README: seções na ordem de quem chega (o que é, como rodar, como testar, como regenerar dados, créditos), com as ferramentas novas e a árvore de pastas atual.
+- [ ] Build a partir de um clone limpo, sem dependências, para garantir que nada removido fazia falta. Commit.
+
 ---
 
 ## Publicação
