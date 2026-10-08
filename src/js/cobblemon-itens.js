@@ -10,7 +10,7 @@ const vazio = secao.querySelector("[data-dex-vazio]");
 
 function aplicar() {
   const texto = semAcento(campo.value);
-  let visiveis = 0;
+  let visiveis = 0, foraVisiveis = 0;
   for (const grupo of grupos) {
     let noGrupo = 0;
     for (const li of grupo.itens) {
@@ -18,11 +18,12 @@ function aplicar() {
       if (!li.hidden) noGrupo++;
     }
     grupo.el.hidden = noGrupo === 0;
-    visiveis += noGrupo;
+    if (!grupo.el.classList.contains("cb-grupo-jogo")) visiveis += noGrupo;      // a contagem é dos itens do mod; os do Minecraft só acompanham a busca
+    else foraVisiveis = noGrupo;
   }
   contagem.textContent = visiveis;
   rotulo.textContent = visiveis === 1 ? "item" : "itens";
-  vazio.hidden = visiveis > 0;
+  vazio.hidden = visiveis + foraVisiveis > 0;
 }
 campo.addEventListener("input", aplicar);
 secao.querySelector("form").addEventListener("submit", (e) => e.preventDefault());

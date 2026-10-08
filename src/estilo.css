@@ -1338,6 +1338,10 @@ a.slot:hover { background: #B4B4D8; }
 .cb-itens-lista strong { font-family: var(--pixel); font-size: 1.14rem; font-weight: 600; }
 .cb-itens-lista span { font-size: var(--t-pequeno); line-height: 1.4; }
 .cb-receita { color: var(--tinta-suave); }
+.cb-deixado { display: grid; gap: 4px; margin-top: 6px; }
+.cb-deixado-rotulo { font-size: 0.78rem; color: var(--tinta-suave); }
+.cb-deixado .slot img { width: 40px; height: 40px; }
+.cb-grupo-jogo .cb-itens-lista li { grid-template-columns: minmax(0, 1fr); }
 
 /* estruturas */
 .cb-estruturas > section + section { margin-top: var(--e6); }

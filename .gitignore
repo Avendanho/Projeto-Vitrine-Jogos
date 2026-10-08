@@ -4,3 +4,4 @@ verificacao/
 .vercel/
 .DS_Store
 *.log
+.mod/

@@ -17,7 +17,9 @@
     "maquetes": "node scripts/maquetes.mjs",
     "pokedex": "node scripts/pokedex.mjs && node scripts/fichas.mjs",
     "cartas": "node scripts/cartas.mjs",
-    "verificar": "node scripts/verificar-paginas.mjs"
+    "verificar": "node scripts/verificar-paginas.mjs",
+    "mod": "node scripts/baixar-mod.mjs",
+    "test": "node --test testes/*.test.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.50.0",

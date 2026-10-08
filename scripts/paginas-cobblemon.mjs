@@ -66,6 +66,12 @@ const mais = (lista, chave) => { const m = new Map(); for (const x of lista) for
 const linhasDe = (e) => e.spawns;
 const soSe = (teste) => NO_MOD.filter((e) => e.spawns.length && e.spawns.every(teste));
 const POR_AMBIENTE = Object.fromEntries(C.ambientes.map((a) => [a.id, NO_MOD.filter((e) => e.ambientes.includes(a.id))]));
+/* Quem deixa cair cada item: o avesso das quedas de cada espécie, pelo nome do item em português. */
+export function quemDeixa() {
+  const mapa = new Map();
+  for (const e of NO_MOD) for (const [nome] of e.drops) { if (!mapa.has(nome)) mapa.set(nome, []); mapa.get(nome).push(e.n); }
+  return mapa;
+}
 const QUEDAS = mais(NO_MOD.flatMap((e) => e.drops.map((d) => d[0])), (x) => x);
 const TROCAS = NO_MOD.filter((e) => e.evolui.some((v) => v.como.startsWith("por troca"))).length;
 const NUMEROS = {
@@ -313,27 +319,38 @@ export function paginaCobblemonItens() {
     bagas: `São ${C.contagens.bagas} bagas, cada uma com o seu tempo de crescimento.`
   };
   const grupos = C.grupos.map((g) => ({ ...g, itens: C.itens.filter((i) => i.grupo === g.id) })).filter((g) => g.itens.length);
+  const deixam = quemDeixa(), doMod = new Set(C.itens.map((i) => i.nome));
+  const nomes = (ns) => semAcento(ns.map((n) => C.especies[n].nome).join(" "));
+  const deixado = (ns) => `<span class="cb-deixado"><span class="cb-deixado-rotulo">Deixado por ${ns.length === 1 ? "uma espécie" : `${ns.length} espécies`}</span>${fileira(ns, 10)}</span>`;
+  const doJogo = [...deixam].filter(([nome]) => !doMod.has(nome)).sort((a, b) => a[0].localeCompare(b[0], "pt-BR"));
   const corpo = `
 <section class="cabecalho">
   <h1>Itens</h1>
-  <p class="prosa">${NUMEROS.itens} itens e blocos do Cobblemon ${esc(C.versao)}, com o ícone, o nome e a descrição do próprio mod. Onde há receita de bancada, ela vem junto. Aponte para um item e ele gira, como quando cai no chão.</p>
+  <p class="prosa">${NUMEROS.itens} itens e blocos do Cobblemon ${esc(C.versao)}, com o ícone, o nome e a descrição do próprio mod. Onde há receita de bancada, ela vem junto. Cada item mostra também os Pokémon que o deixam cair, e a busca acha por eles. Aponte para um item e ele gira, como quando cai no chão.</p>
 </section>
 <section class="cb-itens" data-cb-itens>
   <form class="dex-controles" role="search" aria-label="Procurar item">
     <div class="dex-busca">
       <label for="item-procurar">Procurar item</label>
-      <input id="item-procurar" type="search" placeholder="Nome ou efeito" autocomplete="off" spellcheck="false">
+      <input id="item-procurar" type="search" placeholder="Nome, efeito ou Pokémon que deixa cair" autocomplete="off" spellcheck="false">
     </div>
-    <nav class="filtro-opcoes" aria-label="Grupos">${grupos.map((g) => `<a class="ficha" href="#g-${g.id}">${esc(g.nome)} <span class="dex-conta">${g.itens.length}</span></a>`).join("")}</nav>
+    <nav class="filtro-opcoes" aria-label="Grupos">${grupos.map((g) => `<a class="ficha" href="#g-${g.id}">${esc(g.nome)} <span class="dex-conta">${g.itens.length}</span></a>`).join("")}<a class="ficha" href="#g-minecraft">Do Minecraft <span class="dex-conta">${doJogo.length}</span></a></nav>
     <p class="dex-resumo" aria-live="polite"><strong data-dex-contagem>${NUMEROS.itens}</strong> <span data-dex-rotulo>itens</span></p>
   </form>
   ${grupos.map((g) => `<section class="cb-grupo" id="g-${g.id}" aria-labelledby="t-${g.id}">
     <h2 id="t-${g.id}">${esc(g.nome)}</h2>
     ${NOTAS[g.id] ? `<p class="nota-editorial">${NOTAS[g.id]}</p>` : ""}
     <ul class="cb-itens-lista">
-      ${g.itens.map((i) => `<li data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>` : ""}</div></li>`).join("\n      ")}
+      ${g.itens.map((i) => `<li data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>` : ""}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
     </ul>
   </section>`).join("\n  ")}
+  <section class="cb-grupo cb-grupo-jogo" id="g-minecraft" aria-labelledby="t-minecraft">
+    <h2 id="t-minecraft">Itens do Minecraft que os Pokémon deixam cair</h2>
+    <p class="nota-editorial">Não são itens do mod, mas saem dos Pokémon dele. Servem para saber quem procurar quando falta pena, osso ou pólvora.</p>
+    <ul class="cb-itens-lista">
+      ${doJogo.map(([nome, ns]) => `<li data-fora data-busca="${esc(semAcento(nome))} ${esc(nomes(ns))}"><div class="cb-item-texto"><strong>${esc(nome)}</strong>${deixado(ns)}</div></li>`).join("\n      ")}
+    </ul>
+  </section>
   <p class="vazio" data-dex-vazio hidden>Nenhum item com esse nome ou efeito.</p>
 </section>`;
   return moldura({

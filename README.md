@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://pokeatlas-swart.vercel.app/" target="_blank">
+  <a href="https://pokeatlas-eight.vercel.app/" target="_blank">
     <img src="https://img.shields.io/badge/Acessar%20Pok%C3%A9Atlas-pokeatlas--swart.vercel.app-2ea44f?style=for-the-badge&logo=vercel&logoColor=white" alt="Deploy Vercel" />
   </a>
 </p>
@@ -46,7 +46,7 @@ O **PokéAtlas** é uma experiência interativa e editorial criada para acolher 
 
 Em vez de uma wiki enciclopédica tradicional ou uma vitrine de e-commerce, o PokéAtlas adota o conceito de um **caderno de campo naturalista e atlas de expedição náutica**. Cada jogo ganha uma identidade topográfica própria que traduz sua proposta de experiência em relevo, curvas de nível e altitude.
 
-🔗 **Acesse o site em produção:** [https://pokeatlas-swart.vercel.app/](https://pokeatlas-swart.vercel.app/)
+🔗 **Acesse o site em produção:** [https://pokeatlas-eight.vercel.app/](https://pokeatlas-eight.vercel.app/)
 
 ---
 
@@ -259,7 +259,7 @@ O projeto é configurado nativamente para publicação contínua na **Vercel** a
 
 Desenvolvido por **Bernardo Avendanho**  
 - **GitHub:** [@Avendanho](https://github.com/Avendanho)  
-- **Projeto Online:** [https://pokeatlas-swart.vercel.app/](https://pokeatlas-swart.vercel.app/)
+- **Projeto Online:** [https://pokeatlas-eight.vercel.app/](https://pokeatlas-eight.vercel.app/)
 
 ---
 <p align="center">
