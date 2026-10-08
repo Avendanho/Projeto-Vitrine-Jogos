@@ -51,8 +51,21 @@ function bancada(item) {
   const r = item.receita;
   if (!r?.grade) return "";
   return `<span class="bancada" role="img" aria-label="Receita de bancada${r.forma === "livre" ? ", em qualquer posição" : ""}: ${esc(enumerar(r.ingredientes))}${r.rende > 1 ? `. Rende ${r.rende}` : ""}">
-    <span class="bancada-grade">${r.grade.map(casaDaBancada).join("")}</span><span class="bancada-seta"></span><span class="bancada-saida">${icone(item.id)}${r.rende > 1 ? `<span class="bancada-rende">${r.rende}</span>` : ""}</span>${r.forma === "livre" ? '<span class="bancada-nota">em qualquer posição</span>' : ""}
+    <span class="bancada-grade">${r.grade.map(casaDaBancada).join("")}</span><span class="bancada-seta"></span><span class="bancada-saida">${icone(item.id)}${r.rende > 1 ? `<span class="bancada-rende">${r.rende}</span>` : ""}</span>${r.forma === "livre" ? '<span class="bancada-nota">Em qualquer posição</span>' : ""}
   </span>`;
+}
+/* As receitas das outras estações (panela, suporte de poções, fornalha, ferraria, cortador): o texto, para busca e
+ * leitor de tela, e o desenho, no mesmo formato da bancada. */
+function estacoes(item) {
+  return (item.outras || []).map((o) => {
+    const casas = o.grade ?? o.entradas, nomes = [...new Set(casas.filter(Boolean).map((c) => c[1]))];
+    const notas = [o.forma === "livre" ? "em qualquer posição" : "", o.tempero ? `aceita tempero: ${o.tempero.toLowerCase()}` : "", o.mais ? `há mais ${o.mais === 1 ? "uma receita" : `${o.mais} receitas`} nesta estação` : ""].filter(Boolean);
+    return `<span class="cb-receita">${esc(o.estacao)}: ${esc(enumerar(nomes))}.${o.rende > 1 ? ` Rende ${o.rende}.` : ""}</span>
+    <span class="bancada" role="img" aria-label="${esc(o.estacao)}: ${esc(enumerar(nomes))}${o.rende > 1 ? `. Rende ${o.rende}` : ""}">
+      <span class="bancada-titulo">${esc(o.estacao)}</span>
+      <span class="${o.grade ? "bancada-grade" : "bancada-fila"}">${casas.map(casaDaBancada).join("")}</span><span class="bancada-seta"></span><span class="bancada-saida">${icone(item.id)}${o.rende > 1 ? `<span class="bancada-rende">${o.rende}</span>` : ""}</span>${notas.length ? `<span class="bancada-nota">${esc(maiuscula(notas.join("; ")))}</span>` : ""}
+    </span>`;
+  }).join("");
 }
 /* Uma maquete de blocos: a imagem parada e o botão que a troca pelo modelo que gira (src/js/maquete.js). */
 function maquete(info, legenda, { auto = false, preguica = true } = {}) {
@@ -343,7 +356,7 @@ export function paginaCobblemonItens() {
   const corpo = `
 <section class="cabecalho">
   <h1>Itens</h1>
-  <p class="prosa">${NUMEROS.itens} itens e blocos do Cobblemon ${esc(C.versao)}, com o ícone, o nome e a descrição do próprio mod. Onde há receita, ela vem desenhada como na bancada do jogo; passe o ponteiro numa casa para ver o nome do ingrediente. Cada item mostra também os Pokémon que o deixam cair, e a busca acha por eles. Aponte para um item e ele gira, como quando cai no chão.</p>
+  <p class="prosa">${NUMEROS.itens} itens e blocos do Cobblemon ${esc(C.versao)}, com o ícone, o nome e a descrição do próprio mod. Onde há receita, ela vem desenhada como no jogo, seja de bancada, de panela, de suporte de poções ou de fornalha; passe o ponteiro numa casa para ver o nome do ingrediente. Cada item mostra também os Pokémon que o deixam cair, e a busca acha por eles. Aponte para um item e ele gira, como quando cai no chão.</p>
 </section>
 <section class="cb-itens" data-cb-itens>
   <form class="dex-controles" role="search" aria-label="Procurar item">
@@ -358,7 +371,7 @@ export function paginaCobblemonItens() {
     <h2 id="t-${g.id}">${esc(g.nome)}</h2>
     ${NOTAS[g.id] ? `<p class="nota-editorial">${NOTAS[g.id]}</p>` : ""}
     <ul class="cb-itens-lista">
-      ${g.itens.map((i) => `<li id="item-${i.id}" data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>${bancada(i)}` : ""}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
+      ${g.itens.map((i) => `<li id="item-${i.id}" data-busca="${esc(semAcento(`${i.nome} ${i.dica ?? ""} ${(i.outras ?? []).map((o) => o.estacao).join(" ")}`))}${deixam.has(i.nome) ? ` ${esc(nomes(deixam.get(i.nome)))}` : ""}">${icone(i.id)}<div class="cb-item-texto"><strong>${esc(i.nome)}</strong>${i.dica ? `<span>${esc(i.dica)}</span>` : ""}${i.receita ? `<span class="cb-receita">Feito com ${esc(enumerar(i.receita.ingredientes))}.${i.receita.rende > 1 ? ` Rende ${i.receita.rende}.` : ""}</span>${bancada(i)}` : ""}${estacoes(i)}${deixam.has(i.nome) ? deixado(deixam.get(i.nome)) : ""}</div></li>`).join("\n      ")}
     </ul>
   </section>`).join("\n  ")}
   <section class="cb-grupo cb-grupo-jogo" id="g-minecraft" aria-labelledby="t-minecraft">

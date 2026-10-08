@@ -42,3 +42,23 @@ test("toda receita cabe na bancada e toda casa tem nome e figura", () => {
   const pc = COBBLEMON.itens.find((i) => i.id === "pc").receita;
   assert.ok(pc.ingredientes.includes("Lingote de Ferro"), "o PC leva ferro: as etiquetas de convenção são resolvidas");
 });
+
+test("as receitas das outras estações também têm nome e figura em toda casa", () => {
+  const comOutras = COBBLEMON.itens.filter((i) => i.outras);
+  assert.ok(comOutras.length >= 100, `${comOutras.length} itens`);
+  const estacoes = new Set();
+  for (const item of comOutras) for (const o of item.outras) {
+    estacoes.add(o.estacao);
+    const casas = (o.grade ?? o.entradas).filter(Boolean);
+    assert.ok(casas.length > 0 && typeof o.estacao === "string" && o.estacao.length > 3, item.id);
+    if (o.grade) assert.equal(o.grade.length, 9, item.id);
+    for (const [id, nome] of casas) {
+      const [espaco, curto] = id.split(":");
+      assert.ok(nome.length > 1, `${item.id}: casa sem nome`);
+      assert.ok((espaco === "cobblemon" && (curto in ITENS_ARTE.itens || ITENS_ARTE.blocos.includes(curto))) || id in ITENS_ARTE.ingredientes, `${item.id}: ${id} sem figura`);
+    }
+  }
+  assert.ok([...estacoes].some((e) => e.includes("Panela")) && [...estacoes].some((e) => e.includes("Poções")) && [...estacoes].some((e) => e.includes("Fornalha")));
+  const semNada = COBBLEMON.itens.filter((i) => !i.receita && !i.outras).length;
+  assert.ok(semNada < 200, `${semNada} itens continuam sem receita: são os que só se acham, não se fabricam`);
+});

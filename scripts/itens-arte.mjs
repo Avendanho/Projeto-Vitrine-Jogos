@@ -175,7 +175,8 @@ async function emTinta(arquivo) {
   return sharp(data, { raw: { width: CELULA, height: CELULA, channels: 4 } }).png().toBuffer();
 }
 const COLUNAS_ING = 16, ingredientes = {}, pecasIng = [], semFigura = [];
-const usados = [...new Set(itens.flatMap((i) => (i.receita?.grade ?? []).filter(Boolean).map((c) => c[0])))].sort();
+const casasDe = (i) => [...(i.receita?.grade ?? []), ...(i.outras ?? []).flatMap((o) => o.grade ?? o.entradas)].filter(Boolean);
+const usados = [...new Set(itens.flatMap((i) => casasDe(i).map((c) => c[0])))].sort();
 for (const id of usados) {
   const [espaco, nome] = partes(id);
   if (espaco === "cobblemon" && (nome in posicoes || blocos.includes(nome))) continue;      // já tem ícone no atlas de itens

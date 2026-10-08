@@ -522,22 +522,24 @@ async function itensDaEtiqueta(id, nivel = 0) {
 /* Receitas de bancada: item -> a grade 3×3 como aparece no jogo, os ingredientes por nome e quanto rende.
  * Cada casa da grade é null (vazia) ou [id do item que aparece nela, nome a mostrar]. Para etiquetas, o item é o
  * primeiro da etiqueta e o nome é o do grupo. */
+/* Uma casa de receita: null (vazia) ou [id do item que aparece nela, nome a mostrar]. */
+async function casa(bruto) {
+  const ing = Array.isArray(bruto) ? bruto[0] : bruto;                 // com alternativas, vale a primeira
+  if (ing?.item) return nomeDoItem(ing.item) ? [ing.item, nomeDoItem(ing.item)] : null;
+  if (!ing?.tag) return null;
+  const curto = ing.tag.replace(":", ".").replace(/\//g, ".");
+  const membros = await itensDaEtiqueta(ing.tag), representante = membros.find((m) => nomeDoItem(m));
+  if (!representante) { etiquetasSemItem.add(ing.tag); return null; }
+  // etiqueta com nome na tradução usa o nome; sem nome e com vários itens, vale "o primeiro ou equivalente"
+  const grupo = texto(`tag.item.${curto}`) ?? MC[`tag.item.${curto}`] ?? (membros.length > 1 ? `${nomeDoItem(representante)} ou equivalente` : null);
+  return [representante, grupo ?? nomeDoItem(representante)];
+}
+
 const receitas = {};
 for (const caminho of await arquivos(join(DADOS, "recipe"))) {
   const r = await json(caminho);
   const feito = r.result?.id ?? r.result?.item;
   if (!feito || !/crafting_(shaped|shapeless)/.test(r.type || "") || receitas[feito]) continue;
-  const casa = async (bruto) => {
-    const ing = Array.isArray(bruto) ? bruto[0] : bruto;                 // com alternativas, vale a primeira
-    if (ing?.item) return nomeDoItem(ing.item) ? [ing.item, nomeDoItem(ing.item)] : null;
-    if (!ing?.tag) return null;
-    const curto = ing.tag.replace(":", ".").replace(/\//g, ".");
-    const membros = await itensDaEtiqueta(ing.tag), representante = membros.find((m) => nomeDoItem(m));
-    if (!representante) { etiquetasSemItem.add(ing.tag); return null; }
-    // etiqueta com nome na tradução usa o nome; sem nome e com vários itens, vale "o primeiro ou equivalente"
-    const grupo = texto(`tag.item.${curto}`) ?? MC[`tag.item.${curto}`] ?? (membros.length > 1 ? `${nomeDoItem(representante)} ou equivalente` : null);
-    return [representante, grupo ?? nomeDoItem(representante)];
-  };
   const grade = Array(9).fill(null);
   if (r.pattern) {
     for (let y = 0; y < Math.min(3, r.pattern.length); y++) for (let x = 0; x < Math.min(3, r.pattern[y].length); x++) {
@@ -548,6 +550,49 @@ for (const caminho of await arquivos(join(DADOS, "recipe"))) {
   const nomes = [...new Set(grade.filter(Boolean).map(([, nome]) => nome))];
   if (nomes.length) receitas[feito] = { ingredientes: nomes, rende: r.result.count ?? 1, forma: r.pattern ? "grade" : "livre", grade };
 }
+/* As receitas que não são de bancada: panela, suporte de poções, fornalha e parentes, ferraria e cortador.
+ * item -> lista de { estacao, forma ("grade", "livre" ou "fila"), grade ou entradas, rende, tempero, mais }.
+ * Quando há várias receitas do mesmo item na mesma estação, vale a primeira e `mais` diz quantas ficaram de fora. */
+const ESTACAO = {
+  "cobblemon:cooking_pot": "panela", "cobblemon:cooking_pot_shapeless": "panela", "cobblemon:brewing_stand": "pocoes",
+  "minecraft:smelting": "fogo", "minecraft:blasting": "fogo", "minecraft:smoking": "fogo", "minecraft:campfire_cooking": "fogo",
+  "minecraft:smithing_transform": "ferraria", "minecraft:stonecutting": "cortador"
+};
+const NOME_DA_ESTACAO = {
+  panela: texto("cobblemon.container.campfire_pot"), pocoes: MC["block.minecraft.brewing_stand"], ferraria: MC["block.minecraft.smithing_table"], cortador: MC["block.minecraft.stonecutter"],
+  "minecraft:smelting": MC["block.minecraft.furnace"], "minecraft:blasting": MC["block.minecraft.blast_furnace"], "minecraft:smoking": MC["block.minecraft.smoker"], "minecraft:campfire_cooking": MC["block.minecraft.campfire"]
+};
+const outras = {};
+for (const caminho of await arquivos(join(DADOS, "recipe"))) {
+  const r = await json(caminho), feito = r.result?.id ?? r.result?.item, familia = ESTACAO[r.type];
+  if (!feito || !familia) continue;
+  const lista = (outras[feito] ??= []);
+  let entrada = lista.find((x) => x.familia === familia);
+  const fogo = familia === "fogo" ? NOME_DA_ESTACAO[r.type] : null;
+  if (entrada) {
+    // mesma estação: no fogo, fornalha e alto-forno com o mesmo ingrediente são a mesma receita em dois lugares
+    const mesmo = familia === "fogo" && JSON.stringify(await casa(r.ingredient)) === JSON.stringify(entrada.entradas[0]);
+    if (fogo && !entrada.onde.includes(fogo)) entrada.onde.push(fogo);
+    if (!mesmo) entrada.mais++;
+    continue;
+  }
+  entrada = { familia, onde: [fogo ?? NOME_DA_ESTACAO[familia]], rende: r.result.count ?? 1, mais: 0 };
+  if (familia === "panela") {
+    entrada.grade = Array(9).fill(null);
+    if (r.pattern) { for (let y = 0; y < Math.min(3, r.pattern.length); y++) for (let x = 0; x < Math.min(3, r.pattern[y].length); x++) { const letra = r.pattern[y][x]; if (letra !== " " && r.key[letra]) entrada.grade[y * 3 + x] = await casa(r.key[letra]); } }
+    else for (const [k, ing] of (r.ingredients || []).slice(0, 9).entries()) entrada.grade[k] = await casa(ing);
+    entrada.forma = r.pattern ? "grade" : "livre";
+    const tempero = r.seasoningTag && r.seasoningTag !== "cobblemon:empty" ? texto(`tag.item.${r.seasoningTag.replace(":", ".").replace(/\//g, ".")}`) : null;
+    if (tempero) entrada.tempero = tempero;
+  } else {
+    const brutos = familia === "pocoes" ? [r.bottle, r.input] : familia === "ferraria" ? [r.template, r.base, r.addition] : [r.ingredient];
+    entrada.entradas = (await Promise.all(brutos.map(casa))).filter(Boolean);
+    entrada.forma = "fila";
+  }
+  if ((entrada.grade ?? entrada.entradas).some(Boolean)) lista.push(entrada);
+}
+for (const lista of Object.values(outras)) for (const e of lista) { e.estacao = e.onde.filter(Boolean).join(" ou "); delete e.onde; delete e.familia; if (!e.mais) delete e.mais; }
+
 if (etiquetasSemItem.size) console.warn(`Etiquetas de receita sem item conhecido (a casa ficou vazia): ${[...etiquetasSemItem].join(", ")}`);
 
 const itens = [];
@@ -558,7 +603,7 @@ for (const id of idsDeItem) {
   const nome = texto(`item.cobblemon.${curto}`) ?? texto(`block.cobblemon.${curto}`);
   if (!nome || nome.includes("%")) continue;      // nomes com lacuna são montados pelo jogo na hora
   const dica = ["tooltip", "tooltip_1", "tooltip1"].map((t) => texto(`item.cobblemon.${curto}.${t}`) ?? texto(`block.cobblemon.${curto}.${t}`)).find(Boolean) ?? null;
-  itens.push({ id: curto, nome, dica, grupo: grupoDe[id] ?? "outros", receita: receitas[id] ?? null });
+  itens.push({ id: curto, nome, dica, grupo: grupoDe[id] ?? "outros", receita: receitas[id] ?? null, ...(outras[id]?.length ? { outras: outras[id] } : {}) });
 }
 itens.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 // o mesmo nome no mesmo grupo (as seis cores de Pokédex, por exemplo) aparece uma vez só
