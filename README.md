@@ -98,18 +98,26 @@ Uma régua cronológica abrangendo de **1996 a 2027**, separada por plataformas/
 
 ### 6. 🎲 Desafios (`/desafios/` e `/desafios/<desafio>/`)
 - **Dez maneiras alternativas de jogar**, uma para cada região, cada uma com sinopse, regras, condição de vitória e de derrota (a primeira é "Os Super Woopers").
+- **Diário de desafio** (`/diario/`): acompanha uma campanha (Nuzlocke, um desafio do atlas ou regras suas), com capturas por rota, time, caixa, quem caiu e insígnias. Fica guardado no navegador e exporta para arquivo. Cada desafio e a roleta abrem o diário já com as regras anotadas.
 - **Roleta de desafios:** sorteia um jogo, uma regra para o time, complicações e uma condição de vitória. As espécies e os tipos sorteados existem na Pokédex do jogo sorteado, e cada sorteio tem link próprio (`?roleta=...`), que reproduz o mesmo desafio.
 
 ### 7. ⛏️ Edição Cobblemon (`/cobblemon/`)
 Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) para Minecraft, escolhida no seletor do topo. Tem tema próprio (pergaminho de mapa, painéis de inventário, letra de pixel) e os Pokémon desenhados a partir dos modelos do próprio mod: nas listas eles ficam em tinta de mapa e ganham a cor do jogo quando você aponta; os que você abre ficam revelados de vez. Os itens têm o ícone do mod e giram ao apontar; as estruturas e os biomas aparecem em maquetes de blocos que giram em 3D (WebGL, sem biblioteca).
-- **Pokémon** (`/cobblemon/pokemon/`): as 888 espécies já implementadas, com os biomas em que nascem, raridade, condições, o que deixam cair, montaria e como evoluem dentro do mod.
-- **Itens** (`/cobblemon/itens/`): 490 itens e blocos em português, com ícone e as receitas de bancada.
+- **Pokémon** (`/cobblemon/pokemon/`): as 888 espécies já implementadas, com os biomas em que nascem, raridade, condições, o que deixam cair, montaria e como evoluem dentro do mod. Na página de cada uma, **Girar em 3D** troca o retrato pelo modelo do mod (com zoom e tela cheia) e **Shiny** troca a textura.
+- **Itens** (`/cobblemon/itens/`): 490 itens e blocos em português, com ícone, a receita desenhada como na bancada do jogo e os Pokémon que deixam cair cada um.
 - **Estruturas** (`/cobblemon/estruturas/`): as 65 estruturas que o mod gera, em maquetes 3D com zoom, com o bioma de cada uma e os Pokémon que nascem ali.
 - **Biomas** (`/cobblemon/biomas/`): os 11 ambientes em maquetes 3D que giram, com as espécies e as estruturas de cada um, e as informações gerais do mod (como ele decide o que nasce, fósseis, versões e curiosidades calculadas dos dados).
+- **Caçada** (`/cobblemon/cacada/`): você marca os Pokémon que quer e o atlas diz em que bioma dá para achar mais deles de uma vez, com raridade e condições.
 - **Desafios** (`/cobblemon/desafios/`): cinco desafios para começar um mundo novo, e a roleta.
 - Todos os dados são extraídos dos arquivos da versão **1.8.1** do mod por `scripts/cobblemon.mjs`.
 
-### 8. 🎬 Prólogo Cinematográfico da Home (`/`)
+### 8. 🧰 Ferramentas do Treinador
+- **Quiz diário** (`/quiz/`): "Quem é esse Pokémon?", com dois enigmas por dia, iguais para todo mundo. Pela ficha, cada palpite revela o que bate (tipo, geração, cor, estágio, altura, peso); pela gravura, a tinta aparece aos poucos.
+- **Montar um time** (`/time/`): até seis Pokémon, com a tabela do que cada um recebe de cada tipo, os buracos do time e os tipos sem resposta. Filtra pela Pokédex de cada jogo, e o time vai no endereço.
+- **Comparar Pokémon** (`/comparar/pokemon/`): atributos de base de dois Pokémon frente a frente.
+- **Busca global:** o botão **Buscar** e os atalhos `/` e `Ctrl+K` acham jogos, regiões, Pokémon, desafios, itens, estruturas e biomas de qualquer página.
+
+### 9. 🎬 Prólogo Cinematográfico da Home (`/`)
 Jornada contínua dividida em 6 cenas orientadas pelo scroll:
 1. *O atlas se abre:* introdução tátil e o relevo procedural ao vivo.
 2. *A travessia:* carrossel panorâmico das 10 regiões com pranchas dos iniciais.
@@ -135,8 +143,10 @@ Jornada contínua dividida em 6 cenas orientadas pelo scroll:
 ## ⚡ Arquitetura e Engenharia
 
 - **Zero Dependências em Produção:** Sem frameworks pesados (sem React, Vue, Next.js ou Tailwind). Toda a aplicação roda sobre HTML5 semântico, CSS moderno (com variáveis e Grid/Flexbox) e Vanilla JavaScript (ES Modules).
-- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.982 páginas HTML estáticas prontas em ~1,2 segundos**.
+- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.987 páginas HTML estáticas prontas em ~1,2 segundos**.
 - **Performance Extrema:** Carregamento instantâneo, First Contentful Paint (FCP) quase imediato e consumo mínimo de recursos no cliente.
+- **3D sem biblioteca:** as maquetes de estruturas e biomas e os modelos de Pokémon giram num visor próprio (`src/js/visor.js`), com WebGL e, onde o navegador não o entrega, um desenhista de software.
+- **Testes:** as regras de cada ferramenta ficam em módulos puros (`src/js/*-logica.js`) testados com `node:test`; roteiros de navegador em `testes/navegador/` conferem cada página com Playwright.
 - **Validação Rigorosa em Build:** O processo de compilação valida previamente cada rota, nota de 1 a 5, compatibilidade de Pokédex e coerência cartográfica antes de emitir a pasta de distribuição.
 
 ---
@@ -146,26 +156,25 @@ Jornada contínua dividida em 6 cenas orientadas pelo scroll:
 ```bash
 Projeto-Vitrine-Jogos/
 ├── dados/                       # Conteúdo canônico e bases de dados
-│   ├── atlas.mjs                # Definição de regiões, cidades, rotas e consoles
+│   ├── atlas.mjs                # Regiões, cidades, rotas e consoles
 │   ├── jogos.mjs                # Títulos, atributos (1 a 5), mascotes e plataformas
-│   ├── especies.mjs             # Metadados e mapeamento de Pokémon
-│   ├── pokedex.json             # Dados de espécies e dex regionais (via PokéAPI)
-│   ├── fichas.json              # Estatísticas, medidas, formas especiais e evoluções
-│   ├── cartas.json              # Coordenadas vetoriais das costas e altitudes
-│   ├── cobblemon.json           # Espécies, spawns, itens e estruturas do Cobblemon (extraído do mod)
-│   └── desafios.mjs             # Desafios escritos e peças da roleta
+│   ├── desafios.mjs             # Desafios escritos e peças da roleta
+│   ├── pokedex.json, fichas.json, tipos.json   # Espécies, fichas e tabela de tipos (PokéAPI)
+│   ├── cartas.json              # Coordenadas vetoriais das cartas das regiões
+│   ├── cobblemon.json           # Espécies, spawns, itens, receitas e estruturas (extraído do mod)
+│   └── modelos*.json, maquetes.json, itens-arte.json   # Índices da arte gerada
 │
 ├── scripts/                     # Motor do SSG e automação de dados
 │   ├── build.mjs                # Compilador principal (gera dist/ sem dependências)
-│   ├── paginas.mjs              # Templates das páginas principais e jogos
-│   ├── paginas-pokedex.mjs      # Gerador da Pokédex e cálculo das curiosidades
-│   ├── paginas-cobblemon.mjs    # Templates da edição Cobblemon
-│   ├── paginas-desafios.mjs     # Desafios e dados da roleta, nas duas edições
-│   ├── cobblemon.mjs            # Extrator dos dados do mod Cobblemon
-│   ├── carta.mjs                # Renderizador vetorial dos mapas regionais
-│   ├── cenario.mjs              # Desenhos SVG auxiliares e bússola
+│   ├── paginas*.mjs             # Templates: principais, Pokédex, Cobblemon, desafios e ferramentas
+│   ├── dados-navegador.mjs      # Módulos de dados que o navegador importa (dist/js/dados/)
+│   ├── baixar-mod.mjs           # Baixa o Cobblemon 1.8.1 (e o Minecraft) para .mod/, fora do Git
+│   ├── cobblemon.mjs            # Extrator dos dados do mod
+│   ├── modelos.mjs              # Desenha os Pokémon do mod e exporta os modelos 3D
+│   ├── maquetes.mjs, itens-arte.mjs   # Maquetes das estruturas e ícones dos itens
+│   ├── pokedex.mjs, fichas.mjs, tipos.mjs, arte.mjs, cartas.mjs   # Dados e arte da edição Pokémon
 │   ├── servir.mjs               # Servidor HTTP local para desenvolvimento
-│   └── verificar-paginas.mjs    # Suíte de auditoria visual com Playwright
+│   └── verificar-paginas.mjs    # Auditoria visual: rola cada página e tira fotos
 │
 ├── src/                         # Código-fonte da interface
 │   ├── estilo.css               # Design system e folhas de estilo globais
@@ -173,14 +182,17 @@ Projeto-Vitrine-Jogos/
 │   ├── js/                      # Lógica client-side modularizada
 │   │   ├── relevo.js            # Algoritmo de geração da ilha procedural
 │   │   ├── rolagem.js           # Animações de rolagem das páginas de abertura
-│   │   ├── roleta.js            # Sorteio de desafios com semente no endereço
-│   │   ├── cobblemon-inicio.js  # Mapa em blocos da edição Cobblemon
-│   │   ├── bussola.js           # Lógica interativa do quiz e recomendações
-│   │   ├── pokedex.js           # Mecanismo de busca e filtragem instantânea
-│   │   └── cartas.js            # Interatividade hover/touch dos mapas
-│   └── arte/                    # Sprites oficiais convertidos em gravura
+│   │   ├── visor.js             # Visor 3D: giro, zoom, tela cheia
+│   │   ├── maquete*.js, modelo*.js   # Desenhistas de maquetes e de modelos de Pokémon
+│   │   ├── *-logica.js          # Regras testáveis: quiz, time, diário, caçada, busca
+│   │   └── ...                  # Um módulo por página (bussola, pokedex, quiz, time, diario...)
+│   ├── arte/                    # Gravuras, modelos desenhados, ícones e maquetes paradas
+│   ├── maquetes/                # Blocos das estruturas e dos biomas, para o visor
+│   └── modelos3d/               # Modelo e textura de cada Pokémon do Cobblemon, para o visor
 │
-├── dist/                        # Saída do build estático (servido pela Vercel)
+├── testes/                      # Testes de unidade (node:test) e roteiros de navegador
+├── docs/                        # Plano de implementação dos incrementos
+├── BRIEF.md                     # Decisões de direção de arte e de conteúdo, rodada a rodada
 ├── package.json                 # Scripts e ferramentas auxiliares
 └── vercel.json                  # Roteamento e configuração de deploy
 ```
@@ -213,6 +225,13 @@ Projeto-Vitrine-Jogos/
    npm run build
    ```
 
+4. **Rodar os testes:**
+   ```bash
+   npm test                  # regras das ferramentas, sem navegador e sem dependências
+   npm install               # só para os roteiros de navegador e os scripts de arte
+   npm run test:navegador    # com `npm run dev` rodando em outro terminal
+   ```
+
 ---
 
 ## 🛠️ Scripts Disponíveis
@@ -220,18 +239,21 @@ Projeto-Vitrine-Jogos/
 | Comando | Descrição |
 | :--- | :--- |
 | `npm run dev` | Compila o site em `dist/` e inicia o servidor local em `http://localhost:4600`. |
-| `npm run build` | Valida as regras de negócio e compila todas as 1.982 páginas HTML. |
-| `npm run pokedex` | *(Opcional)* Reconstrói `pokedex.json` e `fichas.json` a partir da PokéAPI. |
-| `npm run arte` | *(Opcional)* Baixa e rasteriza as pranchas em alta resolução dos mascotes. |
-| `npm run arte:mini` | *(Opcional)* Gera o acervo de gravuras e miniaturas de todas as espécies. |
-| `npm run arte:formas` | *(Opcional)* Baixa a arte das formas especiais (megas, Gigantamax, regionais). |
-| `npm run arte:pixel` | *(Opcional)* Gera os sprites em pixel das espécies que ainda não estão no Cobblemon. |
-| `npm run modelos -- --fonte <pasta>` | *(Opcional)* Desenha os Pokémon da edição Cobblemon a partir dos modelos e texturas de um clone do repositório do mod. |
-| `npm run itens -- --ativos <pasta>` | *(Opcional)* Monta o atlas de ícones dos itens do Cobblemon a partir das texturas do mod. |
-| `npm run maquetes -- --dados <pasta> --ativos <pasta> --minecraft <pasta>` | *(Opcional)* Monta as maquetes 3D das estruturas (peças `.nbt` do mod) e dos biomas. |
-| `npm run cobblemon -- --fonte <pasta>` | *(Opcional)* Reconstrói `cobblemon.json` a partir de um clone do repositório do mod. |
-| `npm run cartas` | *(Opcional)* Recalcula os nós vetoriais de altitude e caminhos das cartas. |
-| `npm run verificar` | *(Opcional)* Executa a auditoria visual automática com Playwright. |
+| `npm run build` | Valida as regras de negócio e compila todas as 1.987 páginas HTML. |
+| `npm test` | Testes de unidade das regras (quiz, time, diário, caçada, busca, modelos, dados). |
+| `npm run test:navegador` | Roteiros de navegador de todas as ferramentas (precisa do `npm run dev` rodando). |
+| `npm run verificar` | Auditoria visual: rola cada página em desktop, celular e movimento reduzido e tira fotos. |
+| `npm run pokedex` | *(Dados)* Reconstrói `pokedex.json` e `fichas.json` a partir da PokéAPI. |
+| `npm run tipos` | *(Dados)* Baixa a tabela de efetividade dos 18 tipos. |
+| `npm run arte`, `arte:mini`, `arte:formas` | *(Arte)* Pranchas dos mascotes, gravuras de todas as espécies e arte das formas especiais. |
+| `npm run cartas` | *(Arte)* Recalcula os traçados das cartas das regiões. |
+| `npm run mod -- --minecraft` | *(Cobblemon)* Baixa o mod 1.8.1 e os arquivos do Minecraft para `.mod/`, que fica fora do Git. É o primeiro passo para os quatro comandos abaixo. |
+| `npm run cobblemon -- --fonte .mod` | *(Cobblemon)* Reconstrói `cobblemon.json` (espécies, spawns, itens, receitas, estruturas). |
+| `npm run modelos -- --fonte .mod` | *(Cobblemon)* Desenha os Pokémon a partir dos modelos do mod; com `--3d`, exporta os modelos e as texturas para o visor. |
+| `npm run itens -- --ativos <ativos> --minecraft <minecraft>` | *(Cobblemon)* Atlas de ícones dos itens e dos ingredientes das receitas. |
+| `npm run maquetes -- --dados <dados> --ativos <ativos> --minecraft <minecraft>` | *(Cobblemon)* Maquetes 3D das estruturas e dos biomas. |
+
+Nos dois últimos, `<ativos>` é `.mod/common/src/main/resources/assets/cobblemon`, `<dados>` é `.mod/common/src/main/resources/data/cobblemon` e `<minecraft>` é `.mod/minecraft/assets/minecraft`.
 
 ---
 
@@ -250,8 +272,9 @@ O projeto é configurado nativamente para publicação contínua na **Vercel** a
 - **Pokémon:** Pokémon, nomes dos jogos, criaturas e insígnias são marcas registradas e propriedades intelectuais da **Nintendo**, **Game Freak**, **Creatures Inc.** e **The Pokémon Company**. Este é um projeto de fã, não oficial, de caráter artístico e informativo, sem fins lucrativos e sem qualquer vínculo comercial.
 - **Dados e Sprites:** Nomes, estatísticas e ilustrações oficiais foram obtidos por meio da [PokéAPI](https://pokeapi.co/) e tratados artisticamente em formato de gravura.
 - **Cartografia:** Todas as cartas das regiões são redesenhos originais e interpretações artísticas desenvolvidas especificamente para o atlas.
+- **Minecraft:** os nomes de itens e biomas do jogo base vêm da tradução oficial. As maquetes usam a cor média de cada bloco, e os ingredientes do Minecraft nas receitas aparecem em quatro tons de tinta, redesenhados a partir dos ícones do jogo; as texturas originais não são redistribuídas. Minecraft é marca da Mojang e da Microsoft, e este projeto não tem vínculo com elas.
 - **Tipografia:** Fontes [Archivo](https://fonts.google.com/specimen/Archivo), [Alegreya](https://fonts.google.com/specimen/Alegreya) e [Pixelify Sans](https://fonts.google.com/specimen/Pixelify+Sans), licenciadas sob a *SIL Open Font License*.
-- **Cobblemon:** mod de código aberto da equipe Cobblemon, sob a licença *MPL 2.0*. `dados/cobblemon.json` é derivado dos arquivos de dados e da tradução em português do mod. As imagens em `src/arte/modelo/` são desenhadas por `scripts/modelos.mjs` a partir dos modelos, texturas e poses do mod, que são obra da equipe do Cobblemon; o mesmo vale para os ícones de `src/arte/itens.png` e para as peças de estrutura usadas nas maquetes de `src/maquetes/`. As maquetes não levam textura: cada bloco entra com a cor média da textura dele, calculada a partir dos arquivos do jogo, que não são redistribuídos. Os nomes de itens e biomas do jogo base vêm da tradução oficial do Minecraft, marca da Mojang e da Microsoft. Este projeto não tem vínculo com nenhuma delas.
+- **Cobblemon:** mod de código aberto da equipe Cobblemon, sob a licença *MPL 2.0*. `dados/cobblemon.json` é derivado dos arquivos de dados e da tradução em português do mod. Os modelos, texturas e poses dos Pokémon (`src/arte/modelo/` e `src/modelos3d/`), os ícones dos itens (`src/arte/itens.png`, `src/arte/item/`) e as peças de estrutura usadas nas maquetes (`src/maquetes/`) são obra da equipe do Cobblemon, desenhados ou exportados pelos scripts deste repositório. Este projeto não tem vínculo com ela.
 
 ---
 

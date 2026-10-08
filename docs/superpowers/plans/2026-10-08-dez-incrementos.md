@@ -1,7 +1,7 @@
 # Dez incrementos do PokéAtlas: plano de implementação
 
 > **Para quem executa:** as tarefas são independentes e seguem a ordem abaixo. Cada uma termina com
-> testes passando, verificação no navegador e um commit. Os passos usam caixas (`- [ ]`) para marcar o andamento.
+> testes passando, verificação no navegador e um commit. Os passos usam caixas (`- [x]`) para marcar o andamento.
 > Execução combinada: nativa, nesta sessão, tarefa por tarefa.
 
 **Objetivo:** dar ao visitante motivos para voltar e ferramentas que ele use de verdade, nas duas edições do atlas.
@@ -16,6 +16,17 @@ software de reserva, `sharp` e `playwright-core` só em desenvolvimento.
 
 **Origem:** não há documento de especificação separado. As dez ideias foram apresentadas e aprovadas na
 conversa de 08/10/2026; o desenho de cada uma está na própria tarefa.
+
+## Estado
+
+Executado em 08/10/2026: as doze tarefas (0 a 11) estão concluídas e commitadas. O que saiu diferente do plano:
+
+- **Tarefa 0:** o download do mod usa clone raso e esparso do Git, não o pacote por pasta do GitLab, que recusa pedidos seguidos com erro 406.
+- **Tarefa 4:** "buraco" passou a ser dois ou mais fracos sem ninguém que resista (o plano dizia três): com três, times pequenos nunca teriam buraco.
+- **Tarefa 7:** as receitas existentes omitiam ingredientes definidos por etiqueta de convenção (`c:`). A tarefa passou a incluir a correção, com as etiquetas do pacote do jogo e do repositório do NeoForge.
+- **Tarefa 8:** o desenho das imagens paradas continuou em `scripts/modelos.mjs`, sem passar por `modelo-desenho.js`, para as 888 imagens já publicadas não mudarem. Só a geometria (`modelo-malha.js`) é comum aos dois lados.
+- **Tarefa 9:** foi feita junto com a 8: a textura shiny sai na mesma exportação.
+- **Tarefa 10:** o cabeçalho precisou de novo ponto de quebra (1200px) e, em telas médias, perdeu a chamada principal, que continua no rodapé.
 
 ## Restrições que valem para todas as tarefas
 
@@ -62,11 +73,11 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Arquivos:** modificar `README.md`, `package.json`, `.gitignore`; criar `scripts/baixar-mod.mjs`, `testes/base.test.mjs`.
 
-- [ ] Trocar `pokeatlas-swart.vercel.app` por `pokeatlas-eight.vercel.app` nas três ocorrências do README.
-- [ ] `package.json`: `"test": "node --test testes/*.test.mjs"`, `"mod": "node scripts/baixar-mod.mjs"`.
-- [ ] `scripts/baixar-mod.mjs`: baixa `archive.zip?sha=1.8.1&path=<pasta>` de `gitlab.com/api/v4/projects/cable-mc%2Fcobblemon/repository/` para cada pasta (`assets/cobblemon/{bedrock/pokemon,textures/pokemon,textures/item,textures/block,models,blockstates}` e `data/cobblemon/{recipe,structure,worldgen}`), descompacta em `.mod/` e imprime quantos arquivos vieram. `.mod/` entra no `.gitignore`.
-- [ ] `testes/base.test.mjs`: importa `scripts/base.mjs` e confere que `COBBLEMON.itens.length === 490`, `COBBLEMON.estruturas.length === 65` e que todo item tem arte.
-- [ ] Rodar `npm test` (passa), `npm run mod` (termina sem erro), build. Commit.
+- [x] Trocar `pokeatlas-swart.vercel.app` por `pokeatlas-eight.vercel.app` nas três ocorrências do README.
+- [x] `package.json`: `"test": "node --test testes/*.test.mjs"`, `"mod": "node scripts/baixar-mod.mjs"`.
+- [x] `scripts/baixar-mod.mjs`: baixa `archive.zip?sha=1.8.1&path=<pasta>` de `gitlab.com/api/v4/projects/cable-mc%2Fcobblemon/repository/` para cada pasta (`assets/cobblemon/{bedrock/pokemon,textures/pokemon,textures/item,textures/block,models,blockstates}` e `data/cobblemon/{recipe,structure,worldgen}`), descompacta em `.mod/` e imprime quantos arquivos vieram. `.mod/` entra no `.gitignore`.
+- [x] `testes/base.test.mjs`: importa `scripts/base.mjs` e confere que `COBBLEMON.itens.length === 490`, `COBBLEMON.estruturas.length === 65` e que todo item tem arte.
+- [x] Rodar `npm test` (passa), `npm run mod` (termina sem erro), build. Commit.
 
 ### Tarefa 1: quem deixa cair o quê (ideia 7)
 
@@ -74,10 +85,10 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho:** no build, inverter `especie.drops` (`[nome do item, quanto]`) em `nome do item → [espécies]`. Cada item do mod com quem o deixa cair ganha a linha "Deixado por" com até 10 slots e "e mais N". Uma seção nova no fim, "Itens do Minecraft que os Pokémon deixam cair", lista os que não são do mod. A busca passa a achar pelo nome da espécie (`data-busca` recebe os nomes).
 
-- [ ] Função `quemDeixa()` em `paginas-cobblemon.mjs` devolvendo `Map<string, number[]>`; teste em `testes/base.test.mjs`: "Pó de Blaze" inclui o 6 (Charizard).
-- [ ] Marcação e estilo; build.
-- [ ] `testes/navegador/drops.mjs`: buscar "charizard" na página de itens deixa visíveis só itens que ele deixa cair; a contagem bate com `drops` do dado.
-- [ ] Commit.
+- [x] Função `quemDeixa()` em `paginas-cobblemon.mjs` devolvendo `Map<string, number[]>`; teste em `testes/base.test.mjs`: "Pó de Blaze" inclui o 6 (Charizard).
+- [x] Marcação e estilo; build.
+- [x] `testes/navegador/drops.mjs`: buscar "charizard" na página de itens deixa visíveis só itens que ele deixa cair; a contagem bate com `drops` do dado.
+- [x] Commit.
 
 ### Tarefa 2: comparar dois Pokémon (ideia 3) e o módulo de dados das espécies
 
@@ -89,9 +100,9 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho:** página `/comparar/pokemon/?a=charizard&b=blastoise`. Dois campos de busca, as duas gravuras, os seis atributos em barras espelhadas (a maior de cada linha em destaque), total, tipos, altura e peso. O estado fica no endereço.
 
-- [ ] Testes: `lerLista("charizard,naoexiste,blastoise", L, 6)` devolve os dois válidos; `procurarEspecie(L, "6")` acha Charizard; `estagio` de Charizard é 3 e `familia` é 4.
-- [ ] Implementar, build, roteiro de navegador (troca de espécie atualiza barras e endereço; endereço com lixo abre vazio).
-- [ ] Commit.
+- [x] Testes: `lerLista("charizard,naoexiste,blastoise", L, 6)` devolve os dois válidos; `procurarEspecie(L, "6")` acha Charizard; `estagio` de Charizard é 3 e `familia` é 4.
+- [x] Implementar, build, roteiro de navegador (troca de espécie atualiza barras e endereço; endereço com lixo abre vazio).
+- [x] Commit.
 
 ### Tarefa 3: Quem é esse Pokémon? diário (ideia 1)
 
@@ -105,10 +116,10 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho:** página `/quiz/` com dois enigmas por dia. "Ficha": cada palpite vira uma linha de pistas. "Gravura": a gravura do Pokémon do dia começa com `forca` 0,12 e ganha traço a cada erro, até seis tentativas. Palpites do dia e sequência ficam no navegador; o dia do enigma é fixado quando a página abre.
 
-- [ ] Testes: `alvoDoDia` não repete em 1025 dias seguidos; `diaDoQuiz` muda às 3h UTC; `comparar` de Charmander contra Charizard dá tipo 1 certo, tipo 2 errado, geração certa, estágio errado com seta "mais"; tipo no lugar trocado dá "parcial".
-- [ ] Implementar; conferir que a página de espécie continua gravando igual (roteiro `r6` de antes: `.gravada` aparece).
-- [ ] Roteiro de navegador: palpitar o alvo (lido de `quiz-logica`) vence; recarregar mantém os palpites; com `localStorage` bloqueado a página joga normalmente.
-- [ ] Commit.
+- [x] Testes: `alvoDoDia` não repete em 1025 dias seguidos; `diaDoQuiz` muda às 3h UTC; `comparar` de Charmander contra Charizard dá tipo 1 certo, tipo 2 errado, geração certa, estágio errado com seta "mais"; tipo no lugar trocado dá "parcial".
+- [x] Implementar; conferir que a página de espécie continua gravando igual (roteiro `r6` de antes: `.gravada` aparece).
+- [x] Roteiro de navegador: palpitar o alvo (lido de `quiz-logica`) vence; recarregar mantém os palpites; com `localStorage` bloqueado a página joga normalmente.
+- [x] Commit.
 
 ### Tarefa 4: montador de time (ideia 2)
 
@@ -120,10 +131,10 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho:** página `/time/?t=6,9,25&jogo=emerald`. Até seis espécies, com filtro opcional por jogo (só o que existe na Pokédex dele). Tabela com os 18 tipos atacantes nas colunas e o time nas linhas, resumo de fraquezas, buracos e tipos sem resposta. `scripts/tipos.mjs` baixa `pokeapi.co/api/v2/type/<nome>` dos 18 tipos e grava a matriz com os nomes em português.
 
-- [ ] Rodar `node scripts/tipos.mjs`; teste confere fatos da tabela baixada: Água contra Fogo é 2, Elétrico contra Terrestre é 0, Gelo contra Dragão/Voador é 4.
-- [ ] Testes de `analisar`: time só com Charizard tem Pedra como fraqueza 4×; time vazio devolve listas vazias.
-- [ ] Implementar, roteiro de navegador (montar, filtrar por jogo, recarregar pelo endereço, endereço com lixo).
-- [ ] Commit.
+- [x] Rodar `node scripts/tipos.mjs`; teste confere fatos da tabela baixada: Água contra Fogo é 2, Elétrico contra Terrestre é 0, Gelo contra Dragão/Voador é 4.
+- [x] Testes de `analisar`: time só com Charizard tem Pedra como fraqueza 4×; time vazio devolve listas vazias.
+- [x] Implementar, roteiro de navegador (montar, filtrar por jogo, recarregar pelo endereço, endereço com lixo).
+- [x] Commit.
 
 ### Tarefa 5: diário de desafio (ideia 4)
 
@@ -134,9 +145,9 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho:** página `/diario/`. Várias campanhas guardadas no navegador. Cada uma tem jogo, regras (texto livre, ou as do desafio de onde veio), a lista de rotas numeradas da região com a captura de cada uma (escolhida na Pokédex do jogo, com aviso de família repetida), o time, a caixa, os que caíram e um contador de insígnias ou provas de 0 a 8. Exporta e importa um arquivo `.json`, porque o que fica no navegador some se ele for limpo. O atlas não tem a tabela de encontros por rota: a página diz isso.
 
-- [ ] Testes: registrar e derrubar; `repetida` acusa Charmeleon depois de Charmander; `importar("lixo")` devolve `{ erro }`; exportar e importar devolve o mesmo conteúdo.
-- [ ] Implementar, roteiro de navegador (criar, registrar, derrubar, recarregar, exportar, importar arquivo estragado sem perder nada, vir de um desafio com as regras preenchidas).
-- [ ] Commit.
+- [x] Testes: registrar e derrubar; `repetida` acusa Charmeleon depois de Charmander; `importar("lixo")` devolve `{ erro }`; exportar e importar devolve o mesmo conteúdo.
+- [x] Implementar, roteiro de navegador (criar, registrar, derrubar, recarregar, exportar, importar arquivo estragado sem perder nada, vir de um desafio com as regras preenchidas).
+- [x] Commit.
 
 ### Tarefa 6: plano de caçada (ideia 6)
 
@@ -144,9 +155,9 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Interface:** `planejar(alvos, spawns)` devolve os lugares em ordem: `[{ bioma, acha: [{ n, raridade, condicoes }], falta: [n] }]`, do que cobre mais alvos para o que cobre menos; no empate, vence a soma de raridade mais comum.
 
-- [ ] Testes: com Wooper (194) e Charizard (6), o primeiro lugar de cada um aparece e nenhum lugar lista alvo que não nasce nele; alvo que não nasce no mundo aparece em `falta` de todos; lista vazia devolve `[]`.
-- [ ] Implementar, roteiro de navegador (adicionar pela página da espécie, ver o plano, recarregar mantém, endereço com lixo).
-- [ ] Commit.
+- [x] Testes: com Wooper (194) e Charizard (6), o primeiro lugar de cada um aparece e nenhum lugar lista alvo que não nasce nele; alvo que não nasce no mundo aparece em `falta` de todos; lista vazia devolve `[]`.
+- [x] Implementar, roteiro de navegador (adicionar pela página da espécie, ver o plano, recarregar mantém, endereço com lixo).
+- [x] Commit.
 
 ### Tarefa 7: receitas em grade (ideia 9)
 
@@ -154,10 +165,10 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho:** cada receita aparece como a bancada do jogo: grade 3×3 de slots, seta e o resultado com a quantidade. Ingrediente do mod usa o ícone dele. Ingrediente do Minecraft aparece em **silhueta de tinta de mapa** (forma do ícone, cor média), não com a textura do jogo, pelo mesmo motivo das maquetes. Receita sem forma mostra os ingredientes em fila. Etiqueta de grupo (`#cobblemon:apricorns`) mostra um representante e o nome do grupo. O texto "Feito com…" continua, para leitor de tela e busca.
 
-- [ ] Antes de escrever: contar em `.mod/` quantas das 204 receitas têm forma, quantas não, e quantos ingredientes distintos do Minecraft aparecem. Se a contagem mostrar algo fora do desenho acima, avisar o dono do projeto antes de seguir.
-- [ ] Teste em `testes/base.test.mjs`: toda receita com `grade` tem no máximo 3×3 e todo ingrediente tem ícone ou silhueta.
-- [ ] Implementar, roteiro de navegador (a Poké Bola mostra a grade; largura no celular não estoura).
-- [ ] Commit.
+- [x] Antes de escrever: contar em `.mod/` quantas das 204 receitas têm forma, quantas não, e quantos ingredientes distintos do Minecraft aparecem. Se a contagem mostrar algo fora do desenho acima, avisar o dono do projeto antes de seguir.
+- [x] Teste em `testes/base.test.mjs`: toda receita com `grade` tem no máximo 3×3 e todo ingrediente tem ícone ou silhueta.
+- [x] Implementar, roteiro de navegador (a Poké Bola mostra a grade; largura no celular não estoura).
+- [x] Commit.
 
 ### Tarefa 8: visor 3D comum e Pokémon giratório (ideia 5)
 
@@ -170,11 +181,11 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho:** no retrato da espécie, "Girar em 3D" troca a imagem pelo modelo do mod com a textura dele, com os mesmos controles das maquetes. WebGL com textura sem suavização; sem WebGL, o desenhista de software. O arquivo de cada espécie leva os cubos e as matrizes da pose, não os triângulos, para caber: orçamento de 30 MB para as 888. Se a medição passar disso, trocar para arquivo binário antes de continuar.
 
-- [ ] Refatorar `maquete.js` sobre `visor.js` sem mudar comportamento; rodar os roteiros de maquete (giro, zoom, tela cheia, sem WebGL).
-- [ ] Mover geometria e desenho para os módulos comuns; teste: as imagens de 1, 6, 25, 94, 577 geradas depois da mudança são idênticas, byte a byte, às que estão no repositório.
-- [ ] Exportar os 888 modelos; medir o tamanho; teste: `facesDoModelo` do arquivo exportado do Charizard dá o mesmo número de faces que o gerador.
-- [ ] Página, estilo e roteiro de navegador: com WebGL e com WebGL negado, o modelo entra, gira e aproxima; Solosis mostra o miolo através da gelatina.
-- [ ] Commit.
+- [x] Refatorar `maquete.js` sobre `visor.js` sem mudar comportamento; rodar os roteiros de maquete (giro, zoom, tela cheia, sem WebGL).
+- [x] Mover geometria e desenho para os módulos comuns; teste: as imagens de 1, 6, 25, 94, 577 geradas depois da mudança são idênticas, byte a byte, às que estão no repositório.
+- [x] Exportar os 888 modelos; medir o tamanho; teste: `facesDoModelo` do arquivo exportado do Charizard dá o mesmo número de faces que o gerador.
+- [x] Página, estilo e roteiro de navegador: com WebGL e com WebGL negado, o modelo entra, gira e aproxima; Solosis mostra o miolo através da gelatina.
+- [x] Commit.
 
 ### Tarefa 9: versão shiny (ideia 8)
 
@@ -182,9 +193,9 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho (mudou em relação à proposta):** o botão "Shiny" troca a textura do modelo 3D, ligando o visor se ele estiver parado. Assim não é preciso guardar 888 imagens paradas a mais: entram só as texturas, cerca de 5 MB em vez de 18. Sem JavaScript o botão não aparece.
 
-- [ ] Teste em `testes/base.test.mjs`: toda espécie marcada com shiny tem o arquivo de textura.
-- [ ] Implementar, roteiro de navegador (ligar e desligar o shiny muda a imagem; funciona sem WebGL).
-- [ ] Commit.
+- [x] Teste em `testes/base.test.mjs`: toda espécie marcada com shiny tem o arquivo de textura.
+- [x] Implementar, roteiro de navegador (ligar e desligar o shiny muda a imagem; funciona sem WebGL).
+- [x] Commit.
 
 ### Tarefa 10: busca global (ideia 10)
 
@@ -194,18 +205,18 @@ A 9 usa o visor criado na 8. A 7 e a 8 precisam de `.mod/` (Tarefa 0). A 10 vem 
 
 **Desenho:** botão "Buscar" no cabeçalho e os atalhos `/` e Ctrl+K abrem um `<dialog>` com um campo e os resultados agrupados (jogos, regiões, Pokémon, desafios, ferramentas e, do Cobblemon, Pokémon, itens, estruturas e biomas). Setas escolhem, Enter abre. O índice só é baixado na primeira abertura.
 
-- [ ] Testes: "char" traz Charizard antes de "Bola Charme"; "agua" acha "Água"; texto vazio devolve `[]`; na edição Cobblemon, "wooper" traz primeiro a página do Cobblemon.
-- [ ] Implementar, roteiro de navegador (abrir por atalho e por botão, navegar por teclado, fechar com Esc, celular).
-- [ ] Atualizar `scripts/verificar-paginas.mjs` com as páginas novas, rodar `npm run verificar`, atualizar BRIEF e README. Commit.
+- [x] Testes: "char" traz Charizard antes de "Bola Charme"; "agua" acha "Água"; texto vazio devolve `[]`; na edição Cobblemon, "wooper" traz primeiro a página do Cobblemon.
+- [x] Implementar, roteiro de navegador (abrir por atalho e por botão, navegar por teclado, fechar com Esc, celular).
+- [x] Atualizar `scripts/verificar-paginas.mjs` com as páginas novas, rodar `npm run verificar`, atualizar BRIEF e README. Commit.
 
 ### Tarefa 11: conferência geral e arrumação do repositório (pedido feito durante a execução)
 
 **Arquivos:** os que a conferência apontar; `README.md`, `.gitignore`, `package.json`.
 
-- [ ] Rodar tudo: `npm test`, todos os roteiros de `testes/navegador/`, `npm run verificar`, e ler as folhas de contato das páginas novas em desktop e celular.
-- [ ] Listar o que não é mais usado por nenhuma página nem script (arte em pixel das espécies que saíram, scripts e dados órfãos, restos de rodadas anteriores) e remover.
-- [ ] README: seções na ordem de quem chega (o que é, como rodar, como testar, como regenerar dados, créditos), com as ferramentas novas e a árvore de pastas atual.
-- [ ] Build a partir de um clone limpo, sem dependências, para garantir que nada removido fazia falta. Commit.
+- [x] Rodar tudo: `npm test`, todos os roteiros de `testes/navegador/`, `npm run verificar`, e ler as folhas de contato das páginas novas em desktop e celular.
+- [x] Listar o que não é mais usado por nenhuma página nem script (arte em pixel das espécies que saíram, scripts e dados órfãos, restos de rodadas anteriores) e remover.
+- [x] README: seções na ordem de quem chega (o que é, como rodar, como testar, como regenerar dados, créditos), com as ferramentas novas e a árvore de pastas atual.
+- [x] Build a partir de um clone limpo, sem dependências, para garantir que nada removido fazia falta. Commit.
 
 ---
 

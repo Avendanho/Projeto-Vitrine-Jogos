@@ -10,16 +10,17 @@
     "arte": "node scripts/arte.mjs",
     "arte:mini": "node scripts/arte.mjs --mini",
     "arte:formas": "node scripts/arte.mjs --formas",
-    "arte:pixel": "node scripts/arte.mjs --pixel",
     "cobblemon": "node scripts/cobblemon.mjs",
     "modelos": "node scripts/modelos.mjs",
     "itens": "node scripts/itens-arte.mjs",
     "maquetes": "node scripts/maquetes.mjs",
     "pokedex": "node scripts/pokedex.mjs && node scripts/fichas.mjs",
     "cartas": "node scripts/cartas.mjs",
+    "tipos": "node scripts/tipos.mjs",
     "verificar": "node scripts/verificar-paginas.mjs",
     "mod": "node scripts/baixar-mod.mjs",
-    "test": "node --test testes/*.test.mjs"
+    "test": "node --test testes/*.test.mjs",
+    "test:navegador": "node testes/navegador/todos.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.50.0",

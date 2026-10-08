@@ -1214,7 +1214,6 @@ html:has(.edicao-cobblemon) { background: #DCCB9F; }
   --preto: #1B1B1B;
   background: var(--mar); color: var(--tinta);
 }
-.edicao-cobblemon .pixel { image-rendering: pixelated; }
 .edicao-cobblemon ::selection { background: var(--rota); color: #fff; }
 
 /* letra de pixel em tudo o que é título, rótulo ou botão */
@@ -1708,6 +1707,13 @@ a.slot:hover { background: #B4B4D8; }
 .topo-busca { padding: 7px 12px; font: inherit; font-size: var(--t-pequeno); font-weight: 600; line-height: 1.2; color: inherit; background: transparent; border: 1.5px solid currentColor; border-radius: 2px; cursor: pointer; }
 .topo-busca:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
 html:not(.js) .topo-busca { display: none; }
+/* em tela estreita não cabem logotipo, seletor, busca e menu na mesma linha: a busca vai para dentro do menu */
+.topo-nav-busca { display: none; }
+@media (max-width: 600px) {
+  .topo-busca { display: none; }
+  .js .topo-nav-busca { display: block; width: 100%; margin: var(--e2) 0 4px; padding: 13px; font: inherit; font-size: var(--t-destaque); font-weight: 600; color: inherit; background: transparent; border: 1.5px solid currentColor; border-radius: 2px; cursor: pointer; }
+  .edicao-cobblemon.js .topo-nav-busca, .js .edicao-cobblemon .topo-nav-busca { font-family: var(--pixel); border: 2px solid var(--preto); border-radius: 0; background: var(--papel); }
+}
 .busca { width: min(92vw, 40rem); max-height: min(80vh, 44rem); margin-top: 9vh; padding: 0; color: var(--tinta); background: var(--papel-claro); border: 2px solid var(--tinta); box-shadow: 0 18px 50px rgb(0 0 0 / 0.28); }
 .busca[open] { display: flex; flex-direction: column; }
 .busca::backdrop { background: rgb(0 0 0 / 0.4); }

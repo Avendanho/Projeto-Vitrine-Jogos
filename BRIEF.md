@@ -286,3 +286,41 @@ Ajustes pedidos depois, na mesma rodada:
   inicial, dois itens sem textura nem modelo e, da lista de Pokémon, as 137
   espécies que ainda não estão no mod. As oito máquinas em bloco, que existem
   na versão, ganharam ícone desenhado em 3D a partir do modelo do bloco.
+
+## Rodada 8: dez incrementos
+
+Pedido: pesquisar em sites de Pokémon e de jogos o que vale acrescentar, propor,
+e implementar o que fosse aceito. As dez ideias foram aceitas. O plano está em
+`docs/superpowers/plans/2026-10-08-dez-incrementos.md`.
+
+Referências: Pokédle (enigma diário), Pocketcraft (ferramentas de Cobblemon:
+onde achar, caçada, quem deixa cair), PokeTools e Marriland (time e cobertura de
+tipos), trackers de Nuzlocke.
+
+- **Edição Pokémon:** quiz diário (pela ficha e pela gravura que ganha tinta),
+  montador de time com filtro pela Pokédex de cada jogo, comparador de dois
+  Pokémon, diário de desafio ligado aos desafios e à roleta.
+- **Edição Cobblemon:** Pokémon em 3D giratório com textura do mod e versão
+  shiny, plano de caçada, quem deixa cair cada item, receitas desenhadas como a
+  bancada do jogo.
+- **Nas duas:** busca global com atalho.
+
+Decisões tomadas no caminho:
+
+- Tempo de jogo de cada título ficou de fora: os números circulam em sites, mas
+  não há fonte que o atlas possa citar como sua.
+- O quiz não usa habitat: a PokéAPI só tem esse dado para 386 espécies.
+- A versão shiny troca a textura do modelo 3D em vez de guardar 888 imagens a
+  mais: 5 MB no lugar de 18.
+- As receitas antigas omitiam ingredientes definidos por etiqueta genérica (o PC
+  aparecia sem os lingotes de ferro). Agora as etiquetas são resolvidas com os
+  arquivos do jogo e do NeoForge.
+- Ingrediente do Minecraft aparece em tinta de mapa, redesenhado do ícone do
+  jogo, e não com a textura dele.
+- O diário não tem tabela de encontros por rota: o atlas não tem esse dado, e a
+  página diz isso.
+- O que o visitante guarda (sequência do quiz, diário, lista de caçada, espécies
+  reveladas) fica só no navegador dele. O diário exporta para arquivo.
+- Arrumação: saíram os sprites em pixel, que nenhuma página usava mais; entraram
+  testes de unidade e roteiros de navegador para cada ferramenta.
+

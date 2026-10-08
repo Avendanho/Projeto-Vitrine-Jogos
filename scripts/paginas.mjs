@@ -94,7 +94,7 @@ export const EDICOES = {
     ],
     avisos: [
       "Projeto de fã, sem fins lucrativos. Cobblemon é um mod de código aberto feito pela equipe Cobblemon; este site não tem vínculo com ela, nem com a Mojang, a Microsoft, a Nintendo ou a The Pokémon Company.",
-      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. Os Pokémon são desenhados a partir dos modelos e das texturas do próprio mod, feitos pela equipe do Cobblemon; os que ainda não estão nele aparecem com a arte oficial, do repositório público PokeAPI/sprites, redesenhada em pixel. Os ícones dos itens são as texturas do mod, e as maquetes das estruturas são montadas com as peças dele, em blocos de uma cor só. Fontes: Pixelify Sans, Archivo e Alegreya."
+      "Os dados vêm dos arquivos do próprio mod (licença MPL 2.0), e os nomes em português são os da tradução dele e a do Minecraft. Os Pokémon são desenhados a partir dos modelos e das texturas do próprio mod, feitos pela equipe do Cobblemon. Os ícones dos itens são as texturas do mod, e as maquetes das estruturas são montadas com as peças dele, em blocos de uma cor só. Nas receitas, os ingredientes do Minecraft são redesenhos em tinta a partir dos ícones do jogo, que pertence à Mojang e à Microsoft. Fontes: Pixelify Sans, Archivo e Alegreya."
     ]
   }
 };
@@ -135,6 +135,7 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
   <button type="button" class="topo-busca" data-busca-abrir aria-haspopup="dialog" aria-keyshortcuts="/ Control+K">Buscar</button>
   <button type="button" class="topo-menu" aria-expanded="false" aria-controls="menu">Menu</button>
   <nav class="topo-nav" id="menu" aria-label="Seções">
+    <button type="button" class="topo-nav-busca" data-busca-abrir aria-haspopup="dialog">Buscar no atlas</button>
     ${ed.nav.map(link).join("\n    ")}
     <a class="botao botao-pequeno" href="${ed.acao.href}"${caminho === ed.acao.href ? ' aria-current="page"' : ""}>${ed.acao.texto}</a>
   </nav>

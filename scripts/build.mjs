@@ -85,7 +85,9 @@ function conferir() {
   }
 }
 
+let paginas = 0;                                    // conta as páginas de verdade, para o resumo do fim não depender de soma feita à mão
 async function escrever(caminho, conteudo) {
+  if (caminho.endsWith(".html")) paginas++;
   const destino = join(DIST, caminho);
   await mkdir(dirname(destino), { recursive: true });
   await writeFile(destino, conteudo, "utf8");
@@ -159,6 +161,5 @@ for (const edicao of ["pokemon", "cobblemon"]) {
 }
 for (const d of TODOS_OS_DESAFIOS) await escrever(`${enderecoDoDesafio(d).slice(1)}index.html`, paginaDesafio(d));
 
-const paginas = JOGOS.length + REGIOES.length + TODAS_AS_ESPECIES.length + ESPECIES_DO_COBBLEMON.length + TODOS_OS_DESAFIOS.length + 14;
 console.log(`PokéAtlas: ${JOGOS.length} jogos, ${REGIOES.length} regiões, ${TODAS_AS_ESPECIES.length} espécies, ` +
   `${ESPECIES_DO_COBBLEMON.length} do Cobblemon, ${TODOS_OS_DESAFIOS.length} desafios; ${paginas} páginas em dist/ (${Date.now() - inicio} ms)`);

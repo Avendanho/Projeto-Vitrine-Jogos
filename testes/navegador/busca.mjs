@@ -42,12 +42,18 @@ conferir("na edição Cobblemon, o Wooper do Cobblemon vem primeiro", (await pag
 await pagina.fill("#busca-texto", COBBLEMON.itens.find((i) => i.id === "healing_machine").nome); await pagina.waitForSelector(".busca-resultados li");
 const item = await pagina.getAttribute('.busca-resultados a[href*="/cobblemon/itens/#item-"]', "href");
 await pagina.goto(BASE + item, { waitUntil: "networkidle" });
-conferir("um item leva à âncora dele na página de itens", await pagina.evaluate(() => { const el = document.querySelector(location.hash); return Boolean(el) && el.getBoundingClientRect().top < innerHeight; }), item);
+// a rolagem até a âncora acontece depois da transição entre páginas: espera um instante antes de medir
+const naTela = await pagina.waitForFunction(() => { const el = document.querySelector(location.hash); if (!el) return false; const r = el.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; }, null, { timeout: 5000 }).then(() => true, () => false);
+conferir("um item leva à âncora dele na página de itens", naTela, item);
 if (fotos) { await pagina.goto(`${BASE}/cobblemon/biomas/`, { waitUntil: "networkidle" }); await pagina.keyboard.press("/"); await pagina.waitForSelector("dialog.busca[open]"); await pagina.keyboard.type("ruin"); await pagina.waitForTimeout(300); await pagina.screenshot({ path: `${fotos}/t10-cb.png` }); }
 const cel = await abrir({ celular: true });
 await cel.pagina.goto(`${BASE}/pokedex/`, { waitUntil: "networkidle" });
-conferir("no celular o botão Buscar fica visível fora do menu", await cel.pagina.locator("[data-busca-abrir]").isVisible());
-await cel.pagina.click("[data-busca-abrir]"); await cel.pagina.waitForSelector("dialog.busca[open]");
+const dentro = await cel.pagina.evaluate(() => [...document.querySelectorAll(".topo .marca, .topo .edicoes, .topo-menu")].every((el) => { const r = el.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; }));
+conferir("no celular logotipo, seletor e Menu cabem inteiros na tela", dentro);
+await cel.pagina.click(".topo-menu");
+const noMenu = await cel.pagina.locator(".topo-nav-busca").waitFor({ state: "visible", timeout: 3000 }).then(() => true, () => false);      // o menu abre com uma transição curta
+conferir("e a busca fica dentro do menu", noMenu && await cel.pagina.locator(".topo-busca").isHidden());
+await cel.pagina.click(".topo-nav-busca"); await cel.pagina.waitForSelector("dialog.busca[open]");
 await cel.pagina.fill("#busca-texto", "pika"); await cel.pagina.waitForSelector(".busca-resultados li");
 conferir("e a caixa cabe na tela", await cel.pagina.evaluate(() => document.querySelector("dialog.busca").getBoundingClientRect().right <= innerWidth && document.documentElement.scrollWidth === 390));
 await cel.navegador.close();

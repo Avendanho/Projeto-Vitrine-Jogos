@@ -18,15 +18,12 @@ const DIA = `data-fundo="${FUNDO_COBBLEMON}" data-tinta="${TINTA_COBBLEMON}"`;
 
 /* ---------- peças ---------- */
 
-/* O Pokémon dentro de um "slot" de inventário. Quem já tem modelo no mod aparece em tinta de mapa,
- * e o navegador troca pela cor do modelo quando alguém aponta (src/js/base.js). Quem ainda não
- * está no mod fica com o desenho em pixel da arte oficial. */
+/* O Pokémon dentro de um "slot" de inventário: em tinta de mapa, e o navegador troca pela cor do modelo
+ * quando alguém aponta (src/js/base.js). Toda espécie do atlas tem modelo; uma que não tivesse ficaria
+ * com o slot vazio. */
 export function slot(n, { ligacao = true, lado = 96, preguica = true } = {}) {
   const e = C.especies[n], vivo = MODELOS.has(n);
-  const espera = preguica ? ' loading="lazy" decoding="async"' : "";
-  const figura = vivo
-    ? `<img class="tinta" src="/arte/modelo/${n}-tinta.png" data-cor="/arte/modelo/${n}.webp" alt="" width="${lado}" height="${lado}"${espera}>`
-    : `<img class="pixel" src="/arte/pixel/${n}.png" alt="" width="${lado}" height="${lado}"${espera}>`;
+  const figura = vivo ? `<img class="tinta" src="/arte/modelo/${n}-tinta.png" data-cor="/arte/modelo/${n}.webp" alt="" width="${lado}" height="${lado}"${preguica ? ' loading="lazy" decoding="async"' : ""}>` : "";
   const marca = vivo ? ` data-n="${n}"` : "";
   return ligacao && e.impl
     ? `<a class="slot"${marca} href="${enderecoCobblemon(n)}" title="${esc(e.nome)}" aria-label="${esc(e.nome)}">${figura}</a>`
@@ -288,7 +285,7 @@ export function paginaCobblemonEspecie(n) {
       <canvas class="cb-revela" width="400" height="400" data-tinta="/arte/modelo/${n}-tinta.png" aria-hidden="true"></canvas>
       ${MODELOS_3D.modelos.includes(n) ? `<button type="button" class="maquete-girar">Girar em 3D</button>${MODELOS_3D.shiny.includes(n) ? '<button type="button" class="modelo-shiny" data-shiny-botao aria-pressed="false">Shiny</button>' : ""}<span class="maquete-dica" aria-hidden="true">Arraste para girar, role para aproximar</span>` : ""}
     </figure>`
-      : `<figure class="cb-retrato painel"><img class="pixel" src="/arte/pixel/${n}.png" alt="${esc(e.nome)}, em pixel" width="288" height="288"></figure>`}
+      : ""}
   </section>
 
   <section aria-labelledby="t-onde">

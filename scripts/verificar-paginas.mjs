@@ -24,7 +24,8 @@ const base = opcao("url", "http://localhost:4600");
 const saida = opcao("saida", "verificacao");
 const so = opcao("so", "");            // "desktop", "celular" ou "reduzido"
 const caminhos = args.length ? args : ["/", "/pokedex/charizard/", "/jogos/red-blue-yellow/", "/regioes/", "/regioes/kanto/", "/linha-do-tempo/", "/comparar/", "/bussola/",
-  "/desafios/", "/desafios/os-super-woopers/", "/cobblemon/", "/cobblemon/pokemon/wooper/", "/cobblemon/itens/", "/cobblemon/estruturas/", "/cobblemon/biomas/"];
+  "/desafios/", "/desafios/os-super-woopers/", "/cobblemon/", "/cobblemon/pokemon/wooper/", "/cobblemon/itens/", "/cobblemon/estruturas/", "/cobblemon/biomas/",
+  "/quiz/", "/time/?t=charizard,blastoise,venusaur", "/comparar/pokemon/", "/diario/", "/cobblemon/cacada/?alvos=194,54,60"];
 
 const chrome = ["/usr/bin/google-chrome", "/usr/bin/chromium-browser", "/usr/bin/chromium",
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
