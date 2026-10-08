@@ -1663,6 +1663,13 @@ a.slot:hover { background: #B4B4D8; }
 .diario-captura { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); align-items: end; gap: var(--e3); margin-top: var(--e4); padding: var(--e3); background: var(--papel); border: 1.5px solid var(--tinta); }
 .diario-captura h3 { grid-column: 1 / -1; font-size: var(--t-destaque); font-weight: 800; }
 .diario-captura .dex-busca { max-width: none; }
+.diario-encontros { grid-column: 1 / -1; display: grid; gap: 8px; font-size: var(--t-pequeno); }
+.diario-encontros:empty { display: none; }
+.diario-encontros p { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.diario-encontros p > span { min-width: 7.5rem; font-weight: 660; }
+.diario-encontros .ficha { cursor: pointer; font: inherit; font-size: 0.82rem; font-weight: 600; padding: 4px 9px; }
+.diario-encontros .ficha:hover { background: var(--tinta); color: var(--mar); }
+.diario-encontros-nota { color: var(--tinta-suave); }
 .diario-grupo { margin-top: var(--e5); }
 .diario-grupo h3 { font-size: var(--t-destaque); font-weight: 800; font-stretch: 114%; }
 .diario-vazio { margin-top: var(--e2); font-family: var(--caderno); font-style: italic; font-size: 1.15rem; }

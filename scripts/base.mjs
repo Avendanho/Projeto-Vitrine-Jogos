@@ -11,6 +11,7 @@ export const COBBLEMON = lerDados("cobblemon.json"); // gerado por scripts/cobbl
 export const FORMAS_COM_ARTE = new Set(lerDados("formas-com-arte.json"));   // gerado por scripts/arte.mjs --formas
 export const MAQUETES = lerDados("maquetes.json");                           // gerado por scripts/maquetes.mjs: estruturas e ambientes em blocos
 export const ITENS_ARTE = lerDados("itens-arte.json");                       // gerado por scripts/itens-arte.mjs: posição de cada ícone no atlas
+export const ENCONTROS = lerDados("encontros.json");                         // gerado por scripts/encontros.mjs: o que aparece em cada rota, por jogo
 export const TIPOS_E_FATORES = lerDados("tipos.json");                       // gerado por scripts/tipos.mjs: efetividade dos 18 tipos
 export const MODELOS = new Set(lerDados("modelos.json"));
 export const MODELOS_3D = lerDados("modelos3d.json");                        // gerado por scripts/modelos.mjs --3d: quem gira no visor e quem tem shiny

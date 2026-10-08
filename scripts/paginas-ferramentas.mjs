@@ -1,7 +1,8 @@
 /* As ferramentas da edição Pokémon: comparar dois Pokémon, o quiz diário, o montador de time e o diário
  * de desafio. Aqui só nasce a moldura de cada página; quem a faz funcionar é o módulo de mesmo nome em src/js/. */
 import { moldura } from "./paginas.mjs";
-import { esc, TIPOS_E_FATORES } from "./base.mjs";
+import { esc, enumerar, TIPOS_E_FATORES, ENCONTROS } from "./base.mjs";
+import { JOGOS } from "../dados/jogos.mjs";
 import { jogosParaONavegador } from "./dados-navegador.mjs";
 
 export const ATRIBUTOS = ["PS", "Ataque", "Defesa", "Ataque Especial", "Defesa Especial", "Velocidade"];
@@ -133,7 +134,7 @@ export function paginaDiario() {
   <p class="migalha"><a href="/desafios/">Desafios</a></p>
   <h1>Diário de desafio</h1>
   <p class="prosa">Acompanhe uma campanha do começo ao fim: o que foi capturado em cada lugar, quem está no time, quem ficou na caixa e quem caiu pelo caminho. Serve para um Nuzlocke, para um desafio do atlas ou para as regras que você inventar.</p>
-  <p class="nota-editorial">O diário fica guardado neste navegador. Exporte de vez em quando: se os dados do navegador forem limpos, ele some. O atlas não tem a tabela de encontros de cada rota, então a espécie capturada é você quem informa.</p>
+  <p class="nota-editorial">O diário fica guardado neste navegador. Exporte de vez em quando: se os dados do navegador forem limpos, ele some. Em ${enumerar(JOGOS.filter((j) => ENCONTROS[j.slug]).map((j) => j.curto))}, o diário mostra o que aparece em cada rota, com os dados da PokéAPI. Nos outros jogos ela não tem essa tabela, e a espécie capturada é você quem informa.</p>
 </section>
 <section class="diario" data-diario>
   ${semJs('O diário precisa de JavaScript. Os <a href="/desafios/">desafios</a> podem ser lidos sem ele.')}

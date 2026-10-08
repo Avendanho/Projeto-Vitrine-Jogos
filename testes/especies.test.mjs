@@ -31,3 +31,20 @@ test("a lista do endereço ignora o que não existe, não repete e respeita o li
   assert.deepEqual(lerLista(null, L), []);
   assert.deepEqual(lerLista("<script>,,;drop", L), []);
 });
+
+test("os encontros por rota batem com as rotas e as espécies do atlas", async () => {
+  const { jogosParaONavegador } = await import("../scripts/dados-navegador.mjs");
+  const jogos = jogosParaONavegador(), comTabela = jogos.filter((j) => j.encontros);
+  assert.ok(comTabela.length >= 10, `${comTabela.length} jogos com tabela`);
+  for (const j of comTabela) {
+    const rotas = new Set(j.rotas.map((r) => r[0]));
+    for (const [rota, grupos] of Object.entries(j.encontros)) {
+      assert.ok(rotas.has(rota), `${j.slug}: rota ${rota} não existe no atlas`);
+      assert.equal(grupos.length, 4);
+      for (const id of grupos.flat()) assert.ok(porSlug(L, L.find((l) => l[0] === id)?.[1] ?? ""), `${j.slug} rota ${rota}: espécie ${id}`);
+      assert.ok(grupos.flat().length > 0, `${j.slug} rota ${rota} vazia`);
+    }
+  }
+  const rota1 = jogos.find((j) => j.slug === "red-blue-yellow").encontros["1"];
+  assert.deepEqual(rota1[0], [16, 19], "na Rota 1 de Kanto aparecem Pidgey e Rattata, andando");
+});

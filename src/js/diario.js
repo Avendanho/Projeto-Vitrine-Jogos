@@ -14,7 +14,7 @@ const familiaDe = (id) => porId(ESPECIES, id)?.[10] ?? id;
 const jogoDe = (slug) => JOGOS.find((j) => j.slug === slug) ?? null;
 const nomeDaRota = ([n, de, para]) => `Rota ${n} (${de} a ${para})`;
 
-let campanhas = [], ativa = null, aviso = "";
+let campanhas = [], ativa = null, aviso = "", ultimoLocal = null;      // ultimoLocal: a rota escolhida não volta para a primeira a cada registro
 try {
   const lidas = D.importar(localStorage.getItem(CHAVE) ?? "");
   if (lidas.campanhas) campanhas = lidas.campanhas;
@@ -80,11 +80,12 @@ function desenhar() {
       </div>
       <form class="diario-captura" data-capturar>
         <h3>Registrar captura</h3>
-        <label class="escolha"><span>Onde</span><select name="local">${rotas.map((r) => `<option${comCaptura.has(nomeDaRota(r)) ? ' data-usada="1"' : ""}>${esc(nomeDaRota(r))}</option>`).join("")}<option value="">Outro lugar</option></select></label>
+        <label class="escolha"><span>Onde</span><select name="local">${rotas.map((r) => `<option value="${esc(nomeDaRota(r))}"${nomeDaRota(r) === ultimoLocal ? " selected" : ""}>${esc(nomeDaRota(r))}${comCaptura.has(nomeDaRota(r)) ? " (já tem captura)" : ""}</option>`).join("")}<option value=""${ultimoLocal === "" ? " selected" : ""}>Outro lugar</option></select></label>
         <label class="escolha" data-outro hidden><span>Que lugar</span><input name="outro" type="text" maxlength="80" placeholder="Caverna, cidade, presente"></label>
         <div class="dex-busca"><label for="diario-especie">Pokémon</label><input id="diario-especie" name="especie" type="search" list="lista-diario" placeholder="Nome ou número" autocomplete="off" spellcheck="false" required></div>
         <label class="escolha"><span>Apelido</span><input name="apelido" type="text" maxlength="24"></label>
         <button type="submit" class="botao">Registrar</button>
+        <div class="diario-encontros" data-encontros aria-live="polite"></div>
         <datalist id="lista-diario">${ESPECIES.filter((l) => !jogo || jogo.especies.includes(l[0])).map((l) => `<option value="${l[2]}">`).join("")}</datalist>
       </form>
       ${grupo("Time", c.capturas.filter((x) => x.estado === "vivo" && x.time), "Ninguém no time ainda.")}
@@ -94,7 +95,18 @@ function desenhar() {
     </article>` : ""}`;
   const local = raiz.querySelector('[data-capturar] select[name="local"]');
   if (local) raiz.querySelector("[data-outro]").hidden = local.value !== "";
+  mostrarEncontros();
   aviso = "";
+}
+
+/* O que aparece na rota escolhida, para os jogos em que a PokéAPI tem a tabela. Clicar num nome preenche o campo. */
+const JEITOS = ["Andando", "Na água", "Pescando", "De outros jeitos"];
+function mostrarEncontros() {
+  const caixa = raiz.querySelector("[data-encontros]"), seletor = raiz.querySelector('[data-capturar] select[name="local"]');
+  if (!caixa || !seletor) return;
+  const jogo = jogoDe(atual().jogo), rota = jogo?.rotas.find((r) => nomeDaRota(r) === seletor.value), grupos = rota && jogo.encontros?.[rota[0]];
+  caixa.innerHTML = !grupos ? (rota && jogo.encontros ? '<p class="diario-encontros-nota">A PokéAPI não lista encontros nesta rota.</p>' : "")
+    : `<p class="diario-encontros-nota">Nesta rota, em ${esc(jogo.nome)}:</p>${grupos.map((ids, k) => (ids.length ? `<p><span>${JEITOS[k]}</span>${ids.map((id) => `<button type="button" class="ficha" data-sugerir="${id}">${porId(ESPECIES, id)?.[2] ?? id}</button>`).join("")}</p>` : "")).join("")}`;
 }
 
 raiz.addEventListener("submit", (e) => {
@@ -111,7 +123,9 @@ raiz.addEventListener("submit", (e) => {
     const escrito = String(dados.get("especie"));
     const l = porNome(ESPECIES, escrito) ?? (procurarEspecie(pool, escrito, 2).length === 1 ? procurarEspecie(pool, escrito, 1)[0] : null);
     if (!l) { aviso = "Escolha o Pokémon na lista de sugestões."; return desenhar(); }
-    const local = String(dados.get("local") || dados.get("outro") || "");
+    const seletor = e.target.querySelector('select[name="local"]');
+    ultimoLocal = seletor.value;
+    const local = String(ultimoLocal || dados.get("outro") || "");
     const avisos = [];
     const igual = D.repetida(c, l[0], familiaDe);
     if (igual) avisos.push(`Atenção: ${porId(ESPECIES, igual.especie)[2]}, da mesma família, já foi capturado em ${igual.local}.`);
@@ -122,7 +136,7 @@ raiz.addEventListener("submit", (e) => {
 });
 raiz.addEventListener("change", async (e) => {
   if (e.target.matches("[data-escolher]")) { ativa = e.target.value; guardar(); desenhar(); }
-  else if (e.target.matches('[data-capturar] select[name="local"]')) raiz.querySelector("[data-outro]").hidden = e.target.value !== "";
+  else if (e.target.matches('[data-capturar] select[name="local"]')) { raiz.querySelector("[data-outro]").hidden = e.target.value !== ""; mostrarEncontros(); }
   else if (e.target.matches("[data-nota]")) { campanhas = campanhas.map((c) => (c.id === ativa ? D.anotar(c, e.target.dataset.nota, e.target.value) : c)); guardar(); }
   else if (e.target.matches("[data-importar]")) {
     const arquivo = e.target.files[0];
@@ -137,7 +151,8 @@ raiz.addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b) return;
   const c = atual(), d = b.dataset;
-  if ("nova" in d) { criando = true; desenhar(); raiz.querySelector('[data-criar] input[name="nome"]')?.focus(); }
+  if (d.sugerir) { const campo = raiz.querySelector("#diario-especie"); campo.value = porId(ESPECIES, d.sugerir)[2]; raiz.querySelector('[data-capturar] input[name="apelido"]').focus(); }
+  else if ("nova" in d) { criando = true; desenhar(); raiz.querySelector('[data-criar] input[name="nome"]')?.focus(); }
   else if ("cancelar" in d) { criando = false; desenhar(); }
   else if ("exportar" in d) {
     const link = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([D.exportar(campanhas)], { type: "application/json" })), download: "diario-pokeatlas.json" });
