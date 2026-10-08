@@ -1,0 +1,66 @@
+/* Diário de desafio: criar, registrar, time, queda, recarregar, exportar, importar e chegar de um desafio. */
+import { abrir, conferir, fechar, BASE } from "./_comum.mjs";
+import { writeFileSync, readFileSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+const fotos = process.argv[2], pasta = mkdtempSync(join(tmpdir(), "diario-"));
+const { navegador, pagina, erros } = await abrir();
+const capturar = async (p, nome, apelido = "") => { await p.fill("#diario-especie", nome); await p.fill('[data-capturar] input[name="apelido"]', apelido); await p.click('[data-capturar] button[type="submit"]'); };
+const conta = (p, titulo) => p.locator(`.diario-grupo:has(h3:text-is("${titulo}")) .diario-cartao`).count();
+
+await pagina.goto(`${BASE}/diario/`, { waitUntil: "networkidle" });
+conferir("sem campanhas, abre no formulário de começar", await pagina.locator("[data-criar]").isVisible());
+await pagina.fill('[data-criar] input[name="nome"]', "Teste em Kanto");
+await pagina.selectOption('[data-criar] select[name="jogo"]', { index: 0 });
+await pagina.fill('[data-criar] textarea[name="regras"]', "Só o primeiro encontro.\nQuem cai não volta.");
+await pagina.click('[data-criar] button[type="submit"]');
+conferir("a campanha é criada e mostra as regras", (await pagina.textContent(".diario-campanha h2")) === "Teste em Kanto" && (await pagina.textContent(".diario-regras-lidas")).includes("Quem cai não volta"));
+const rotas = await pagina.locator('[data-capturar] select[name="local"] option').count();
+conferir("o jogo traz as rotas numeradas da região", rotas > 5, `${rotas - 1} rotas`);
+await capturar(pagina, "Charmander", "Brasa");
+await capturar(pagina, "Charmeleon");
+conferir("a segunda da mesma família e do mesmo lugar gera os dois avisos", /mesma família/.test(await pagina.textContent(".diario-alerta")) && /só a primeira/.test(await pagina.textContent(".diario-alerta")));
+conferir("as capturas vão para a caixa", await conta(pagina, "Caixa") === 2);
+await pagina.locator('.diario-cartao:has-text("Brasa") [data-time]').click();
+conferir("pôr no time move da caixa para o time", await conta(pagina, "Time") === 1 && await conta(pagina, "Caixa") === 1);
+await pagina.locator('.diario-cartao:has-text("Brasa") [data-caiu]').click();
+conferir("quem cai sai do time e vai para os caídos", await conta(pagina, "Time") === 0 && await conta(pagina, "Caíram") === 1);
+await pagina.fill("[data-nota]", "Brock, Onix"); await pagina.locator("[data-nota]").blur();
+await pagina.click('[data-insignia="1"]');
+if (fotos) await pagina.screenshot({ path: `${fotos}/t5.png`, fullPage: true });
+await pagina.reload({ waitUntil: "networkidle" });
+conferir("recarregar mantém campanha, queda, nota e insígnia", await conta(pagina, "Caíram") === 1 && await pagina.inputValue("[data-nota]") === "Brock, Onix" && (await pagina.textContent(".diario-placar")).includes("1 de 8"));
+
+const [baixado] = await Promise.all([pagina.waitForEvent("download"), pagina.click("[data-exportar]")]);
+const arquivo = join(pasta, "diario.json"); await baixado.saveAs(arquivo);
+conferir("exportar entrega um arquivo com a campanha", JSON.parse(readFileSync(arquivo, "utf8")).campanhas[0].nome === "Teste em Kanto");
+const lixo = join(pasta, "lixo.json"); writeFileSync(lixo, "isto não é um diário");
+await pagina.setInputFiles("[data-importar]", lixo);
+conferir("importar arquivo estragado avisa e não apaga nada", /Nada foi alterado/.test(await pagina.textContent(".diario-alerta")) && await conta(pagina, "Caíram") === 1);
+await pagina.click("[data-apagar-campanha]"); await pagina.click("[data-apagar-campanha]");
+conferir("apagar pede confirmação e volta ao começo", await pagina.locator("[data-criar]").isVisible() && await pagina.locator(".diario-campanha").count() === 0);
+await pagina.setInputFiles("[data-importar]", arquivo);
+conferir("importar o arquivo exportado devolve a campanha", (await pagina.textContent(".diario-campanha h2")) === "Teste em Kanto" && await conta(pagina, "Caíram") === 1);
+
+await pagina.goto(`${BASE}/desafios/os-super-woopers/`, { waitUntil: "networkidle" });
+await pagina.click('a[href^="/diario/?"]');
+await pagina.waitForSelector("[data-criar]");
+conferir("o desafio abre o diário com nome, jogo e regras preenchidos", await pagina.inputValue('[data-criar] input[name="nome"]') === "Os Super Woopers" && (await pagina.inputValue('[data-criar] textarea[name="regras"]')).includes("Woopers") && (await pagina.inputValue('[data-criar] select[name="jogo"]')).includes("gold"));
+await pagina.goto(`${BASE}/desafios/?roleta=abc123#roleta`, { waitUntil: "networkidle" });
+conferir("a roleta passa o desafio sorteado para o diário", (await pagina.getAttribute("[data-diario-link]", "href")).includes("regras="));
+
+const sem = await abrir({ semArmazenamento: true });
+await sem.pagina.goto(`${BASE}/diario/`, { waitUntil: "networkidle" });
+await sem.pagina.fill('[data-criar] input[name="nome"]', "Sem guardar"); await sem.pagina.click('[data-criar] button[type="submit"]');
+await capturar(sem.pagina, "Pikachu");
+conferir("sem localStorage o diário funciona na visita e avisa que não guarda", await conta(sem.pagina, "Caixa") === 1 && /não está deixando/.test(await sem.pagina.textContent(".diario-alerta")) && sem.erros.length === 0, sem.erros.join(" | "));
+await sem.navegador.close();
+const cel = await abrir({ celular: true });
+await cel.pagina.goto(`${BASE}/diario/`, { waitUntil: "networkidle" });
+await cel.pagina.fill('[data-criar] input[name="nome"]', "No celular"); await cel.pagina.click('[data-criar] button[type="submit"]');
+await capturar(cel.pagina, "Bulbasaur");
+conferir("no celular a página não estoura para os lados", await cel.pagina.evaluate(() => document.documentElement.scrollWidth) === 390);
+if (fotos) await cel.pagina.screenshot({ path: `${fotos}/t5-cel.png` });
+await cel.navegador.close();
+await fechar(navegador, erros);

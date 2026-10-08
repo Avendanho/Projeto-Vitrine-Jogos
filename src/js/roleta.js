@@ -41,6 +41,7 @@ function sortear(semente) {
     v.especie = nome(um(comuns));
     v.seis = lista(varios(comuns, 6).map(nome));
     cenario = [["Jogo", `<a href="/jogos/${jogo.slug}/">${esc(jogo.nome)}</a>`], ["Região", esc(jogo.regiao)]];
+    v.jogoSlug = jogo.slug;
   } else {
     const ambiente = um(MUNDO.ambientes.filter((a) => a.especies.length >= 8));
     const todas = Object.keys(MUNDO.especies);
@@ -63,7 +64,7 @@ function sortear(semente) {
   const vitoria = um(PECAS.vitorias), derrota = um(PECAS.derrotas);
   const limite = (n) => Math.min(5, Math.max(1, Math.round(n)));
   return {
-    titulo: preencher(regra.titulo), cenario,
+    titulo: preencher(regra.titulo), cenario, jogo: v.jogoSlug ?? null,
     regra: preencher(regra.texto), complicacoes: complicacoes.map((c) => preencher(c.texto)),
     vitoria: vitoria.texto, derrota,
     dificuldade: limite(regra.d + complicacoes.reduce((s, c) => s + c.d, 0) * 0.6 + vitoria.d * 0.6),
@@ -92,6 +93,12 @@ function mostrar(semente, gravar) {
   resultado.classList.add("girou");
   copiar.hidden = false;
   copiar.textContent = "Copiar o link deste desafio";
+  // o diário abre com este desafio já anotado: nome, jogo e regras vão no endereço
+  const diario = secao.querySelector("[data-diario-link]");
+  if (diario) {
+    diario.href = `/diario/?${new URLSearchParams({ nome: d.titulo, ...(d.jogo ? { jogo: d.jogo } : {}), regras: [d.regra, ...d.complicacoes, `Vitória: ${d.vitoria}`, `Derrota: ${d.derrota}`].join("\n") })}`;
+    diario.textContent = "Acompanhar este desafio no diário";
+  }
   if (gravar) history.replaceState(null, "", `?roleta=${semente}#roleta`);
 }
 

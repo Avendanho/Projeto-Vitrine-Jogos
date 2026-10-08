@@ -6,6 +6,7 @@ import { REGIOES } from "../dados/atlas.mjs";
 import { POKEDEX, FICHAS, esc, enderecoEspecie } from "./base.mjs";
 import { moldura } from "./paginas.mjs";
 import { slot, dadosDaRoletaCobblemon } from "./paginas-cobblemon.mjs";
+import { enderecoDoDiario } from "./paginas-ferramentas.mjs";
 
 const RAIZ = { pokemon: "/desafios/", cobblemon: "/cobblemon/desafios/" };
 const doEdicao = (edicao) => DESAFIOS.filter((d) => d.edicao === edicao);
@@ -67,6 +68,7 @@ export function paginaDesafios(edicao) {
       <button type="button" class="ligacao" data-copiar hidden>Copiar o link deste desafio</button>
       <span class="so-leitor" aria-live="polite" data-copiado></span>
     </div>
+    ${cobblemon ? "" : '<p class="roleta-diario"><a class="ligacao" href="/diario/" data-diario-link>Acompanhar uma campanha no diário</a></p>'}
   </div>
   <article class="roleta-resultado painel" data-resultado aria-live="polite">
     <p class="roleta-vazio">O desafio sorteado aparece aqui. Cada um tem um link próprio, para você mandar o mesmo a um amigo.</p>
@@ -131,9 +133,14 @@ export function paginaDesafio(d) {
     </dl>
   </section>
 
+  ${cobblemon ? "" : `<section class="desafio-outro">
+    <p class="prosa">Vai encarar? O diário guarda as capturas, o time e quem caiu, com estas regras já anotadas.</p>
+    <a class="botao" href="${esc(enderecoDoDiario({ nome: d.nome, jogo: jogos[0]?.slug, regras: [d.objetivo, ...d.blocos.flatMap((b) => (b.itens ? b.itens : [b.texto]))].join("\n") }))}">Acompanhar no diário</a>
+  </section>`}
+
   <section class="desafio-outro">
     <p class="prosa">Quer outra coisa? A roleta sorteia um desafio novo a cada giro.</p>
-    <a class="botao" href="${RAIZ[d.edicao]}#roleta">Girar a roleta</a>
+    <a class="botao botao-contorno" href="${RAIZ[d.edicao]}#roleta">Girar a roleta</a>
   </section>
 
   <nav class="jogo-passos" aria-label="Outros desafios">

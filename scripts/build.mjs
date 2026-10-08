@@ -13,7 +13,7 @@ import {
   paginaCobblemonInicio, paginaCobblemonPokemon, paginaCobblemonEspecie, paginaCobblemonItens,
   paginaCobblemonEstruturas, paginaCobblemonBiomas, ESPECIES_DO_COBBLEMON
 } from "./paginas-cobblemon.mjs";
-import { paginaCompararPokemon, paginaQuiz, paginaTime } from "./paginas-ferramentas.mjs";
+import { paginaCompararPokemon, paginaQuiz, paginaTime, paginaDiario } from "./paginas-ferramentas.mjs";
 import { moduloEspecies, moduloTipos, moduloJogos } from "./dados-navegador.mjs";
 import { paginaDesafios, paginaDesafio, dadosDaRoleta, TODOS_OS_DESAFIOS, enderecoDoDesafio } from "./paginas-desafios.mjs";
 import { svgIlha, valoresDe, sementeDe, malhaQuadrada, EIXOS } from "../src/js/relevo.js";
@@ -133,6 +133,7 @@ await escrever("comparar/pokemon/index.html", paginaCompararPokemon());
 await escrever("js/dados/especies.js", moduloEspecies());
 await escrever("quiz/index.html", paginaQuiz());
 await escrever("time/index.html", paginaTime());
+await escrever("diario/index.html", paginaDiario());
 await escrever("js/dados/tipos.js", moduloTipos());
 await escrever("js/dados/jogos.js", moduloJogos());
 await escrever("bussola/index.html", paginaBussola());

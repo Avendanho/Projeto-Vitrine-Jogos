@@ -1608,6 +1608,46 @@ a.slot:hover { background: #B4B4D8; }
 .time .nota-editorial { margin-top: var(--e3); max-width: 70ch; }
 @media (max-width: 760px) { .time-vagas { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
+/* ---------- diário de desafio ---------- */
+
+.roleta-diario { margin-top: var(--e3); }
+.diario { padding: var(--e3) var(--margem) var(--e7); max-width: 76rem; }
+.diario [hidden] { display: none; }
+.diario-barra { display: flex; flex-wrap: wrap; align-items: end; gap: var(--e3) var(--e4); padding-bottom: var(--e3); border-bottom: 1.5px solid currentColor; }
+.diario-importar { cursor: pointer; }
+.diario-importar:focus-within { outline: 3px solid var(--rota); outline-offset: 3px; }
+.diario-alerta { margin-bottom: var(--e3); padding: var(--e2) var(--e3); background: var(--papel); border-left: 5px solid var(--rota); font-size: var(--t-pequeno); font-weight: 600; }
+.diario-nova { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e3); margin-top: var(--e4); padding: var(--e4); background: var(--papel); border: 1.5px solid var(--tinta); }
+.diario-nova h2, .diario-regras, .diario-botoes { grid-column: 1 / -1; }
+.diario-nova h2, .diario-campanha h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; font-stretch: 116%; letter-spacing: -0.02em; line-height: 1.05; }
+.diario :is(input[type="text"], textarea) { width: 100%; padding: 11px 12px; font: inherit; font-size: var(--t-texto); color: var(--tinta); background: var(--papel-claro); border: 1.5px solid var(--tinta); border-radius: 2px; }
+.diario-botoes { display: flex; align-items: center; gap: var(--e3); }
+.diario-campanha { margin-top: var(--e4); }
+.diario-campanha > header p { margin-top: 4px; }
+.diario-regras-lidas { margin-top: var(--e3); max-width: 70ch; }
+.diario-regras-lidas summary { cursor: pointer; font-weight: 700; }
+.diario-regras-lidas p { margin-top: var(--e2); font-family: var(--caderno); font-size: 1.15rem; line-height: 1.45; }
+.diario-placar { display: flex; flex-wrap: wrap; gap: var(--e2) var(--e5); margin-top: var(--e4); padding: var(--e3) 0; border-block: 1.5px solid currentColor; font-size: var(--t-pequeno); }
+.diario-numero { font-size: 1.7rem; font-weight: 800; font-stretch: 118%; font-variant-numeric: tabular-nums; }
+.diario-placar .botao { min-width: 2.4rem; }
+.diario-captura { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); align-items: end; gap: var(--e3); margin-top: var(--e4); padding: var(--e3); background: var(--papel); border: 1.5px solid var(--tinta); }
+.diario-captura h3 { grid-column: 1 / -1; font-size: var(--t-destaque); font-weight: 800; }
+.diario-captura .dex-busca { max-width: none; }
+.diario-grupo { margin-top: var(--e5); }
+.diario-grupo h3 { font-size: var(--t-destaque); font-weight: 800; font-stretch: 114%; }
+.diario-vazio { margin-top: var(--e2); font-family: var(--caderno); font-style: italic; font-size: 1.15rem; }
+.diario-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 0 var(--e4); margin-top: var(--e2); }
+.diario-cartao { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 4px var(--e2); align-items: center; padding: 12px 0; border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent); }
+.diario-cartao > div { display: grid; gap: 1px; line-height: 1.25; }
+.diario-cartao strong { font-weight: 760; overflow-wrap: anywhere; }
+.diario-cartao span { font-size: var(--t-pequeno); color: var(--tinta-suave); }
+.diario-cartao.caiu img { opacity: 0.45; }
+.diario-cartao.caiu strong { text-decoration: line-through; text-decoration-color: var(--rota); text-decoration-thickness: 2px; }
+.diario-nota input { margin-top: 4px; padding: 6px 8px !important; font-size: var(--t-pequeno) !important; }
+.diario-acoes { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--e3); font-size: var(--t-pequeno); }
+.diario-fim { margin-top: var(--e6); font-size: var(--t-pequeno); }
+@media (max-width: 620px) { .diario-nova { grid-template-columns: minmax(0, 1fr); padding: var(--e3); } }
+
 /* ---------- movimento reduzido ---------- */
 
 @media (prefers-reduced-motion: reduce) {

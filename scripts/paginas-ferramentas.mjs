@@ -118,3 +118,29 @@ export function paginaTime() {
     descricao: "Monte um time de até seis Pokémon e veja fraquezas, resistências e o que falta cobrir, com filtro pela Pokédex de cada jogo."
   });
 }
+
+/* ---------- diário de desafio ---------- */
+
+/* O endereço que abre o diário com uma campanha já preenchida: é assim que um desafio ou a roleta passam as regras adiante. */
+export function enderecoDoDiario({ nome, jogo, regras }) {
+  const busca = new URLSearchParams({ nome, ...(jogo ? { jogo } : {}), regras: regras.slice(0, 1500) });
+  return `/diario/?${busca}`;
+}
+
+export function paginaDiario() {
+  const corpo = `
+<section class="cabecalho">
+  <p class="migalha"><a href="/desafios/">Desafios</a></p>
+  <h1>Diário de desafio</h1>
+  <p class="prosa">Acompanhe uma campanha do começo ao fim: o que foi capturado em cada lugar, quem está no time, quem ficou na caixa e quem caiu pelo caminho. Serve para um Nuzlocke, para um desafio do atlas ou para as regras que você inventar.</p>
+  <p class="nota-editorial">O diário fica guardado neste navegador. Exporte de vez em quando: se os dados do navegador forem limpos, ele some. O atlas não tem a tabela de encontros de cada rota, então a espécie capturada é você quem informa.</p>
+</section>
+<section class="diario" data-diario>
+  ${semJs('O diário precisa de JavaScript. Os <a href="/desafios/">desafios</a> podem ser lidos sem ele.')}
+  <div data-palco></div>
+</section>`;
+  return moldura({
+    titulo: "Diário de desafio", caminho: "/diario/", classe: "pagina-diario", corpo, modulo: "diario",
+    descricao: "Acompanhe um Nuzlocke ou um desafio de Pokémon: capturas por rota, time, caixa, quem caiu e insígnias, guardados no seu navegador."
+  });
+}
