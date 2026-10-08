@@ -9,7 +9,7 @@ test("números por extenso em inglês", () => {
 
 test("as duas línguas têm as mesmas frases", () => {
   const pt = LINGUAS["pt-BR"], en = LINGUAS.en;
-  for (const grupo of ["cromo", "inicio_", "bussola_", "prancha"]) assert.deepEqual(Object.keys(en[grupo]).sort(), Object.keys(pt[grupo]).sort(), grupo);
+  for (const grupo of ["cromo", "inicio_", "bussola_", "jogo_", "prancha"]) assert.deepEqual(Object.keys(en[grupo]).sort(), Object.keys(pt[grupo]).sort(), grupo);
 });
 
 test("um jogo em inglês troca o texto e mantém o resto", () => {

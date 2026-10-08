@@ -12,6 +12,9 @@ const rotulo = secao.querySelector("[data-dex-rotulo]");
 const vazio = secao.querySelector("[data-dex-vazio]");
 const mais = secao.querySelector("[data-dex-mais]");
 
+/* As palavras do contador vêm da página, que pode estar em português ou em inglês. */
+const ROTULOS = { especie: "espécie", especies: "espécies", mostrar: "Mostrar as {n} espécies", ...JSON.parse(secao.dataset.rotulos || "{}") };
+
 let atual = gavetas[0];
 let tipo = "";
 
@@ -36,10 +39,10 @@ function aplicar() {
     b.setAttribute("aria-pressed", String(b.dataset.tipo === tipo));
   }
   contagem.textContent = visiveis;
-  rotulo.textContent = visiveis === 1 ? "espécie" : "espécies";
+  rotulo.textContent = visiveis === 1 ? ROTULOS.especie : ROTULOS.especies;
   vazio.hidden = visiveis > 0;
   mais.parentElement.hidden = !secao.classList.contains("recolhida");
-  mais.textContent = `Mostrar as ${atual.children.length} espécies`;
+  mais.textContent = ROTULOS.mostrar.replace("{n}", atual.children.length);
 }
 
 for (const aba of abas) {

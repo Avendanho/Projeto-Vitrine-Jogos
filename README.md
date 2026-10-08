@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/Status-Online-success?style=flat-square" alt="Status" />
   <img src="https://img.shields.io/badge/Node.js-%3E%3D20-informational?style=flat-square&logo=node.js" alt="Node version" />
   <img src="https://img.shields.io/badge/Framework-Zero%20Dependencies%20(Vanilla)-f5a623?style=flat-square" alt="Zero Framework" />
-  <img src="https://img.shields.io/badge/P%C3%A1ginas%20Geradas-1.988%20est%C3%A1ticas-blue?style=flat-square" alt="Páginas" />
+  <img src="https://img.shields.io/badge/P%C3%A1ginas%20Geradas-2.018%20est%C3%A1ticas-blue?style=flat-square" alt="Páginas" />
   <img src="https://img.shields.io/badge/Dados-Pok%C3%A9API-red?style=flat-square" alt="PokéAPI" />
   <img src="https://img.shields.io/badge/Tipo-Projeto%20de%20F%C3%A3%20(N%C3%A3o%20Oficial)-lightgrey?style=flat-square" alt="Não Oficial" />
   <img src="https://img.shields.io/badge/Licen%C3%A7a-MIT%20(c%C3%B3digo)-green?style=flat-square" alt="Licença MIT" />
@@ -147,8 +147,8 @@ O atlas abre em silêncio. O botão do alto-falante, no cabeçalho, abre um pain
 - **Sons das teclas:** bipes de aparelho na edição Pokémon e o estalo de menu em blocos na edição Cobblemon.
 - **Gritos:** a página de cada espécie, nas duas edições, tem o botão **Ouvir o grito**, que toca o grito do Pokémon nos jogos. Esse funciona mesmo com o som do atlas desligado.
 
-### 11. 🌍 Versão em inglês (`/en/` e `/en/compass/`)
-A página inicial e a bússola existem também em inglês, com os nomes dos eixos, as chamadas e as notas dos jogos, os textos das regiões e as oito perguntas traduzidos. O link **English** fica no menu das duas páginas. As outras seções seguem só em português, e as páginas em inglês avisam disso nos links que levam a elas.
+### 11. 🌍 Versão em inglês (`/en/`, `/en/compass/` e `/en/games/<jogo>/`)
+A página inicial, a bússola e a ficha de cada um dos 30 jogos existem também em inglês: os nomes dos eixos, os textos e as listas de cada jogo, os textos das regiões, as oito perguntas e os tipos na Pokédex de cada jogo. O link **English** fica no menu dessas páginas. As outras seções seguem só em português, e as páginas em inglês avisam disso nos links que levam a elas.
 
 ### 12. 📲 Para instalar e compartilhar
 - **Instalar no celular:** o atlas tem manifesto e ícones, e pode ser adicionado à tela inicial como um aplicativo.
@@ -175,11 +175,11 @@ A edição Cobblemon tem direção própria (pergaminho de mapa, painéis de inv
 ## ⚡ Arquitetura e Engenharia
 
 - **Zero Dependências em Produção:** Sem frameworks pesados (sem React, Vue, Next.js ou Tailwind). Toda a aplicação roda sobre HTML5 semântico, CSS moderno (com variáveis e Grid/Flexbox) e Vanilla JavaScript (ES Modules).
-- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **1.988 páginas HTML estáticas prontas em ~1,2 segundos**.
+- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **2.018 páginas HTML estáticas prontas em ~1,2 segundos**.
 - **Performance Extrema:** Carregamento instantâneo, First Contentful Paint (FCP) quase imediato e consumo mínimo de recursos no cliente.
 - **3D sem biblioteca:** as maquetes de estruturas e biomas e os modelos de Pokémon giram num visor próprio (`src/js/visor.js`), com WebGL e, onde o navegador não o entrega, um desenhista de software.
 - **Som sem arquivo de música:** a trilha e os efeitos são partituras escritas em texto (`src/js/som-logica.js`) e tocadas com osciladores; só os gritos dos Pokémon são arquivos.
-- **Duas línguas sem duplicar página:** a moldura, o início e a bússola recebem a língua como parâmetro; as frases estão em `scripts/textos.mjs` e as traduções do conteúdo em `dados/en.mjs`, e o build falha se alguma tradução ficar para trás.
+- **Duas línguas sem duplicar página:** a moldura, o início, a bússola e a ficha de jogo recebem a língua como parâmetro; as frases estão em `scripts/textos.mjs` e as traduções do conteúdo em `dados/en.mjs`, e o build falha se alguma tradução ficar para trás.
 - **Testes:** as regras de cada ferramenta ficam em módulos puros (`src/js/*-logica.js`) testados com `node:test`; roteiros de navegador em `testes/navegador/` conferem cada página com Playwright.
 - **Validação Rigorosa em Build:** O processo de compilação valida previamente cada rota, nota de 1 a 5, compatibilidade de Pokédex e coerência cartográfica antes de emitir a pasta de distribuição.
 
@@ -193,7 +193,7 @@ Projeto-Vitrine-Jogos/
 │   ├── atlas.mjs                # Regiões, cidades, rotas e consoles
 │   ├── jogos.mjs                # Títulos, atributos (1 a 5), mascotes e plataformas
 │   ├── desafios.mjs             # Desafios escritos e peças da roleta
-│   ├── en.mjs                   # O que o início e a bússola dizem em inglês
+│   ├── en.mjs                   # O que o início, a bússola e as fichas dos jogos dizem em inglês
 │   ├── pokedex.json, fichas.json, tipos.json, encontros.json   # Espécies, fichas, tipos e encontros por rota (PokéAPI)
 │   ├── cartas.json              # Coordenadas vetoriais das cartas das regiões
 │   ├── cobblemon.json           # Espécies, spawns, itens, receitas e estruturas (extraído do mod)
@@ -202,7 +202,7 @@ Projeto-Vitrine-Jogos/
 ├── scripts/                     # Motor do SSG e automação de dados
 │   ├── build.mjs                # Compilador principal (gera dist/ sem dependências)
 │   ├── paginas*.mjs             # Templates: principais, Pokédex, Cobblemon, desafios e ferramentas
-│   ├── textos.mjs               # As frases da moldura, do início e da bússola, em português e em inglês
+│   ├── textos.mjs               # As frases da moldura, do início, da bússola e da ficha de jogo, em português e em inglês
 │   ├── dados-navegador.mjs      # Módulos de dados que o navegador importa (dist/js/dados/)
 │   ├── baixar-mod.mjs           # Baixa o Cobblemon 1.8.1 (e o Minecraft) para .mod/, fora do Git
 │   ├── cobblemon.mjs            # Extrator dos dados do mod
@@ -235,7 +235,6 @@ Projeto-Vitrine-Jogos/
 ├── testes/                      # Testes de unidade (node:test) e roteiros de navegador
 ├── docs/                        # Plano de implementação, texto de divulgação e capturas de tela
 ├── LICENSE                      # Licença MIT do código, com a ressalva do material de terceiros
-├── BRIEF.md                     # Decisões de direção de arte e de conteúdo, rodada a rodada
 ├── package.json                 # Scripts e ferramentas auxiliares
 └── vercel.json                  # Roteamento e configuração de deploy
 ```
@@ -282,7 +281,7 @@ Projeto-Vitrine-Jogos/
 | Comando | Descrição |
 | :--- | :--- |
 | `npm run dev` | Compila o site em `dist/` e inicia o servidor local em `http://localhost:4600`. |
-| `npm run build` | Valida as regras de negócio e compila todas as 1.988 páginas HTML. |
+| `npm run build` | Valida as regras de negócio e compila todas as 2.018 páginas HTML. |
 | `npm test` | Testes de unidade das regras (time, diário, caçada, busca, modelos, som, dados). |
 | `npm run test:navegador` | Roteiros de navegador de todas as ferramentas (precisa do `npm run dev` rodando). |
 | `npm run verificar` | Auditoria visual: rola cada página em desktop, celular e movimento reduzido e tira fotos. |

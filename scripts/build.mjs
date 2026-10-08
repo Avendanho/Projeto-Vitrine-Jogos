@@ -10,7 +10,9 @@ import { terrenoSVG } from "./cenario.mjs";
 import { POKEDEX, FICHAS, CARTAS, COBBLEMON, SITE, VERMELHO } from "./base.mjs";
 import { FAVICON } from "./icone.mjs";
 import { PERGUNTAS } from "../dados/quiz.mjs";
-import { EIXOS_EN, JOGOS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN } from "../dados/en.mjs";
+import { EIXOS_EN, JOGOS_EN, FICHAS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN, ESTILOS_EN, CATEGORIAS_EN, TIPOS_EN } from "../dados/en.mjs";
+import { TIPOS as CATEGORIAS } from "../dados/atlas.mjs";
+import { ORDEM_TIPOS } from "./base.mjs";
 import { paginaPokedex, paginaEspecie, TODAS_AS_ESPECIES } from "./paginas-pokedex.mjs";
 import {
   paginaCobblemonInicio, paginaCobblemonPokemon, paginaCobblemonEspecie, paginaCobblemonItens,
@@ -89,7 +91,14 @@ function conferir() {
     if (!en?.chamada) { erros.push(`inglês: falta a chamada de ${j.slug}`); continue; }
     const pt = Object.keys(j.notas || {}).sort().join(), ing = Object.keys(en.notas || {}).sort().join();
     if (pt !== ing) erros.push(`inglês: as notas de ${j.slug} não batem com o original (${pt} / ${ing})`);
+    const ficha = FICHAS_EN[j.slug];
+    if (!ficha) { erros.push(`inglês: falta a ficha de ${j.slug}`); continue; }
+    for (const campo of ["texto", "paraQuem", "naoSe"]) if (ficha[campo]?.length !== j[campo].length) erros.push(`inglês: "${campo}" de ${j.slug} tem outro tamanho`);
+    for (const campo of ["pokedexNota", "semPokedex", "lugar"]) if (Boolean(j[campo]) !== Boolean(ficha[campo])) erros.push(`inglês: "${campo}" de ${j.slug} não acompanha o original`);
   }
+  for (const e of ESTILOS) if (!ESTILOS_EN[e.id]) erros.push(`inglês: falta o estilo ${e.id}`);
+  for (const c of CATEGORIAS) if (!CATEGORIAS_EN[c.id]) erros.push(`inglês: falta a categoria ${c.id}`);
+  for (const tipo of ORDEM_TIPOS) if (!TIPOS_EN[tipo]) erros.push(`inglês: falta o tipo ${tipo}`);
   for (const r of REGIOES) if (!REGIOES_EN[r.id]?.texto || !REGIOES_EN[r.id]?.inspiracao) erros.push(`inglês: falta o texto da região ${r.id}`);
   for (const id of Object.keys(PEDIDOS)) for (const campo of ["frase", "alto", "baixo"]) if (!PEDIDOS_EN[id]?.[campo]) erros.push(`inglês: falta "${campo}" do pedido ${id}`);
   if (PERGUNTAS_EN.length !== PERGUNTAS.length) erros.push("inglês: o número de perguntas da bússola não bate");
@@ -164,7 +173,10 @@ await escrever("js/dados/jogos.js", moduloJogos());
 await escrever("bussola/index.html", paginaBussola());
 await escrever("en/compass/index.html", paginaBussola("en"));
 await escrever("404.html", pagina404());
-for (const j of JOGOS) await escrever(`jogos/${j.slug}/index.html`, paginaJogo(j));
+for (const j of JOGOS) {
+  await escrever(`jogos/${j.slug}/index.html`, paginaJogo(j));
+  await escrever(`en/games/${j.slug}/index.html`, paginaJogo(j, "en"));
+}
 
 // edição Cobblemon
 await escrever("cobblemon/index.html", paginaCobblemonInicio());

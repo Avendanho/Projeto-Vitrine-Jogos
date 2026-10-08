@@ -1,4 +1,4 @@
-/* As duas páginas que existem em inglês (o início e a bússola), e a bússola em português, que divide o código com ela. */
+/* As páginas que existem em inglês (o início, a bússola e a ficha de cada jogo), e a bússola em português, que divide o código com a outra. */
 import { abrir, conferir, fechar, BASE } from "./_comum.mjs";
 
 /* Palavras que só apareceriam se um trecho tivesse ficado sem tradução. */
@@ -47,14 +47,30 @@ for (let q = 1; q < 8; q++) { await pagina.locator(".opcao").first().click(); aw
 await pagina.waitForSelector("[data-resultado]:not([hidden])");
 const en = await pagina.innerText("[data-resultado]"), topo = await pagina.innerText(".bussola");
 conferir("o resultado vem em inglês, com o porquê de cada jogo", await pagina.locator(".resultado-lista > li").count() === 3 && en.includes("Why it suits you") && en.includes("First on the list") && topo.includes("Your profile is ready."));
-conferir("sem trecho esquecido em português", !PORTUGUES.test(en.replace(/\(in Portuguese\)/g, "")) && !PORTUGUES.test(topo), (en.match(PORTUGUES) || topo.match(PORTUGUES) || [""])[0]);
-conferir("as fichas dos jogos avisam que estão em português", (await pagina.getAttribute(".resultado-lista h3 a", "hreflang")) === "pt-BR" && en.includes("(in Portuguese)"));
+conferir("sem trecho esquecido em português", !PORTUGUES.test(en) && !PORTUGUES.test(topo), (en.match(PORTUGUES) || topo.match(PORTUGUES) || [""])[0]);
 const mesmoJogo = await pagina.getAttribute(".resultado-lista h3 a", "href");
+conferir("o resultado leva às fichas em inglês", mesmoJogo.startsWith("/en/games/") && (await pagina.getAttribute(".resultado-ligacoes .botao", "href")) === mesmoJogo, mesmoJogo);
 await pagina.goto(`${BASE}/bussola/#r=00000000`, { waitUntil: "networkidle" });
-conferir("as mesmas respostas dão o mesmo primeiro jogo nas duas línguas", (await pagina.getAttribute(".resultado-lista h3 a", "href")) === mesmoJogo, mesmoJogo);
+conferir("as mesmas respostas dão o mesmo primeiro jogo nas duas línguas", (await pagina.getAttribute(".resultado-lista h3 a", "href")) === mesmoJogo.replace("/en/games/", "/jogos/"), mesmoJogo);
+
+// a ficha de um jogo em inglês
+await pagina.goto(`${BASE}/en/games/scarlet-violet/`, { waitUntil: "networkidle" });
+const ficha = await pagina.evaluate(() => { const c = document.querySelector("main").cloneNode(true); c.querySelectorAll(".gaveta").forEach((g) => g.remove()); return c.innerText; });   // sem os nomes das espécies
+conferir("a ficha em inglês tem título, leitura e listas traduzidos", (await pagina.textContent("h1")) === "Pokémon Scarlet and Violet" && ficha.includes("Reading the profile") && ficha.includes("It is for you if you") && ficha.includes("One continuous map, with no gates between areas."));
+conferir("sem trecho esquecido em português na ficha", !PORTUGUES.test(ficha.replace(/\(in Portuguese\)/g, "").replace(/\(timeline, in Portuguese\)/g, "")), (ficha.match(PORTUGUES) || [""])[0]);
+conferir("a ficha aponta para a versão em português, e os vizinhos para as fichas em inglês", (await pagina.getAttribute(".topo-lingua", "href")) === "/jogos/scarlet-violet/" && (await pagina.getAttribute(".jogo-vizinhas .hex-item", "href")).startsWith("/en/games/") && (await pagina.getAttribute(".jogo-passos a", "href")).startsWith("/en/games/"));
+conferir("os tipos da Pokédex do jogo vêm em inglês", (await pagina.textContent('.dex-controles [data-tipo="fogo"]')) === "Fire" && (await pagina.textContent(".gaveta li .tipo")) !== "" && (await pagina.textContent("[data-dex-rotulo]")) === "species");
+const todas = Number(await pagina.textContent("[data-dex-contagem]"));
+await pagina.click('.dex-controles [data-tipo="fogo"]');
+const deFogo = Number(await pagina.textContent("[data-dex-contagem]"));
+conferir("o filtro por tipo funciona na ficha em inglês", deFogo > 0 && deFogo < todas, `${deFogo} de ${todas}`);
+await pagina.goto(`${BASE}/en/games/colosseum-xd/`, { waitUntil: "networkidle" });
+conferir("jogo sem Pokédex e fora das regiões também tem ficha em inglês", (await pagina.innerText(".jogo-pokedex")).includes("Orre has no regional Pokédex") && (await pagina.innerText(".ficha-tecnica")).includes("Setting"));
+await pagina.goto(`${BASE}/jogos/scarlet-violet/`, { waitUntil: "networkidle" });
+conferir("a ficha em português aponta para a versão em inglês", (await pagina.getAttribute(".topo-lingua", "href")) === "/en/games/scarlet-violet/" && (await pagina.textContent("[data-dex-rotulo]")) === "espécies");
 
 const cel = await abrir({ celular: true });
-for (const caminho of ["/en/", "/en/compass/"]) {
+for (const caminho of ["/en/games/scarlet-violet/", "/en/", "/en/compass/"]) {
   await cel.pagina.goto(BASE + caminho, { waitUntil: "networkidle" });
   conferir(`${caminho} cabe na largura do celular`, await cel.pagina.evaluate(() => document.documentElement.scrollWidth) === 390);
 }

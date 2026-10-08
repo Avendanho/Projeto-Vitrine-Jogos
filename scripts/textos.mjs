@@ -1,7 +1,7 @@
 /* O que a moldura, a página inicial e a bússola dizem, em português e em inglês. São as únicas páginas com
  * as duas línguas; o resto do atlas é só em português. As traduções do conteúdo (jogos, regiões, perguntas)
  * estão em dados/en.mjs; aqui ficam as frases da interface. */
-import { EIXOS_EN, CONSOLES_EN, JOGOS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN } from "../dados/en.mjs";
+import { EIXOS_EN, CONSOLES_EN, JOGOS_EN, FICHAS_EN, REGIOES_EN, PEDIDOS_EN, PERGUNTAS_EN, ESTILOS_EN, CATEGORIAS_EN, TIPOS_EN, LISTAS_EN } from "../dados/en.mjs";
 import { extenso, numero } from "./base.mjs";
 
 const UNIDADES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
@@ -12,7 +12,26 @@ const eEmIngles = (t) => t.replace(/ e /g, " and ");   // "Red, Blue e Yellow": 
 
 export const LINGUAS = {
   "pt-BR": {
-    codigo: "pt-BR", og: "pt_BR", inicio: "/", bussola: "/bussola/",
+    codigo: "pt-BR", og: "pt_BR", inicio: "/", bussola: "/bussola/", jogos: "/jogos/",
+    estilo: (e) => e.nome, categoria: (c) => c.nome, tipo: (t) => t, lista: (rotulo) => rotulo,
+    jogo_: {
+      todos: "Todos os jogos",
+      ficha: { lancamento: "Lançamento", console: "Console", regiao: "Região", cenario: "Cenário", geracao: "Geração", estilo: "Estilo", categoria: "Categoria" },
+      hexAlt: (jogo, notas) => `Hexágono de atributos de ${jogo}. Notas: ${notas}.`,
+      leitura: "Leitura do perfil", notas: "Notas de 1 a 5, na avaliação do atlas.", nota: ["nota ", " de 5"], media: "fica na média dos jogos do atlas",
+      paraVoce: "É para você, se", talvezNao: "Talvez não seja, se",
+      onde: "Onde se passa", abrirCarta: (lugar) => `Abrir a carta de ${lugar}`,
+      especimes: "Espécimes deste jogo", parecidos: "Jogos de perfil parecido", compararOsDois: "Comparar os dois",
+      ordem: "Ordem de lançamento", antes: "Lançado antes", depois: "Lançado depois",
+      descricao: (chamada, jogo) => `${chamada} Veja para quem é ${jogo}, o perfil do jogo e títulos parecidos.`,
+      pokedex: "Pokédex", elenco: "Elenco de Pokémon", pokedexDe: (lista) => `Pokédex de ${lista}`,
+      formaNativa: "Quando a espécie tem uma forma regional nativa deste jogo, é ela que aparece, com os tipos dela. ",
+      formaPadrao: "A arte e os tipos são os da forma padrão de cada espécie. ",
+      escolha: "Escolha uma espécie para abrir a página dela.",
+      lista: "Lista", procurar: "Procurar nesta lista", nomeOuNumero: "Nome ou número", tipo: "Tipo",
+      especie: "espécie", especies: "espécies", mostrarTodas: "Mostrar todas", mostrar: "Mostrar as {n} espécies",
+      vazio: "Nenhuma espécie com esse nome ou tipo nesta lista.", formaDe: (regiao) => `forma de ${regiao}`
+    },
     extenso, numero,
     eixo: (e) => e.nome,
     jogo: (j) => j,
@@ -64,10 +83,29 @@ export const LINGUAS = {
     }
   },
   en: {
-    codigo: "en", og: "en_US", inicio: "/en/", bussola: "/en/compass/",
+    codigo: "en", og: "en_US", inicio: "/en/", bussola: "/en/compass/", jogos: "/en/games/",
+    estilo: (e) => ESTILOS_EN[e.id], categoria: (c) => CATEGORIAS_EN[c.id], tipo: (t) => TIPOS_EN[t], lista: (rotulo) => LISTAS_EN[rotulo] ?? rotulo,
+    jogo_: {
+      todos: "All games (timeline, in Portuguese)",
+      ficha: { lancamento: "Release", console: "Console", regiao: "Region", cenario: "Setting", geracao: "Generation", estilo: "Style", categoria: "Category" },
+      hexAlt: (jogo, notas) => `Attribute hexagon of ${jogo}. Scores: ${notas}.`,
+      leitura: "Reading the profile", notas: "Scores from 1 to 5, in the atlas's own assessment.", nota: ["score ", " out of 5"], media: "sits at the average of the games in the atlas",
+      paraVoce: "It is for you if you", talvezNao: "Maybe not, if",
+      onde: "Where it takes place", abrirCarta: (lugar) => `Open the map of ${lugar}`,
+      especimes: "Specimens from this game", parecidos: "Games with a similar profile", compararOsDois: "Compare the two",
+      ordem: "Release order", antes: "Released before", depois: "Released after",
+      descricao: (chamada, jogo) => `${chamada} See who ${jogo} is for, the game's profile and similar titles.`,
+      pokedex: "Pokédex", elenco: "Pokémon roster", pokedexDe: (lista) => `${lista} Pokédex`,
+      formaNativa: "When a species has a regional form native to this game, that is the one shown, with its types. ",
+      formaPadrao: "The art and types are those of each species' standard form. ",
+      escolha: "Pick a species to open its page (in Portuguese).",
+      lista: "List", procurar: "Search this list", nomeOuNumero: "Name or number", tipo: "Type",
+      especie: "species", especies: "species", mostrarTodas: "Show all", mostrar: "Show all {n} species",
+      vazio: "No species with that name or type in this list.", formaDe: (regiao) => `${regiao} form`
+    },
     extenso: emIngles, numero: (n) => n.toLocaleString("en-US"),
     eixo: (e) => EIXOS_EN[e.id],
-    jogo: (j) => ({ ...j, titulo: eEmIngles(j.titulo), curto: eEmIngles(j.curto), chamada: JOGOS_EN[j.slug].chamada, notas: JOGOS_EN[j.slug].notas }),
+    jogo: (j) => ({ ...j, titulo: eEmIngles(j.titulo), curto: eEmIngles(j.curto), chamada: JOGOS_EN[j.slug].chamada, notas: JOGOS_EN[j.slug].notas, ...FICHAS_EN[j.slug] }),
     regiao: (r) => ({ ...r, ...REGIOES_EN[r.id] }),
     pedido: (p, id) => ({ ...p, ...PEDIDOS_EN[id] }),
     console: (c) => CONSOLES_EN[c.id] ?? c.nome, e: "and",
@@ -79,7 +117,7 @@ export const LINGUAS = {
     /* A moldura das páginas em inglês: as abas levam às seções em português, e o rodapé avisa disso. */
     edicao: {
       nome: "Pokémon", inicio: "/en/", sufixo: "PokéAtlas",
-      lema: "A guide to find out which Pokémon game suits you. Only this page and the compass are in English so far; the other sections are in Portuguese.",
+      lema: "A guide to find out which Pokémon game suits you. The home page, the compass and the page of each game are in English; the other sections are in Portuguese.",
       acao: { href: "/en/compass/", texto: "Open the compass" },
       nav: [
         { href: "/pokedex/", texto: "Pokédex" },
@@ -102,7 +140,7 @@ export const LINGUAS = {
       vertices: "Six vertices, six qualities. The farther from the center, the higher the score.",
       teclas: "Put another profile on screen", de: "of",
       cartas: (n) => `${n} maps, from Kanto to Paldea`,
-      cartasTexto: "Each region has its map, its three first partners and the games set in it. Tap a map to open it with names and routes (in Portuguese).",
+      cartasTexto: "Each region has its map, its three first partners and the games set in it. Tap a map to open it with names and routes (the map pages are in Portuguese).",
       geracao: "Generation", abrirCarta: (nome) => `Open the map of ${nome}`,
       anos: (n) => `${n} years on the road`,
       anosTexto: "From a gray cartridge in 1996 to open worlds for four players. Each dot on the ruler is a game in this atlas, and no two play the same way.",

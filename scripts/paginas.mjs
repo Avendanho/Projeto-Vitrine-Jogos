@@ -17,7 +17,7 @@ const nome = (lista, id) => lista.find((x) => x.id === id)?.nome ?? id;
 
 export const ORDENADOS = [...JOGOS].sort((a, b) => a.ano - b.ano || (a.tipo === "derivado") - (b.tipo === "derivado"));
 const porSlug = Object.fromEntries(JOGOS.map((j) => [j.slug, j]));
-const consolesDe = (j) => j.plataformas.map((p) => nome(CONSOLES, p)).join(" e ");
+const consolesDe = (j, L = LINGUAS["pt-BR"]) => j.plataformas.map((p) => L.console(CONSOLES.find((c) => c.id === p))).join(` ${L.e} `);
 const lugarDe = (j) => (j.regiao === "outras" ? (j.lugar ? maiuscula(j.lugar) : null) : nome(REGIOES, j.regiao));
 const ANO_ATUAL = Math.max(...JOGOS.map((j) => j.ano));
 
@@ -45,13 +45,17 @@ function prancha(id, L = LINGUAS["pt-BR"]) {
 </figure>`;
 }
 
-function itemHex(j, opc = {}) {
-  return `<a class="hex-item" href="/jogos/${j.slug}/">
+function itemHex(original, opc = {}, L = LINGUAS["pt-BR"]) {
+  const j = L.jogo(original);
+  return `<a class="hex-item" href="${L.jogos}${j.slug}/">
   ${hex(j, opc)}
   <span class="hex-nome">${esc(j.curto)}</span>
-  <span class="hex-meta">${j.ano}, ${esc(consolesDe(j))}</span>
+  <span class="hex-meta">${j.ano}, ${esc(consolesDe(j, L))}</span>
 </a>`;
 }
+
+/* O selo de um tipo na língua da página. (O data-tipo continua em português: é ele que dá a cor e que o filtro lê.) */
+const seloEm = (L) => (t) => `<span class="tipo" data-tipo="${semAcento(t)}">${L.tipo(t)}</span>`;
 
 /* ---------- moldura comum ---------- */
 
@@ -207,7 +211,7 @@ function folhaRegiao(regiao, L) {
     <p class="folha-texto">${esc(r.texto)}</p>
     <div class="folha-iniciais">${r.iniciais.map((id) => prancha(id, L)).join("")}</div>
     <ul class="folha-jogos">
-      ${jogos.map((j) => `<li><a href="/jogos/${j.slug}/"${pt}>${hex(j)}<span><span class="hex-nome">${esc(j.curto)}</span><span class="hex-meta">${j.ano}</span></span></a></li>`).join("\n      ")}
+      ${jogos.map((j) => `<li><a href="${L.jogos}${j.slug}/">${hex(j)}<span><span class="hex-nome">${esc(j.curto)}</span><span class="hex-meta">${j.ano}</span></span></a></li>`).join("\n      ")}
     </ul>
   </div>
   ${caixaCarta(r.id, { ligacao: `/regioes/${r.id}/`, rotulo: T.abrirCarta(r.nome) })}
@@ -227,7 +231,7 @@ export function paginaInicio(lingua = "pt-BR") {
     const p = L.pedido(PEDIDOS[e.id], e.id), j = jogoDe(p.eleito);
     return `<li data-eixo="${e.id}" data-eleito="${j.slug}">
         <p class="pico-frase">“${esc(p.frase)}”</p>
-        <p class="pico-resposta">${T.picoResposta(L.eixo(e), `<a href="/jogos/${j.slug}/"${pt}>${esc(j.curto)}</a>`)}</p>
+        <p class="pico-resposta">${T.picoResposta(L.eixo(e), `<a href="${L.jogos}${j.slug}/">${esc(j.curto)}</a>`)}</p>
       </li>`;
   }).join("\n      ");
 
@@ -244,7 +248,7 @@ export function paginaInicio(lingua = "pt-BR") {
     <h1 class="marca-gigante" id="t-abertura">PokéAtlas</h1>
     <p class="abertura-lema" data-entra="palavras" data-ritmo="1200">${T.lema}</p>
     <div class="abertura-legenda">
-      <p>${T.naTela(`<a href="/jogos/${primeiro.slug}/"${pt} data-perfil-atual>${esc(primeiro.curto)}</a>`)}</p>
+      <p>${T.naTela(`<a href="${L.jogos}${primeiro.slug}/" data-perfil-atual>${esc(primeiro.curto)}</a>`)}</p>
       <p>${T.vertices}</p>
     </div>
     <div class="abertura-teclas" role="group" aria-label="${T.teclas}">
@@ -367,27 +371,30 @@ function barra(nota) {
   return `<span class="estratos" aria-hidden="true">${[1, 2, 3, 4, 5].map((n) => `<span class="estrato${n <= nota ? ` estrato-${n}` : ""}"></span>`).join("")}</span>`;
 }
 
-export function paginaJogo(j) {
-  const i = ORDENADOS.indexOf(j);
-  const anterior = ORDENADOS[i - 1], proximo = ORDENADOS[i + 1];
+export function paginaJogo(original, lingua = "pt-BR") {
+  const L = LINGUAS[lingua], T = L.jogo_, pt = lingua === "pt-BR" ? "" : ' hreflang="pt-BR"';
+  const j = L.jogo(original);
+  const i = ORDENADOS.indexOf(original);
+  const anterior = ORDENADOS[i - 1] && L.jogo(ORDENADOS[i - 1]), proximo = ORDENADOS[i + 1] && L.jogo(ORDENADOS[i + 1]);
   const lugar = lugarDe(j);
-  const eixos = EIXOS.map((e) => ({ ...e, nota: j.atributos[e.id] })).sort((a, b) => b.nota - a.nota);
-  const perto = vizinhos(j);
+  const eixos = EIXOS.map((e) => ({ ...e, nome: L.eixo(e), nota: j.atributos[e.id] })).sort((a, b) => b.nota - a.nota);
+  const perto = vizinhos(original);
   const resumo = eixos.map((e) => `${e.nome} ${e.nota}`).join(", ");
   const ficha = [
-    ["Lançamento", String(j.ano)],
-    ["Console", esc(consolesDe(j))],
-    lugar ? [j.regiao === "outras" ? "Cenário" : "Região", j.regiao === "outras" ? esc(lugar) : `<a href="/regioes/${j.regiao}/">${esc(lugar)}</a>`] : null,
-    j.geracao ? ["Geração", ROMANOS[j.geracao]] : null,
-    ["Estilo", esc(nome(ESTILOS, j.estilo))],
-    ["Categoria", esc(nome(TIPOS, j.tipo))]
+    [T.ficha.lancamento, String(j.ano)],
+    [T.ficha.console, esc(consolesDe(j, L))],
+    lugar ? [j.regiao === "outras" ? T.ficha.cenario : T.ficha.regiao, j.regiao === "outras" ? esc(lugar) : `<a href="/regioes/${j.regiao}/"${pt}>${esc(lugar)}</a>`] : null,
+    j.geracao ? [T.ficha.geracao, ROMANOS[j.geracao]] : null,
+    [T.ficha.estilo, esc(L.estilo(ESTILOS.find((e) => e.id === j.estilo)))],
+    [T.ficha.categoria, esc(L.categoria(TIPOS.find((c) => c.id === j.tipo)))]
   ].filter(Boolean);
+  const pedido = (id) => L.pedido(PEDIDOS[id], id);
 
   const corpo = `
 <article class="jogo" data-slug="${j.slug}">
   <section class="jogo-topo">
     <div class="jogo-texto">
-      <p class="migalha"><a href="/linha-do-tempo/">Todos os jogos</a></p>
+      <p class="migalha"><a href="/linha-do-tempo/"${pt}>${T.todos}</a></p>
       <h1>${esc(j.titulo)}</h1>
       <p class="jogo-chamada">${esc(j.chamada)}</p>
       <dl class="ficha-tecnica">
@@ -396,22 +403,22 @@ export function paginaJogo(j) {
     </div>
     <figure class="jogo-hex">
       <div class="hex-vivo hex-do-jogo">
-        ${hex(j, { preguica: false, alt: `Hexágono de atributos de ${j.curto}. Notas: ${resumo}.` })}
+        ${hex(j, { preguica: false, alt: T.hexAlt(j.curto, resumo) })}
         <canvas aria-hidden="true"></canvas>
-        ${posicoesDosEixos(50).map((e) => `<span class="hex-eixo" data-eixo="${e.id}" style="left:${e.x.toFixed(1)}%;top:${e.y.toFixed(1)}%">${e.nome}</span>`).join("")}
+        ${eixosEmVolta(L)}
       </div>
     </figure>
   </section>
 
   <section class="jogo-leitura" aria-labelledby="t-leitura">
-    <h2 id="t-leitura">Leitura do perfil</h2>
-    <p class="nota-editorial">Notas de 1 a 5, na avaliação do atlas.</p>
+    <h2 id="t-leitura">${T.leitura}</h2>
+    <p class="nota-editorial">${T.notas}</p>
     <ul class="leitura-lista">
       ${eixos.map((e) => `<li data-eixo="${e.id}">
         <span class="leitura-eixo">${e.nome}</span>
         ${barra(e.nota)}
-        <span class="leitura-nota"><span class="so-leitor">nota </span>${e.nota}<span class="so-leitor"> de 5</span></span>
-        <span class="leitura-texto">${esc(j.notas[e.id] ?? `${maiuscula(e.nota >= 4 ? PEDIDOS[e.id].alto : e.nota <= 2 ? PEDIDOS[e.id].baixo : "fica na média dos jogos do atlas")}.`)}</span>
+        <span class="leitura-nota"><span class="so-leitor">${T.nota[0]}</span>${e.nota}<span class="so-leitor">${T.nota[1]}</span></span>
+        <span class="leitura-texto">${esc(j.notas[e.id] ?? `${maiuscula(e.nota >= 4 ? pedido(e.id).alto : e.nota <= 2 ? pedido(e.id).baixo : T.media)}.`)}</span>
       </li>`).join("\n      ")}
     </ul>
   </section>
@@ -422,49 +429,50 @@ export function paginaJogo(j) {
     </div>
     <div class="jogo-listas">
       <div>
-        <h2>É para você, se</h2>
+        <h2>${T.paraVoce}</h2>
         <ul class="lista-marcada">${j.paraQuem.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
       </div>
       <div>
-        <h2>Talvez não seja, se</h2>
+        <h2>${T.talvezNao}</h2>
         <ul class="lista-marcada lista-contra">${j.naoSe.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
       </div>
     </div>
   </section>
 
   ${j.regiao === "outras" ? "" : `<section class="jogo-regiao" aria-labelledby="t-regiao">
-    ${caixaCarta(j.regiao, { ligacao: `/regioes/${j.regiao}/`, rotulo: `Abrir a carta de ${lugar}` })}
+    ${caixaCarta(j.regiao, { ligacao: `/regioes/${j.regiao}/`, rotulo: T.abrirCarta(lugar) })}
     <div>
-      <h2 id="t-regiao">Onde se passa</h2>
+      <h2 id="t-regiao">${T.onde}</h2>
       <p class="jogo-regiao-nome">${esc(lugar)}</p>
-      <p class="prosa">${esc(REGIOES.find((x) => x.id === j.regiao).texto)}</p>
-      <a class="botao botao-contorno" href="/regioes/${j.regiao}/">Abrir a carta de ${esc(lugar)}</a>
+      <p class="prosa">${esc(L.regiao(REGIOES.find((x) => x.id === j.regiao)).texto)}</p>
+      <a class="botao botao-contorno" href="/regioes/${j.regiao}/"${pt}>${esc(T.abrirCarta(lugar))}</a>
     </div>
   </section>`}
 
   <section class="jogo-especimes" aria-labelledby="t-especimes">
-    <h2 id="t-especimes">Espécimes deste jogo</h2>
-    <div class="pranchas">${j.mascotes.map((id) => prancha(id)).join("")}</div>
+    <h2 id="t-especimes">${T.especimes}</h2>
+    <div class="pranchas">${j.mascotes.map((id) => prancha(id, L)).join("")}</div>
   </section>
 
-  ${secaoPokedex(j)}
+  ${secaoPokedex(j, L)}
 
   <section class="jogo-vizinhas" aria-labelledby="t-vizinhas">
-    <h2 id="t-vizinhas">Jogos de perfil parecido</h2>
+    <h2 id="t-vizinhas">${T.parecidos}</h2>
     <ul class="estante estante-curta">
-      ${perto.map((o) => `<li>${itemHex(o)}<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${o.slug}">Comparar os dois</a></li>`).join("\n      ")}
+      ${perto.map((o) => `<li>${itemHex(o, {}, L)}<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${o.slug}"${pt}>${T.compararOsDois}</a></li>`).join("\n      ")}
     </ul>
   </section>
 
-  <nav class="jogo-passos" aria-label="Ordem de lançamento">
-    ${anterior ? `<a href="/jogos/${anterior.slug}/"><span>Lançado antes</span>${esc(anterior.curto)}, ${anterior.ano}</a>` : "<span></span>"}
-    ${proximo ? `<a href="/jogos/${proximo.slug}/"><span>Lançado depois</span>${esc(proximo.curto)}, ${proximo.ano}</a>` : "<span></span>"}
+  <nav class="jogo-passos" aria-label="${T.ordem}">
+    ${anterior ? `<a href="${L.jogos}${anterior.slug}/"><span>${T.antes}</span>${esc(anterior.curto)}, ${anterior.ano}</a>` : "<span></span>"}
+    ${proximo ? `<a href="${L.jogos}${proximo.slug}/"><span>${T.depois}</span>${esc(proximo.curto)}, ${proximo.ano}</a>` : "<span></span>"}
   </nav>
 </article>`;
 
   return moldura({
-    titulo: j.titulo, caminho: `/jogos/${j.slug}/`, classe: "pagina-jogo", corpo, modulo: "jogo", extra: j.pokedex ? "pokedex" : null,
-    descricao: `${j.chamada} Veja para quem é ${j.curto}, o perfil do jogo e títulos parecidos.`
+    titulo: j.titulo, caminho: `${L.jogos}${j.slug}/`, classe: "pagina-jogo", corpo, modulo: "jogo", extra: j.pokedex ? "pokedex" : null,
+    lingua, versoes: { "pt-BR": `/jogos/${j.slug}/`, en: `/en/games/${j.slug}/` },
+    descricao: T.descricao(j.chamada, j.curto)
   });
 }
 
@@ -634,42 +642,43 @@ const REGIAO_DA_LISTA = {
 };
 const NOME_DA_REGIAO = { alola: "Alola", galar: "Galar", hisui: "Hisui", paldea: "Paldea" };
 
-function secaoPokedex(j) {
+function secaoPokedex(j, L = LINGUAS["pt-BR"]) {
+  const T = L.jogo_, selo = seloEm(L);
   if (!j.pokedex) {
     return `<section class="jogo-pokedex" aria-labelledby="t-pokedex">
-    <h2 id="t-pokedex">Pokédex</h2>
+    <h2 id="t-pokedex">${T.pokedex}</h2>
     <p class="prosa">${esc(j.semPokedex)}</p>
   </section>`;
   }
-  const listas = j.pokedex.map(([id, rotulo]) => ({ id, rotulo, entradas: POKEDEX.dex[id] }));
+  const listas = j.pokedex.map(([id, rotulo]) => ({ id, elenco: rotulo === "Elenco", rotulo: L.lista(rotulo), entradas: POKEDEX.dex[id] }));
   const presentes = new Set(listas.flatMap((l) => l.entradas.flatMap(([, e]) => POKEDEX.especies[e][1])));
   const tipos = ORDEM_TIPOS.filter((t) => presentes.has(t));
   const unica = listas.length === 1;
-  const titulo = !unica ? "Pokédex" : listas[0].rotulo === "Elenco" ? "Elenco de Pokémon" : `Pokédex de ${listas[0].rotulo}`;
+  const titulo = !unica ? T.pokedex : listas[0].elenco ? T.elenco : T.pokedexDe(listas[0].rotulo);
   const gaveta = (l, i) => `<ol class="gaveta" data-lista="${l.id}"${i ? " hidden" : ""}>
       ${l.entradas.map(([n, e]) => {
         const nome = POKEDEX.especies[e][0];
         const regiao = REGIAO_DA_LISTA[l.id];
         const forma = regiao && POKEDEX.formas[regiao][e];
         const [arte, ts] = forma || [e, POKEDEX.especies[e][1]];
-        return `<li data-nome="${esc(semAcento(nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="${enderecoEspecie(e)}"><span class="dex-arte"><img src="/arte/mini/${arte}.webp" data-cor="/arte/mini/${arte}-cor.webp" alt="" width="92" height="92" loading="lazy" decoding="async"></span><span class="dex-numero">${String(n).padStart(3, "0")}</span><span class="dex-nome">${esc(nome)}</span>${forma ? `<span class="dex-forma">forma de ${NOME_DA_REGIAO[regiao]}</span>` : ""}<span class="dex-tipos">${ts.map(selo).join(" ")}</span></a></li>`;
+        return `<li data-nome="${esc(semAcento(nome))}" data-tipos="${ts.map(semAcento).join(" ")}"><a href="${enderecoEspecie(e)}"><span class="dex-arte"><img src="/arte/mini/${arte}.webp" data-cor="/arte/mini/${arte}-cor.webp" alt="" width="92" height="92" loading="lazy" decoding="async"></span><span class="dex-numero">${String(n).padStart(3, "0")}</span><span class="dex-nome">${esc(nome)}</span>${forma ? `<span class="dex-forma">${T.formaDe(NOME_DA_REGIAO[regiao])}</span>` : ""}<span class="dex-tipos">${ts.map(selo).join(" ")}</span></a></li>`;
       }).join("")}
     </ol>`;
-  return `<section class="jogo-pokedex" aria-labelledby="t-pokedex" data-pokedex>
+  return `<section class="jogo-pokedex" aria-labelledby="t-pokedex" data-pokedex data-rotulos="${esc(JSON.stringify({ especie: T.especie, especies: T.especies, mostrar: T.mostrar }))}">
     <h2 id="t-pokedex">${titulo}</h2>
-    <p class="nota-editorial">${j.pokedexNota ? `${esc(j.pokedexNota)} ` : ""}${listas.some((l) => REGIAO_DA_LISTA[l.id]) ? "Quando a espécie tem uma forma regional nativa deste jogo, é ela que aparece, com os tipos dela. " : "A arte e os tipos são os da forma padrão de cada espécie. "}Escolha uma espécie para abrir a página dela.</p>
+    <p class="nota-editorial">${j.pokedexNota ? `${esc(j.pokedexNota)} ` : ""}${listas.some((l) => REGIAO_DA_LISTA[l.id]) ? T.formaNativa : T.formaPadrao}${T.escolha}</p>
     <div class="dex-controles">
-      ${unica ? "" : `<div class="filtro-opcoes" role="group" aria-label="Lista">${listas.map((l, i) => `<button type="button" class="ficha" data-aba="${l.id}" aria-pressed="${i === 0}">${esc(l.rotulo)} <span class="dex-conta">${l.entradas.length}</span></button>`).join("")}</div>`}
+      ${unica ? "" : `<div class="filtro-opcoes" role="group" aria-label="${T.lista}">${listas.map((l, i) => `<button type="button" class="ficha" data-aba="${l.id}" aria-pressed="${i === 0}">${esc(l.rotulo)} <span class="dex-conta">${l.entradas.length}</span></button>`).join("")}</div>`}
       <div class="dex-busca">
-        <label for="dex-procurar">Procurar nesta lista</label>
-        <input id="dex-procurar" type="search" placeholder="Nome ou número" autocomplete="off" spellcheck="false">
+        <label for="dex-procurar">${T.procurar}</label>
+        <input id="dex-procurar" type="search" placeholder="${T.nomeOuNumero}" autocomplete="off" spellcheck="false">
       </div>
-      <div class="filtro-opcoes" role="group" aria-label="Tipo">${tipos.map((t) => `<button type="button" class="ficha ficha-tipo" data-tipo="${semAcento(t)}" aria-pressed="false">${t}</button>`).join("")}</div>
-      <p class="dex-resumo" aria-live="polite"><strong data-dex-contagem>${listas[0].entradas.length}</strong> <span data-dex-rotulo>espécies</span></p>
+      <div class="filtro-opcoes" role="group" aria-label="${T.tipo}">${tipos.map((t) => `<button type="button" class="ficha ficha-tipo" data-tipo="${semAcento(t)}" aria-pressed="false">${L.tipo(t)}</button>`).join("")}</div>
+      <p class="dex-resumo" aria-live="polite"><strong data-dex-contagem>${listas[0].entradas.length}</strong> <span data-dex-rotulo>${T.especies}</span></p>
     </div>
     ${listas.map(gaveta).join("\n    ")}
-    <p class="dex-mais" hidden><button type="button" class="botao botao-contorno" data-dex-mais>Mostrar todas</button></p>
-    <p class="vazio" data-dex-vazio hidden>Nenhuma espécie com esse nome ou tipo nesta lista.</p>
+    <p class="dex-mais" hidden><button type="button" class="botao botao-contorno" data-dex-mais>${T.mostrarTodas}</button></p>
+    <p class="vazio" data-dex-vazio hidden>${T.vazio}</p>
   </section>`;
 }
 

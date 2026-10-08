@@ -2,7 +2,8 @@
 import { EIXOS } from "./hexagono.js";
 import { hexVivo, REDUZIDO } from "./hex-vivo.js";
 /* A página inicial existe em português e em inglês: os nomes e os consoles vêm na língua dela. */
-const { JOGOS, PEDIDOS, DESTAQUES } = await import(document.documentElement.lang === "en" ? "./dados-en.js" : "./dados.js");
+const INGLES = document.documentElement.lang === "en", FICHAS = INGLES ? "/en/games/" : "/jogos/";
+const { JOGOS, PEDIDOS, DESTAQUES } = await import(INGLES ? "./dados-en.js" : "./dados.js");
 
 const limitar = (v, a, b) => Math.min(b, Math.max(a, v));
 const doisDigitos = (n) => String(n).padStart(2, "0");
@@ -26,7 +27,7 @@ function abertura() {
     const maior = Math.max(...j.valores);
     rotulos.forEach((r, i) => r.classList.toggle("ativo", j.valores[i] === maior));
     ligacao.textContent = j.curto;
-    ligacao.href = `/jogos/${j.slug}/`;
+    ligacao.href = `${FICHAS}${j.slug}/`;
     numero.textContent = doisDigitos(indice + 1);
     nota.textContent = `${j.ano}, ${j.consoles}`;
     teclas.forEach((t) => t.setAttribute("aria-pressed", String(t.dataset.perfil === j.slug)));

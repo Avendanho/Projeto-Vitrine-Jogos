@@ -128,11 +128,11 @@ function concluir(rolar) {
       </figure>
       <div>
         <p class="resultado-ordem">${T.ordem[k]}</p>
-        <h3><a href="/jogos/${j.slug}/"${emPortugues}>${esc(j.titulo)}</a></h3>
+        <h3><a href="${T.fichas}${j.slug}/">${esc(j.titulo)}</a></h3>
         <p class="resultado-chamada">${esc(j.chamada)}</p>
         <div class="resultado-porque"><h4>${T.porque}</h4><ul class="lista-marcada">${porque}</ul></div>
         ${atencao ? `<p class="resultado-atencao"><strong>${T.atencao}</strong> ${esc(atencao)}</p>` : ""}
-        <p class="resultado-ligacoes"><a class="botao botao-contorno" href="/jogos/${j.slug}/"${emPortugues}>${esc(T.ficha(j.curto))}</a>${outro ? `<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${outro.slug}"${emPortugues}>${esc(T.comparar(outro.curto))}</a>` : ""}</p>
+        <p class="resultado-ligacoes"><a class="botao botao-contorno" href="${T.fichas}${j.slug}/">${esc(T.ficha(j.curto))}</a>${outro ? `<a class="ligacao" href="/comparar/?a=${j.slug}&amp;b=${outro.slug}"${emPortugues}>${esc(T.comparar(outro.curto))}</a>` : ""}</p>
       </div>
     </li>`;
   }).join("");

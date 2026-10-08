@@ -24,7 +24,7 @@ O que tem lá dentro:
 E a parte de que mais me orgulho, por baixo do capô:
 
 → Zero dependências em produção. HTML, CSS e JavaScript puro, sem framework
-→ Um gerador de site estático feito à mão, que escreve 1.988 páginas em cerca de um segundo
+→ Um gerador de site estático feito à mão, que escreve 2.018 páginas em cerca de um segundo
 → 3D em WebGL sem biblioteca
 → A trilha sonora é uma partitura em texto tocada com osciladores, sem arquivo de música
 → Testes automatizados para cada ferramenta
@@ -63,14 +63,14 @@ What's inside:
 And the part I'm proudest of, under the hood:
 
 → Zero production dependencies. Plain HTML, CSS and JavaScript, no framework
-→ A hand-made static site generator that writes 1,988 pages in about one second
+→ A hand-made static site generator that writes 2,018 pages in about one second
 → 3D in WebGL without a library
 → The soundtrack is a score written as text and played with oscillators, with no music file
 → Automated tests for every tool
 
 I built it together with Claude Code: I directed product, content and design, round by round, and the AI wrote and tested the code with me.
 
-The home page and the quiz are in English; the rest of the site is in Brazilian Portuguese. It's a non-profit fan project, not affiliated with Nintendo or The Pokémon Company.
+The home page, the quiz and the page of each game are in English; the rest of the site is in Brazilian Portuguese. It's a non-profit fan project, not affiliated with Nintendo or The Pokémon Company.
 
 🔗 Site: https://pokeatlas-eight.vercel.app/en/
 💻 Code: https://github.com/Avendanho/Projeto-Vitrine-Jogos

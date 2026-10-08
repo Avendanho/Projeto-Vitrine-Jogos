@@ -2,7 +2,7 @@
  * com os dados; aqui ficam as frases que a página monta na hora.) */
 export const TEXTOS = {
   "pt-BR": {
-    dados: "./dados.js", e: "e",
+    dados: "./dados.js", fichas: "/jogos/", e: "e",
     ordem: ["Primeiro da lista", "Segundo", "Terceiro"],
     passo: (n, total) => `Pergunta ${n} de ${total}`,
     filtro: "Essa resposta não mexe no perfil: ela escolhe entre quais jogos procurar.",
@@ -24,7 +24,7 @@ export const TEXTOS = {
     copiado: "Link copiado.", copiadoBotao: "Link copiado", naoCopiou: "Não foi possível copiar. O link está na barra de endereço."
   },
   en: {
-    dados: "./dados-en.js", e: "and",
+    dados: "./dados-en.js", fichas: "/en/games/", e: "and",
     ordem: ["First on the list", "Second", "Third"],
     passo: (n, total) => `Question ${n} of ${total}`,
     filtro: "This answer does not change the profile: it chooses which games to search among.",
@@ -42,7 +42,7 @@ export const TEXTOS = {
     esteJogo: (alto) => `This game ${alto}.`,
     pesa: (eixo, frase) => `${eixo} weighs more here than you asked for. ${frase}`,
     puxou: (eixo, baixo) => `You pulled toward ${eixo}, and here ${baixo}.`,
-    ficha: (jogo) => `Open the page of ${jogo} (in Portuguese)`, comparar: (jogo) => `Compare with ${jogo}`,
+    ficha: (jogo) => `Open the page of ${jogo}`, comparar: (jogo) => `Compare with ${jogo}`,
     copiado: "Link copied.", copiadoBotao: "Link copied", naoCopiou: "Could not copy. The link is in the address bar."
   }
 };
