@@ -11,10 +11,10 @@ import { MAR, TINTA, POKEDEX, FICHAS, CARTAS, COBBLEMON } from "./base.mjs";
 import { paginaPokedex, paginaEspecie, TODAS_AS_ESPECIES } from "./paginas-pokedex.mjs";
 import {
   paginaCobblemonInicio, paginaCobblemonPokemon, paginaCobblemonEspecie, paginaCobblemonItens,
-  paginaCobblemonEstruturas, paginaCobblemonBiomas, ESPECIES_DO_COBBLEMON
+  paginaCobblemonEstruturas, paginaCobblemonBiomas, paginaCobblemonCacada, ESPECIES_DO_COBBLEMON
 } from "./paginas-cobblemon.mjs";
 import { paginaCompararPokemon, paginaQuiz, paginaTime, paginaDiario } from "./paginas-ferramentas.mjs";
-import { moduloEspecies, moduloTipos, moduloJogos } from "./dados-navegador.mjs";
+import { moduloEspecies, moduloTipos, moduloJogos, moduloSpawns } from "./dados-navegador.mjs";
 import { paginaDesafios, paginaDesafio, dadosDaRoleta, TODOS_OS_DESAFIOS, enderecoDoDesafio } from "./paginas-desafios.mjs";
 import { svgIlha, valoresDe, sementeDe, malhaQuadrada, EIXOS } from "../src/js/relevo.js";
 import {
@@ -147,6 +147,8 @@ for (const n of ESPECIES_DO_COBBLEMON) await escrever(`cobblemon/pokemon/${FICHA
 await escrever("cobblemon/itens/index.html", paginaCobblemonItens());
 await escrever("cobblemon/estruturas/index.html", paginaCobblemonEstruturas());
 await escrever("cobblemon/biomas/index.html", paginaCobblemonBiomas());
+await escrever("cobblemon/cacada/index.html", paginaCobblemonCacada());
+await escrever("js/dados/spawns.js", moduloSpawns());
 
 // desafios, nas duas edições
 for (const edicao of ["pokemon", "cobblemon"]) {

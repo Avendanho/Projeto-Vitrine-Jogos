@@ -1648,6 +1648,30 @@ a.slot:hover { background: #B4B4D8; }
 .diario-fim { margin-top: var(--e6); font-size: var(--t-pequeno); }
 @media (max-width: 620px) { .diario-nova { grid-template-columns: minmax(0, 1fr); padding: var(--e3); } }
 
+/* ---------- plano de caçada (edição Cobblemon) ---------- */
+
+.cb-cacar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e3); margin-top: var(--e3); }
+.cb-cacar [hidden], .cacada-controles [hidden] { display: none; }
+.cacada { padding: var(--e3) var(--margem) var(--e7); }
+.cacada-controles { display: flex; flex-wrap: wrap; align-items: end; gap: var(--e3); }
+.cacada-controles .dex-busca { flex: 1 1 14rem; }
+.cacada-lista { display: flex; flex-wrap: wrap; gap: var(--e3) var(--e2); margin-top: var(--e3); padding: var(--e3) 0; border-block: 3px solid var(--preto); }
+.cacada-lista li { display: grid; justify-items: center; gap: 4px; width: 92px; text-align: center; line-height: 1.2; font-family: var(--pixel); }
+.cacada-lista .ligacao { font-family: inherit; font-size: 0.85rem; }
+.cacada-vazio { margin-top: var(--e3); font-family: var(--caderno); font-style: italic; font-size: 1.3rem; max-width: 46ch; }
+.cacada-plano { margin-top: var(--e5); }
+.cacada-plano h2 { margin-bottom: var(--e2); }
+.cacada-fora { margin-bottom: var(--e4); max-width: 70ch; font-size: var(--t-pequeno); }
+.cacada-lugares { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); gap: var(--e3); margin-top: var(--e3); }
+.cacada-lugar { display: grid; align-content: start; gap: var(--e2); }
+.cacada-conta strong { font-family: var(--pixel); font-size: 1.7rem; font-weight: 600; }
+.cacada-lugar ul { display: grid; gap: var(--e2); }
+.cacada-lugar ul li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; }
+.cacada-lugar ul div { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: var(--t-pequeno); line-height: 1.35; }
+.cacada-lugar ul strong { font-family: var(--pixel); font-size: 1.1rem; font-weight: 600; }
+.cacada-lugar ul div > span:not(.raridade) { flex-basis: 100%; }
+.cacada-mais { color: var(--tinta-suave); }
+
 /* ---------- movimento reduzido ---------- */
 
 @media (prefers-reduced-motion: reduce) {

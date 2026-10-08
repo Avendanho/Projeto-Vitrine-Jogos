@@ -1,6 +1,6 @@
 /* Os módulos de dados que o navegador importa, gerados no build em dist/js/dados/.
  * Cada função devolve o texto de um módulo. As páginas só baixam o que usam. */
-import { FICHAS, POKEDEX, TIPOS_E_FATORES } from "./base.mjs";
+import { FICHAS, POKEDEX, TIPOS_E_FATORES, COBBLEMON, enderecoCobblemon } from "./base.mjs";
 import { JOGOS } from "../dados/jogos.mjs";
 import { REGIOES, ROTAS } from "../dados/atlas.mjs";
 
@@ -30,3 +30,18 @@ export function jogosParaONavegador() {
   }));
 }
 export const moduloJogos = () => `${cabecalho}export const JOGOS = ${JSON.stringify(jogosParaONavegador())};\n`;
+
+/* As regras de spawn do Cobblemon para o plano de caçada. Os nomes dos biomas ficam numa lista só, e cada
+ * regra aponta para eles pela posição: [raridade (0 comum a 3 ultrarrara), [biomas], [contextos], [nível mínimo, máximo], hora, [condições], forma]. */
+const BALDES = ["common", "uncommon", "rare", "ultra-rare"];
+export function spawnsParaONavegador() {
+  const biomas = [], posicao = (nome) => { let i = biomas.indexOf(nome); if (i < 0) { i = biomas.length; biomas.push(nome); } return i; };
+  const especies = Object.values(COBBLEMON.especies).filter((e) => e.impl).sort((a, b) => a.n - b.n);
+  const spawns = {};
+  for (const e of especies) if (e.spawns.length) spawns[e.n] = e.spawns.map((s) => [BALDES.indexOf(s.b), s.bi.map(posicao), s.c, s.n, s.h ?? "", s.q, s.f ?? ""]);
+  return { biomas, spawns, especies: especies.map((e) => [e.n, enderecoCobblemon(e.n), e.nome]) };
+}
+export function moduloSpawns() {
+  const d = spawnsParaONavegador();
+  return `${cabecalho}export const BIOMAS = ${JSON.stringify(d.biomas)};\nexport const SPAWNS = ${JSON.stringify(d.spawns)};\nexport const ESPECIES = ${JSON.stringify(d.especies)};\nexport const CONTEXTOS = ${JSON.stringify(COBBLEMON.contextos)};\n`;
+}

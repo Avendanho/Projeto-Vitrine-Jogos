@@ -89,6 +89,7 @@ export const EDICOES = {
       { href: "/cobblemon/itens/", texto: "Itens" },
       { href: "/cobblemon/estruturas/", texto: "Estruturas" },
       { href: "/cobblemon/biomas/", texto: "Biomas" },
+      { href: "/cobblemon/cacada/", texto: "Caçada" },
       { href: "/cobblemon/desafios/", texto: "Desafios" }
     ],
     avisos: [

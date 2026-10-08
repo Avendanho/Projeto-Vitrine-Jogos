@@ -262,6 +262,7 @@ export function paginaCobblemonEspecie(n) {
       <h1>${esc(e.nome)}</h1>
       <ul class="especie-tipos" aria-label="Tipos e classificação">${e.tipos.map((t) => `<li><a class="ficha" href="/cobblemon/pokemon/?tipo=${semAcento(t)}">${t}</a></li>`).join("")}${e.rotulos.map((r) => `<li><span class="ficha ficha-rotulo">${r}</span></li>`).join("")}</ul>
       ${e.desc ? `<p class="cb-descricao">${esc(e.desc)}</p>` : ""}
+      ${e.spawns.length ? `<p class="cb-cacar"><button type="button" class="botao botao-contorno botao-pequeno" data-cacar="${n}" hidden>Pôr na caçada</button> <a class="ligacao" href="/cobblemon/cacada/" data-cacada-link hidden>Ver o plano de caçada</a></p>` : ""}
     </div>
     ${MODELOS.has(n)
       ? `<figure class="cb-retrato painel" data-retrato="${n}">
@@ -523,6 +524,33 @@ export function paginaCobblemonBiomas() {
   return moldura({
     ...base, titulo: "Biomas do Cobblemon", caminho: "/cobblemon/biomas/", classe: "pagina-cb-biomas", corpo, modulo: "maquete", espelho: "/regioes/",
     descricao: `Os ${C.ambientes.length} ambientes do Cobblemon ${C.versao} em maquetes de blocos que giram, com os Pokémon e as estruturas de cada um, e como o mod decide o que nasce.`
+  });
+}
+
+/* ---------- plano de caçada ---------- */
+
+export function paginaCobblemonCacada() {
+  const corpo = `
+<section class="cabecalho">
+  <h1>Plano de caçada</h1>
+  <p class="prosa">Marque os Pokémon que você quer e veja em que bioma dá para achar mais deles de uma vez, com a raridade e as condições de cada um. A lista fica guardada neste navegador.</p>
+</section>
+<section class="cacada" data-cacada>
+  <noscript><p class="prosa">O plano de caçada precisa de JavaScript. A página de cada espécie, a partir da <a href="/cobblemon/pokemon/">lista de Pokémon</a>, mostra onde ela nasce sem ele.</p></noscript>
+  <form class="cacada-controles" aria-label="Lista de caçada">
+    <div class="dex-busca"><label for="cacada-campo">Pôr na lista</label><input id="cacada-campo" type="search" list="lista-cacada" placeholder="Nome ou número" autocomplete="off" spellcheck="false"></div>
+    <button type="submit" class="botao">Adicionar</button>
+    <button type="button" class="ligacao" data-copiar hidden>Copiar o link desta lista</button>
+    <button type="button" class="ligacao" data-limpar hidden>Esvaziar a lista</button>
+    <p class="time-aviso" data-aviso aria-live="polite"></p>
+    <datalist id="lista-cacada"></datalist>
+  </form>
+  <div class="cacada-alvos" data-alvos></div>
+  <div class="cacada-plano" data-plano aria-live="polite"></div>
+</section>`;
+  return moldura({
+    ...base, titulo: "Plano de caçada do Cobblemon", caminho: "/cobblemon/cacada/", classe: "pagina-cb-cacada", corpo, modulo: "cacada", espelho: "/time/",
+    descricao: `Marque os Pokémon que você quer no Cobblemon ${C.versao} e veja em que bioma dá para achar mais deles de uma vez, com raridade e condições.`
   });
 }
 

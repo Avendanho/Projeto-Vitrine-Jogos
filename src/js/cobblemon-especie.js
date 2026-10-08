@@ -66,3 +66,20 @@ if (figura) {
     figura.addEventListener("animationend", (e) => { if (e.animationName === "cb-pulo") figura.classList.remove("pulando"); });
   }
 }
+
+/* O botão "Pôr na caçada": a espécie entra na lista do plano de caçada, guardada no navegador (src/js/cacada.js). */
+const cacar = document.querySelector("[data-cacar]");
+if (cacar) {
+  const CACADA = "pokeatlas.cobblemon.cacada", n = Number(cacar.dataset.cacar), link = document.querySelector("[data-cacada-link]");
+  const ler = () => { try { const l = JSON.parse(localStorage.getItem(CACADA) || "[]"); return Array.isArray(l) ? l.map(Number).filter(Number.isInteger) : []; } catch { return null; } };
+  const mostrar = (lista) => { const dentro = lista.includes(n); cacar.textContent = dentro ? "Tirar da caçada" : "Pôr na caçada"; cacar.setAttribute("aria-pressed", String(dentro)); link.hidden = !lista.length; };
+  const inicial = ler();
+  if (inicial) {                                   // sem armazenamento o botão nem aparece: não teria onde guardar
+    cacar.hidden = false;
+    mostrar(inicial);
+    cacar.addEventListener("click", () => {
+      const lista = ler() ?? [], nova = lista.includes(n) ? lista.filter((x) => x !== n) : [...lista, n].slice(-24);
+      try { localStorage.setItem(CACADA, JSON.stringify(nova)); mostrar(nova); } catch { cacar.hidden = true; }
+    });
+  }
+}

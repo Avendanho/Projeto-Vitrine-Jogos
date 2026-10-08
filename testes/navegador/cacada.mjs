@@ -1,0 +1,45 @@
+/* Plano de caçada: adicionar pela página da espécie e pelo campo, ver o plano, recarregar, endereço com lixo. */
+import { abrir, conferir, fechar, BASE } from "./_comum.mjs";
+import { spawnsParaONavegador } from "../../scripts/dados-navegador.mjs";
+import { planejar } from "../../src/js/cacada-logica.js";
+
+const fotos = process.argv[2], { biomas, spawns, especies } = spawnsParaONavegador();
+const { navegador, pagina, erros } = await abrir();
+await pagina.goto(`${BASE}/cobblemon/pokemon/wooper/`, { waitUntil: "networkidle" });
+await pagina.click("[data-cacar]");
+conferir("a página da espécie põe na caçada e oferece o plano", (await pagina.textContent("[data-cacar]")) === "Tirar da caçada" && await pagina.locator("[data-cacada-link]").isVisible());
+await pagina.click("[data-cacada-link]");
+await pagina.waitForSelector(".cacada-lista");
+conferir("o plano abre com o Wooper na lista", (await pagina.textContent(".cacada-lista")).includes("Wooper"));
+const por = async (nome) => { await pagina.fill("#cacada-campo", nome); await pagina.click('.cacada-controles button[type="submit"]'); };
+await por("Psyduck"); await por("Poliwag"); await por("Magikarp");
+const esperado = planejar([194, 54, 60, 129], spawns).lugares[0];
+conferir("o primeiro lugar é o que a conta manda", (await pagina.textContent(".cacada-lugar:first-child h3")) === biomas[esperado.bioma], `${biomas[esperado.bioma]}, ${esperado.acha.length} alvos`);
+conferir("e mostra quantos alvos ele rende", (await pagina.textContent(".cacada-lugar:first-child .cacada-conta")).startsWith(String(esperado.acha.length)));
+await por("Psyduck");
+conferir("repetido é recusado", (await pagina.textContent("[data-aviso]")).includes("já está"));
+const semSpawn = especies.find((e) => !spawns[e[0]]);
+await por(semSpawn[2]);
+conferir("quem não nasce solto é explicado à parte", (await pagina.textContent(".cacada-fora")).includes(semSpawn[2]));
+if (fotos) await pagina.screenshot({ path: `${fotos}/t6.png` });
+if (fotos) { await pagina.locator(".cacada-lugar").first().scrollIntoViewIfNeeded(); await pagina.screenshot({ path: `${fotos}/t6b.png` }); }
+await pagina.goto(`${BASE}/cobblemon/cacada/`, { waitUntil: "networkidle" });
+conferir("a lista continua lá ao voltar", await pagina.locator(".cacada-lista li").count() === 5);
+await pagina.click('[data-tirar="54"]');
+conferir("tirar remove da lista e do endereço", await pagina.locator(".cacada-lista li").count() === 4 && !pagina.url().includes("54"));
+await pagina.goto(`${BASE}/cobblemon/cacada/?alvos=abc,99999,%3Cb%3E,6`, { waitUntil: "networkidle" });
+conferir("endereço com lixo fica só com o que existe", await pagina.locator(".cacada-lista li").count() === 1 && (await pagina.textContent(".cacada-lista")).includes("Charizard"));
+await pagina.goto(`${BASE}/cobblemon/cacada/?alvos=`, { waitUntil: "networkidle" });
+conferir("lista vazia convida a começar", await pagina.locator(".cacada-vazio").isVisible());
+const sem = await abrir({ semArmazenamento: true });
+await sem.pagina.goto(`${BASE}/cobblemon/cacada/`, { waitUntil: "networkidle" });
+await sem.pagina.fill("#cacada-campo", "Wooper"); await sem.pagina.click('.cacada-controles button[type="submit"]');
+conferir("sem localStorage o plano funciona na visita", await sem.pagina.locator(".cacada-lugar").count() > 0 && sem.erros.length === 0, sem.erros.join(" | "));
+await sem.pagina.goto(`${BASE}/cobblemon/pokemon/wooper/`, { waitUntil: "networkidle" });
+conferir("e a página da espécie esconde o botão que não teria onde guardar", await sem.pagina.locator("[data-cacar]").isHidden() && sem.erros.length === 0);
+await sem.navegador.close();
+const cel = await abrir({ celular: true });
+await cel.pagina.goto(`${BASE}/cobblemon/cacada/?alvos=194,54,60,129`, { waitUntil: "networkidle" });
+conferir("no celular a página não estoura para os lados", await cel.pagina.evaluate(() => document.documentElement.scrollWidth) === 390);
+await cel.navegador.close();
+await fechar(navegador, erros);
