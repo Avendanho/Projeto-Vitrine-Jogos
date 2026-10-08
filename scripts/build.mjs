@@ -18,8 +18,8 @@ import {
   paginaCobblemonInicio, paginaCobblemonPokemon, paginaCobblemonEspecie, paginaCobblemonItens,
   paginaCobblemonEstruturas, paginaCobblemonBiomas, paginaCobblemonCacada, ESPECIES_DO_COBBLEMON
 } from "./paginas-cobblemon.mjs";
-import { paginaCompararPokemon, paginaTime, paginaDiario } from "./paginas-ferramentas.mjs";
-import { moduloEspecies, moduloTipos, moduloJogos, moduloSpawns, moduloBusca } from "./dados-navegador.mjs";
+import { paginaCompararPokemon, paginaTime, paginaDiario, paginaTipos, paginaDesenhar } from "./paginas-ferramentas.mjs";
+import { moduloEspecies, moduloTipos, moduloJogos, moduloSpawns, moduloBusca, moduloNumeros } from "./dados-navegador.mjs";
 import { paginaDesafios, paginaDesafio, dadosDaRoleta, TODOS_OS_DESAFIOS, enderecoDoDesafio } from "./paginas-desafios.mjs";
 import { svgHexagono, gradeDoHexagono, valoresDe, EIXOS, TEMAS } from "../src/js/hexagono.js";
 import {
@@ -167,6 +167,9 @@ await escrever("comparar/index.html", paginaComparar());
 await escrever("comparar/pokemon/index.html", paginaCompararPokemon());
 await escrever("js/dados/especies.js", moduloEspecies());
 await escrever("time/index.html", paginaTime());
+await escrever("tipos/index.html", paginaTipos());
+await escrever("desenhar/index.html", paginaDesenhar());
+await escrever("js/dados/numeros.js", moduloNumeros());
 await escrever("diario/index.html", paginaDiario());
 await escrever("js/dados/tipos.js", moduloTipos());
 await escrever("js/dados/jogos.js", moduloJogos());

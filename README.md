@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/Status-Online-success?style=flat-square" alt="Status" />
   <img src="https://img.shields.io/badge/Node.js-%3E%3D20-informational?style=flat-square&logo=node.js" alt="Node version" />
   <img src="https://img.shields.io/badge/Framework-Zero%20Dependencies%20(Vanilla)-f5a623?style=flat-square" alt="Zero Framework" />
-  <img src="https://img.shields.io/badge/P%C3%A1ginas%20Geradas-2.018%20est%C3%A1ticas-blue?style=flat-square" alt="Páginas" />
+  <img src="https://img.shields.io/badge/P%C3%A1ginas%20Geradas-2.020%20est%C3%A1ticas-blue?style=flat-square" alt="Páginas" />
   <img src="https://img.shields.io/badge/Dados-Pok%C3%A9API-red?style=flat-square" alt="PokéAPI" />
   <img src="https://img.shields.io/badge/Tipo-Projeto%20de%20F%C3%A3%20(N%C3%A3o%20Oficial)-lightgrey?style=flat-square" alt="Não Oficial" />
   <img src="https://img.shields.io/badge/Licen%C3%A7a-MIT%20(c%C3%B3digo)-green?style=flat-square" alt="Licença MIT" />
@@ -129,6 +129,8 @@ Uma segunda edição do atlas, sobre o mod [Cobblemon](https://cobblemon.com/) p
 
 ### 8. 🧰 Ferramentas do Treinador
 - **Montar um time** (`/time/`): até seis Pokémon, no formato da tela de equipe dos jogos. Cada vaga mostra os tipos do Pokémon e o que ele recebe em quádruplo ou em dobro, a que resiste e do que é imune; embaixo, a leitura do time em selos de tipo (os buracos, os tipos sem resposta, de que o time apanha e o que ele segura). Filtra pela Pokédex de cada jogo, e o time vai no endereço.
+- **Roda de tipos** (`/tipos/`): os 18 tipos em círculo. Escolher um acende quem ele atinge em dobro (linhas cheias, saindo dele) e quem o atinge em dobro (linhas tracejadas, chegando nele); ao lado, o que ele atinge pela metade, a que resiste e o que não faz efeito. As setas do teclado andam pela roda.
+- **Desenhe o seu perfil** (`/desenhar/`): em vez de responder à bússola, você arrasta os seis vértices do hexágono (ou move com as setas), e a lista de jogos se reordena na hora pela afinidade com o que foi desenhado. O resultado da bússola abre aqui para ser ajustado à mão.
 - **Comparar Pokémon** (`/comparar/pokemon/`): atributos de base de dois Pokémon frente a frente.
 - **Busca global:** o botão **Buscar** e os atalhos `/` e `Ctrl+K` acham jogos, regiões, Pokémon, desafios, itens, estruturas e biomas de qualquer página.
 
@@ -146,6 +148,8 @@ O atlas abre em silêncio. O botão do alto-falante, no cabeçalho, abre um pain
 - **Música de fundo:** uma por edição, composta para o atlas e tocada na hora pelo navegador (Web Audio), sem arquivo de áudio. Na edição Pokémon, uma melodia em ondas quadradas, como num portátil; na edição Cobblemon, notas soltas e longas, com eco. Quem troca de página continua a música mais ou menos de onde ela estava.
 - **Sons das teclas:** bipes de aparelho na edição Pokémon e o estalo de menu em blocos na edição Cobblemon.
 - **Gritos:** a página de cada espécie, nas duas edições, tem o botão **Ouvir o grito**, que toca o grito do Pokémon nos jogos. Esse funciona mesmo com o som do atlas desligado.
+- **A Pokédex que fala:** na página de cada espécie, **Ouvir a Pokédex** lê o nome, a categoria e a entrada em voz alta, com a voz do próprio navegador (em inglês, a língua da entrada). Na edição Cobblemon, o botão lê a descrição em português.
+- **O aparelho funciona:** as três luzes do alto piscam no ritmo da música e do grito; no rodapé, o direcional leva à seção vizinha, ao alto da página e a um Pokémon ao acaso; e digitar um número em qualquer página abre a espécie com aquele número.
 
 ### 11. 🌍 Versão em inglês (`/en/`, `/en/compass/` e `/en/games/<jogo>/`)
 A página inicial, a bússola e a ficha de cada um dos 30 jogos existem também em inglês: os nomes dos eixos, os textos e as listas de cada jogo, os textos das regiões, as oito perguntas e os tipos na Pokédex de cada jogo. O link **English** fica no menu dessas páginas. As outras seções seguem só em português, e as páginas em inglês avisam disso nos links que levam a elas.
@@ -175,7 +179,7 @@ A edição Cobblemon tem direção própria (pergaminho de mapa, painéis de inv
 ## ⚡ Arquitetura e Engenharia
 
 - **Zero Dependências em Produção:** Sem frameworks pesados (sem React, Vue, Next.js ou Tailwind). Toda a aplicação roda sobre HTML5 semântico, CSS moderno (com variáveis e Grid/Flexbox) e Vanilla JavaScript (ES Modules).
-- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **2.018 páginas HTML estáticas prontas em ~1,2 segundos**.
+- **Gerador de Sites Estáticos (SSG) sob medida:** O script `scripts/build.mjs` valida todo o modelo de dados e gera **2.020 páginas HTML estáticas prontas em ~1,2 segundos**.
 - **Performance Extrema:** Carregamento instantâneo, First Contentful Paint (FCP) quase imediato e consumo mínimo de recursos no cliente.
 - **3D sem biblioteca:** as maquetes de estruturas e biomas e os modelos de Pokémon giram num visor próprio (`src/js/visor.js`), com WebGL e, onde o navegador não o entrega, um desenhista de software.
 - **Som sem arquivo de música:** a trilha e os efeitos são partituras escritas em texto (`src/js/som-logica.js`) e tocadas com osciladores; só os gritos dos Pokémon são arquivos.
@@ -225,7 +229,8 @@ Projeto-Vitrine-Jogos/
 │   │   ├── visor.js             # Visor 3D: giro, zoom, tela cheia
 │   │   ├── maquete*.js, modelo*.js   # Desenhistas de maquetes e de modelos de Pokémon
 │   │   ├── som.js, som-logica.js   # Música, sons das teclas e gritos; as partituras das duas músicas
-│   │   ├── *-logica.js          # Regras testáveis: time, diário, caçada, busca, som
+│   │   ├── tipos-roda.js, desenhar.js, aparelho.js   # A roda de tipos, o perfil desenhado e as teclas do aparelho
+│   │   ├── *-logica.js          # Regras testáveis: time, tipos, diário, caçada, busca, som
 │   │   └── ...                  # Um módulo por página (bussola, pokedex, time, diario...)
 │   ├── arte/                    # Gravuras, modelos desenhados, ícones e maquetes paradas
 │   ├── gritos/                  # O grito de cada espécie, em .ogg
@@ -281,8 +286,8 @@ Projeto-Vitrine-Jogos/
 | Comando | Descrição |
 | :--- | :--- |
 | `npm run dev` | Compila o site em `dist/` e inicia o servidor local em `http://localhost:4600`. |
-| `npm run build` | Valida as regras de negócio e compila todas as 2.018 páginas HTML. |
-| `npm test` | Testes de unidade das regras (time, diário, caçada, busca, modelos, som, dados). |
+| `npm run build` | Valida as regras de negócio e compila todas as 2.020 páginas HTML. |
+| `npm test` | Testes de unidade das regras (time, tipos, diário, caçada, busca, modelos, som, textos, dados). |
 | `npm run test:navegador` | Roteiros de navegador de todas as ferramentas (precisa do `npm run dev` rodando). |
 | `npm run verificar` | Auditoria visual: rola cada página em desktop, celular e movimento reduzido e tira fotos. |
 | `npm run pokedex` | *(Dados)* Reconstrói `pokedex.json` e `fichas.json` a partir da PokéAPI. |

@@ -16,8 +16,8 @@ const botoes = [...document.querySelectorAll("[data-som]")];
 const Contexto = window.AudioContext || window.webkitAudioContext;
 /* O que o painel de som diz. As páginas em inglês (o início e a bússola) trazem o painel na língua delas. */
 const T = document.documentElement.lang === "en"
-  ? { som: "Sound", estado: (l) => `Sound: ${l ? "on" : "off"}`, ligar: "Turn sound on", desligar: "Turn sound off", musica: "Music", teclas: "Key sounds", gritos: "Each Pokémon's cry plays when you ask for it, whether the sound is on or not.", fechar: "Close", semGrito: "Could not play the cry in this browser." }
-  : { som: "Som", estado: (l) => `Som: ${l ? "ligado" : "desligado"}`, ligar: "Ligar o som", desligar: "Desligar o som", musica: "Música", teclas: "Sons das teclas", gritos: "O grito de cada Pokémon toca quando você pede, com o som ligado ou não.", fechar: "Fechar", semGrito: "Não deu para tocar o grito neste navegador." };
+  ? { som: "Sound", estado: (l) => `Sound: ${l ? "on" : "off"}`, ligar: "Turn sound on", desligar: "Turn sound off", musica: "Music", teclas: "Key sounds", gritos: "Each Pokémon's cry plays when you ask for it, whether the sound is on or not.", fechar: "Close", semGrito: "Could not play the cry in this browser.", parar: "Stop", semVoz: "This browser has no voice to read the entry." }
+  : { som: "Som", estado: (l) => `Som: ${l ? "ligado" : "desligado"}`, ligar: "Ligar o som", desligar: "Desligar o som", musica: "Música", teclas: "Sons das teclas", gritos: "O grito de cada Pokémon toca quando você pede, com o som ligado ou não.", fechar: "Fechar", semGrito: "Não deu para tocar o grito neste navegador.", parar: "Parar", semVoz: "Este navegador não tem voz para ler a entrada." };
 
 let ctx = null, barraMusica = null, nivelMusica = null, barraEfeitos = null, chiado = null, painel = null;
 let ligado = false, tocando = false, relogio = 0, passo = 0, proximo = 0;
@@ -91,6 +91,22 @@ function batida(destino, quando, volume, solta) {
   fonte.start(quando); fonte.stop(quando + solta + 0.05);
 }
 
+/* ---------- as luzes do aparelho ---------- */
+
+/* As três luzes do alto da edição Pokémon acendem com a música: a vermelha no baixo, a amarela na melodia,
+ * a verde na percussão. Quem pediu menos movimento fica sem o pisca-pisca. */
+const LUZES = edicao === "pokemon" && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+const LUZ_DA_VOZ = [2, 0, 1, 3];                     // por voz da música: 1 vermelha, 2 amarela, 3 verde (0 não acende nada)
+function acender(qual, quando) {
+  if (!LUZES || !qual) return;
+  setTimeout(() => {
+    if (!tocando) return;
+    const classe = `luz-${qual}`, raiz = document.documentElement;
+    raiz.classList.add(classe);
+    setTimeout(() => raiz.classList.remove(classe), 120);
+  }, Math.max(0, (quando - ctx.currentTime) * 1000));
+}
+
 /* ---------- música ---------- */
 
 /* Agenda com folga: a cada volta, marca as notas dos próximos instantes na hora do contexto. */
@@ -101,6 +117,7 @@ function agendar() {
       const voz = musica.vozes[e.voz];
       if (voz.onda === "ruido") batida(barraMusica, proximo, voz.volume, voz.solta);
       else nota(barraMusica, e.freq, proximo, e.passos * folha.duracao * 0.92, voz);
+      acender(LUZ_DA_VOZ[e.voz], proximo);
     }
     passo = (passo + 1) % folha.passos;
     proximo += folha.duracao;
@@ -158,7 +175,7 @@ export function efeito(nome) {
 document.addEventListener("click", (e) => {
   if (!ligado) return;
   const alvo = e.target.closest?.("a, button, summary, select, [role='button']");
-  if (!alvo || alvo.matches("[data-som], [data-som-chave], [data-grito]")) return;
+  if (!alvo || alvo.matches("[data-som], [data-som-chave], [data-grito], [data-falar]")) return;
   efeito(edicao === "cobblemon" ? "estalo" : alvo.matches(".botao, .abertura-teclas button, .opcao") ? "tecla" : "toque");
 });
 
@@ -215,12 +232,55 @@ document.addEventListener("click", (e) => {
   grito?.pause();
   grito = new Audio(botao.dataset.grito);
   grito.volume = 0.7;
-  const fim = () => botao.classList.remove("tocando");
+  const fim = () => { botao.classList.remove("tocando"); document.documentElement.classList.remove("tocando-grito"); };
+  document.documentElement.classList.add("tocando-grito");   // as luzes do aparelho piscam enquanto o grito soa
   grito.addEventListener("ended", fim);
   grito.addEventListener("pause", fim);
   botao.classList.add("tocando");
   grito.play().catch(() => { fim(); if (aviso) aviso.textContent = T.semGrito; });
 });
+
+/* ---------- a Pokédex que fala ---------- */
+
+/* O botão lê a entrada em voz alta com a voz do próprio navegador, como a Pokédex do desenho. Só aparece
+ * onde o navegador sabe falar, e funciona com o som do atlas ligado ou não. */
+const fala = window.speechSynthesis;
+if (fala && window.SpeechSynthesisUtterance) {
+  const falantes = [...document.querySelectorAll("[data-falar]")];
+  let ativo = null;
+  const calar = () => {
+    if (!ativo) return;
+    ativo.textContent = ativo.dataset.rotulo;
+    ativo.classList.remove("tocando");
+    document.documentElement.classList.remove("falando");
+    ativo = null;
+  };
+  for (const botao of falantes) {
+    botao.hidden = false;
+    botao.dataset.rotulo = botao.textContent;
+    botao.addEventListener("click", () => {
+      const era = ativo;
+      fala.cancel();
+      calar();
+      if (era === botao) return;                      // o segundo toque só interrompe
+      const aviso = botao.parentElement.querySelector("[data-grito-aviso]"), lingua = botao.dataset.lingua;
+      const frase = new SpeechSynthesisUtterance(botao.dataset.falar);
+      frase.lang = lingua;
+      frase.voice = fala.getVoices().find((v) => v.lang === lingua) ?? fala.getVoices().find((v) => v.lang.startsWith(lingua.slice(0, 2))) ?? null;
+      frase.rate = 0.95;
+      frase.pitch = 0.85;                             // um pouco mais grave, com cara de aparelho
+      frase.onend = calar;
+      frase.onerror = (e) => { calar(); if (aviso && e.error !== "interrupted" && e.error !== "canceled") aviso.textContent = T.semVoz; };
+      if (aviso) aviso.textContent = "";
+      ativo = botao;
+      botao.textContent = T.parar;
+      botao.classList.add("tocando");
+      document.documentElement.classList.add("falando");
+      fala.speak(frase);
+    });
+  }
+  addEventListener("pagehide", () => fala.cancel());
+}
 
 ligado = guardado() && Boolean(Contexto);
 mostrar();

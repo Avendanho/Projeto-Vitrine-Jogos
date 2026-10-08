@@ -127,6 +127,16 @@ export function moldura({ titulo, descricao, caminho, classe, corpo, modulo, ext
   // a mesma página na outra língua, quando existe (por enquanto, o início e a bússola)
   const outra = versoes && Object.entries(versoes).find(([l]) => l !== lingua);
   const NOMES = { "pt-BR": "Português", en: "English" };
+  // o direcional do rodapé: para os lados, a seção vizinha na ordem das abas; para cima, o alto da página; para baixo, um Pokémon ao acaso
+  const voltas = [{ href: ed.inicio, texto: "PokéAtlas" }, ...ed.nav], aqui = voltas.findLastIndex((n) => (n.href === ed.inicio ? caminho === n.href : caminho.startsWith(n.href)));
+  const vizinha = (passo) => voltas[(Math.max(aqui, 0) + passo + voltas.length) % voltas.length];
+  const direcional = edicao !== "pokemon" ? "" : `<div class="direcional" role="group" aria-label="${C.direcional}">
+    <a class="direcional-cima" href="#conteudo" aria-label="${C.alto}" title="${C.alto}"></a>
+    <a class="direcional-esquerda" href="${vizinha(-1).href}" aria-label="${C.anterior(vizinha(-1).texto)}" title="${C.anterior(vizinha(-1).texto)}"${emPortugues(vizinha(-1).href)}></a>
+    <a class="direcional-direita" href="${vizinha(1).href}" aria-label="${C.proxima(vizinha(1).texto)}" title="${C.proxima(vizinha(1).texto)}"${emPortugues(vizinha(1).href)}></a>
+    <button type="button" class="direcional-baixo" data-acaso aria-label="${C.acaso}" title="${C.acaso}"></button>
+  </div>
+  `;
   return `<!doctype html>
 <html lang="${L.codigo}">
 <head>
@@ -171,7 +181,7 @@ ${ed.fontes.map((f) => `<link rel="preload" href="/fontes/${f}.woff2" as="font" 
 ${corpo}
 </main>
 <footer class="rodape">
-  <div class="rodape-grade">
+  ${direcional}<div class="rodape-grade">
     <div>
       <p class="marca">PokéAtlas</p>
       <p>${ed.lema}</p>
@@ -593,6 +603,7 @@ export function paginaBussola(lingua = "pt-BR") {
     </div>
     <div class="bussola-acoes">
       <button type="button" class="ligacao" data-voltar hidden>${T.voltar}</button>
+      <a class="ligacao bussola-atalho" href="/desenhar/"${lingua === "pt-BR" ? "" : ' hreflang="pt-BR"'}>${T.desenhar}</a>
     </div>
   </div>
   <figure class="bussola-hex">

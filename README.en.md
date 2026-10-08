@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/Status-Online-success?style=flat-square" alt="Status" />
   <img src="https://img.shields.io/badge/Node.js-%3E%3D20-informational?style=flat-square&logo=node.js" alt="Node version" />
   <img src="https://img.shields.io/badge/Framework-Zero%20Dependencies%20(Vanilla)-f5a623?style=flat-square" alt="No framework" />
-  <img src="https://img.shields.io/badge/Generated%20Pages-2%2C018%20static-blue?style=flat-square" alt="Pages" />
+  <img src="https://img.shields.io/badge/Generated%20Pages-2%2C020%20static-blue?style=flat-square" alt="Pages" />
   <img src="https://img.shields.io/badge/Data-Pok%C3%A9API-red?style=flat-square" alt="PokéAPI" />
   <img src="https://img.shields.io/badge/Kind-Fan%20Project%20(Unofficial)-lightgrey?style=flat-square" alt="Unofficial" />
   <img src="https://img.shields.io/badge/License-MIT%20(code)-green?style=flat-square" alt="MIT License" />
@@ -134,6 +134,8 @@ A second edition of the atlas, about the [Cobblemon](https://cobblemon.com/) mod
 
 ### 8. 🧰 Trainer Tools
 - **Team builder** (`/time/`): up to six Pokémon, laid out like the games' party screen. Each slot shows the Pokémon's types and what it takes 4× or 2× damage from, what it resists and what it is immune to; below, the team reading in type badges (holes, types with no answer, what the team is weak to and what it covers). Filters by each game's Pokédex, and the team lives in the URL.
+- **Type wheel** (`/tipos/`): the 18 types in a circle. Picking one lights up the types it hits for double damage (solid lines going out) and the types that hit it for double damage (dashed lines coming in); beside it, what it hits for half, what it resists and what has no effect. Arrow keys walk around the wheel.
+- **Draw your profile** (`/desenhar/`): instead of answering the compass, you drag the six vertices of the hexagon (or move them with the arrow keys) and the list of games reorders live by how close each one is to what you drew. The compass result opens here to be adjusted by hand.
 - **Compare Pokémon** (`/comparar/pokemon/`): base stats of two Pokémon side by side.
 - **Global search:** the **Buscar** button and the `/` and `Ctrl+K` shortcuts find games, regions, Pokémon, challenges, items, structures and biomes from any page.
 
@@ -151,6 +153,8 @@ The atlas opens silent. The speaker button in the header opens a small panel wit
 - **Background music:** one tune per edition, composed for the atlas and played live by the browser (Web Audio), with no audio file. Square waves like a handheld in the Pokémon edition; long, loose notes with echo in the Cobblemon edition.
 - **Key sounds:** device beeps in the Pokémon edition and a block-menu click in the Cobblemon edition.
 - **Cries:** each species page, in both editions, has a **Ouvir o grito** ("hear the cry") button that plays the Pokémon's cry from the games. This one works even with the atlas sound off.
+- **The talking Pokédex:** on each species page, **Ouvir a Pokédex** reads the name, the category and the entry aloud with the browser's own voice (in English, the language of the entry). In the Cobblemon edition the button reads the description in Portuguese.
+- **The device works:** the three lights at the top blink to the music and to the cry; in the footer, the D-pad goes to the neighboring section, to the top of the page and to a random Pokémon; and typing a number on any page opens the species with that number.
 
 ### 11. 🌍 English version (`/en/`, `/en/compass/` and `/en/games/<game>/`)
 The home page, the compass and the page of each of the 30 games also exist in English: the axis names, each game's text and lists, the region blurbs, the eight questions and the type names in each game's Pokédex. The other sections are in Portuguese only, and the English pages say so on the links that lead to them.
@@ -180,7 +184,7 @@ The Cobblemon edition has its own direction (map parchment, inventory panels, **
 ## ⚡ Architecture and Engineering
 
 - **Zero production dependencies:** no React, Vue, Next.js or Tailwind. The whole site runs on semantic HTML, modern CSS and vanilla JavaScript (ES modules).
-- **Custom static site generator:** `scripts/build.mjs` validates the data model and writes **2,018 static HTML pages in about one second**.
+- **Custom static site generator:** `scripts/build.mjs` validates the data model and writes **2,020 static HTML pages in about one second**.
 - **3D without a library:** structure and biome models and Pokémon models rotate in the project's own viewer (`src/js/visor.js`), with WebGL and, where the browser does not provide it, a software renderer.
 - **Music without audio files:** the soundtrack and effects are scores written as text (`src/js/som-logica.js`) and played with oscillators; only the Pokémon cries are files.
 - **Own scroll engine:** entrances, pinned scenes and horizontal rails are driven by `src/js/rolagem.js`, and everything falls back to plain sections under reduced motion.
@@ -237,8 +241,8 @@ npm run test:navegador    # with `npm run dev` running in another terminal
 | Command | What it does |
 | :--- | :--- |
 | `npm run dev` | Builds the site into `dist/` and serves it at `http://localhost:4600`. |
-| `npm run build` | Validates the data and writes all 2,018 pages. |
-| `npm test` | Unit tests of the rules (team, journal, hunt, search, models, sound, data). |
+| `npm run build` | Validates the data and writes all 2,020 pages. |
+| `npm test` | Unit tests of the rules (team, types, journal, hunt, search, models, sound, texts, data). |
 | `npm run test:navegador` | Browser scripts for every tool (needs `npm run dev` running). |
 | `npm run verificar` | Visual audit: scrolls each page on desktop, phone and reduced motion and takes screenshots. |
 | `npm run pokedex`, `tipos`, `encontros` | *(Data)* Rebuild species, type chart and route encounters from PokéAPI. |

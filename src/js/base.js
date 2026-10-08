@@ -3,6 +3,8 @@
 
 /* O som (música, teclas e gritos) vem à parte: se o módulo não carregar, o resto da página segue igual. */
 import("./som.js").catch(() => {});
+/* O mesmo vale para as teclas do aparelho (o Pokémon ao acaso e o número digitado). */
+import("./aparelho.js").catch(() => {});
 
 /* menu em telas estreitas */
 const botaoMenu = document.querySelector(".topo-menu");

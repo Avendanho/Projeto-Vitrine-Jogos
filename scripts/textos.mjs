@@ -40,7 +40,8 @@ export const LINGUAS = {
     console: (c) => c.nome, e: "e",
     cromo: {
       pular: "Pular para o conteúdo", edicoes: "Edição do atlas", buscar: "Buscar", som: "Som: desligado", somTitulo: "Música e sons do atlas",
-      menu: "Menu", secoes: "Seções", buscarNoAtlas: "Buscar no atlas", musicaESons: "Música e sons", rodape: "Rodapé"
+      menu: "Menu", secoes: "Seções", buscarNoAtlas: "Buscar no atlas", musicaESons: "Música e sons", rodape: "Rodapé",
+      direcional: "Direcional", alto: "Voltar ao alto da página", acaso: "Abrir um Pokémon ao acaso", anterior: (secao) => `Seção anterior: ${secao}`, proxima: (secao) => `Próxima seção: ${secao}`
     },
     prancha: { arte: (nome) => `Arte oficial de ${nome}`, numero: "Nº" },
     inicio_: {
@@ -77,7 +78,7 @@ export const LINGUAS = {
       descricao: (n) => `${n} perguntas para descobrir qual jogo de Pokémon combina com você, com a explicação de cada recomendação.`,
       passo: (total) => `Pergunta 1 de ${total}`,
       semJs: 'A bússola precisa de JavaScript para desenhar o seu perfil. Enquanto isso, a <a href="/linha-do-tempo/">linha do tempo</a> mostra todos os jogos.',
-      voltar: "Voltar uma pergunta", perfil: "O seu perfil, que cresce a cada resposta",
+      voltar: "Voltar uma pergunta", desenhar: "Prefere desenhar o perfil à mão?", perfil: "O seu perfil, que cresce a cada resposta",
       legenda: "O seu perfil ainda está em branco. Cada resposta puxa um vértice.",
       resultado: "Os jogos com o seu perfil", refazer: "Refazer a bússola", copiar: "Copiar o link deste resultado"
     }
@@ -111,7 +112,8 @@ export const LINGUAS = {
     console: (c) => CONSOLES_EN[c.id] ?? c.nome, e: "and",
     cromo: {
       pular: "Skip to content", edicoes: "Edition of the atlas", buscar: "Search", som: "Sound: off", somTitulo: "Music and sounds of the atlas",
-      menu: "Menu", secoes: "Sections", buscarNoAtlas: "Search the atlas", musicaESons: "Music and sounds", rodape: "Footer"
+      menu: "Menu", secoes: "Sections", buscarNoAtlas: "Search the atlas", musicaESons: "Music and sounds", rodape: "Footer",
+      direcional: "D-pad", alto: "Back to the top of the page", acaso: "Open a random Pokémon", anterior: (secao) => `Previous section: ${secao}`, proxima: (secao) => `Next section: ${secao}`
     },
     prancha: { arte: (nome) => `Official art of ${nome}`, numero: "No." },
     /* A moldura das páginas em inglês: as abas levam às seções em português, e o rodapé avisa disso. */
@@ -166,7 +168,7 @@ export const LINGUAS = {
       descricao: (n) => `${n} questions to find out which Pokémon game suits you, with the reason behind each recommendation.`,
       passo: (total) => `Question 1 of ${total}`,
       semJs: 'The compass needs JavaScript to draw your profile. Meanwhile, the <a href="/linha-do-tempo/" hreflang="pt-BR">timeline</a> (in Portuguese) shows every game.',
-      voltar: "Go back one question", perfil: "Your profile, which grows with each answer",
+      voltar: "Go back one question", desenhar: "Rather draw the profile by hand? (in Portuguese)", perfil: "Your profile, which grows with each answer",
       legenda: "Your profile is still blank. Each answer pulls a vertex.",
       resultado: "The games with your profile", refazer: "Retake the compass", copiar: "Copy the link to this result"
     }

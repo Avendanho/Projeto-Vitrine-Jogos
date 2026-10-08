@@ -23,6 +23,10 @@ export const valoresDe = (atributos) => EIXOS.map((e) => atributos[e.id] || 0);
 /* A que distância do centro fica o vértice de uma nota, de 0 (centro) a 1 (borda). */
 export const alcance = (nota) => MIOLO + (1 - MIOLO) * Math.min(NOTA_MAXIMA, Math.max(0, nota)) / NOTA_MAXIMA;
 
+/* O caminho de volta: que nota põe o vértice a certa distância do centro (0 a 1). É o que deixa arrastar um
+ * vértice com o dedo e ler a nota de onde ele parou. */
+export const notaDoAlcance = (distancia) => Math.min(NOTA_MAXIMA, Math.max(0, ((distancia - MIOLO) / (1 - MIOLO)) * NOTA_MAXIMA));
+
 /* Os seis vértices de um perfil, num círculo de raio `raio` com centro em (cx, cy). */
 export function vertices(valores, raio = 1, cx = 0, cy = 0) {
   return EIXOS.map((e, i) => {

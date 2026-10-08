@@ -246,7 +246,7 @@ a.tipo:hover { transform: translateY(-2px); }
 .ficha-tipo[aria-pressed="true"]::before { background: var(--branco); }
 
 /* A caixa de texto dos jogos: branca, de borda escura, com a sombra dura. É onde o atlas fala. */
-.painel, .veredito, .folha, .regioes-chave, .diario-nova, .diario-captura, .roleta-resultado, .time-grupo, .time-vaga, .abertura-visor {
+.painel, .veredito, .folha, .regioes-chave, .diario-nova, .diario-captura, .roleta-resultado, .time-grupo, .time-vaga, .abertura-visor, .roda-grupo, .desenhar-hex {
   background: var(--branco); color: var(--tinta);
   border: var(--traco) solid var(--tinta); border-radius: 18px;
   box-shadow: 5px 5px 0 var(--tinta);
@@ -279,14 +279,22 @@ a.tipo:hover { transform: translateY(-2px); }
   transition: filter 0.3s;
 }
 .topo .marca:hover::before { filter: brightness(1.18); }
-/* as três luzes */
+/* as três luzes: cada uma tem a cor numa variável, para acender sozinha com a música (src/js/som.js) */
 .topo .marca::after {
   content: ""; flex: none; align-self: flex-start; width: 46px; height: 12px; margin: 2px 0 0 2px;
   background:
-    radial-gradient(circle at 6px 6px, #FFB3B3 0 1.5px, #B8001F 2px 4px, var(--tinta) 4.4px 5.6px, transparent 6px),
-    radial-gradient(circle at 23px 6px, #FFF6C2 0 1.5px, var(--amarelo) 2px 4px, var(--tinta) 4.4px 5.6px, transparent 6px),
-    radial-gradient(circle at 40px 6px, #D2F7DA 0 1.5px, #45B25D 2px 4px, var(--tinta) 4.4px 5.6px, transparent 6px);
+    radial-gradient(circle at 6px 6px, var(--brilho-1, #FFB3B3) 0 1.5px, var(--luz-1, #B8001F) 2px 4px, var(--tinta) 4.4px 5.6px, transparent 6px),
+    radial-gradient(circle at 23px 6px, var(--brilho-2, #FFF6C2) 0 1.5px, var(--luz-2, #D9A900) 2px 4px, var(--tinta) 4.4px 5.6px, transparent 6px),
+    radial-gradient(circle at 40px 6px, var(--brilho-3, #D2F7DA) 0 1.5px, var(--luz-3, #2F9A47) 2px 4px, var(--tinta) 4.4px 5.6px, transparent 6px);
 }
+.luz-1 .topo .marca { --luz-1: #FF8A96; --brilho-1: #fff; }
+.luz-2 .topo .marca { --luz-2: #FFF07A; --brilho-2: #fff; }
+.luz-3 .topo .marca { --luz-3: #8CF0A3; --brilho-3: #fff; }
+/* enquanto um grito soa, as três piscam juntas; enquanto a Pokédex fala, a lente pulsa */
+.tocando-grito .topo .marca::after { animation: luzes 0.28s steps(2, jump-none) infinite; }
+@keyframes luzes { to { filter: brightness(1.9) saturate(1.3); } }
+.falando .topo .marca::before { animation: lente 0.55s ease-in-out infinite alternate; }
+@keyframes lente { to { filter: brightness(1.45); box-shadow: 0 0 0 var(--traco) var(--tinta), 0 0 14px 4px rgb(255 255 255 / 0.55); } }
 .topo-nav { display: flex; align-items: center; gap: clamp(4px, 0.8vw, 14px); }
 .topo-nav a:not(.botao) { padding: 6px 10px 7px; font-size: var(--t-pequeno); font-weight: 700; line-height: 1.2; text-decoration: none; border-radius: 999px; white-space: nowrap; transition: background-color 0.2s, color 0.2s; }
 .topo-nav a:not(.botao):hover { background: rgb(255 255 255 / 0.2); }
@@ -305,7 +313,14 @@ a.tipo:hover { transform: translateY(-2px); }
 
 .topo-busca, .topo-menu { padding: 6px 13px 7px; font: inherit; font-size: var(--t-pequeno); font-weight: 700; line-height: 1.2; color: inherit; background: transparent; border: 2px solid #fff; border-radius: 999px; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
 .topo-busca:hover, .topo-menu:hover { background: #fff; color: var(--vermelho-fundo); }
-html:not(.js) :is(.topo-busca, .topo-som, .especie-grito) { display: none; }
+html:not(.js) :is(.topo-busca, .topo-som, .especie-grito, [data-acaso]) { display: none; }
+[data-falar][hidden] { display: none; }
+/* o número digitado em qualquer página: o aparelho mostra a espécie daquele número antes de abri-la */
+.visor-numero { position: fixed; left: 50%; bottom: clamp(16px, 5vh, 44px); z-index: 60; translate: -50% 0; display: flex; align-items: baseline; gap: 14px; margin: 0; padding: 10px 20px 12px; white-space: nowrap; color: var(--tela); background: var(--noite); border: 3px solid var(--tinta); border-radius: 16px; box-shadow: 0 0 0 3px var(--amarelo), 6px 8px 0 3px var(--tinta); }
+.visor-numero[hidden] { display: none; }
+.visor-numero span { font-family: var(--ponto); font-size: 1.5rem; line-height: 1; color: var(--amarelo); }
+.visor-numero strong { font-size: 1.3rem; line-height: 1.1; }
+.visor-numero.sem-registro strong { font-family: var(--ponto); font-weight: 400; color: #8C93A3; }
 .topo-nav-busca, .topo-nav-som { display: none; }
 /* o botão de som: um alto-falante redondo, que acende quando o som está ligado */
 .topo-som { flex: none; width: 36px; height: 36px; display: grid; place-items: center; padding: 0; color: #fff; background: transparent; border: 2px solid #fff; border-radius: 50%; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
@@ -370,11 +385,24 @@ html:not(.js) :is(.topo-busca, .topo-som, .especie-grito) { display: none; }
 
 .rodape { position: relative; padding: 150px calc(var(--corpo) + var(--margem)) var(--e4); color: #fff; font-size: var(--t-pequeno); --foco: #fff; }
 /* o direcional e a grade do alto-falante */
-.rodape::before {
-  content: ""; position: absolute; left: calc(var(--corpo) + var(--margem)); top: 38px; width: 82px; aspect-ratio: 1;
-  background: radial-gradient(circle, #3A3F4B 0 8px, transparent 9px), linear-gradient(var(--tinta), var(--tinta)) center / 34% 100% no-repeat, linear-gradient(var(--tinta), var(--tinta)) center / 100% 34% no-repeat;
+.direcional {
+  position: absolute; left: calc(var(--corpo) + var(--margem)); top: 34px; width: 90px; aspect-ratio: 1;
+  display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  background: radial-gradient(circle, #3A3F4B 0 8px, var(--tinta) 9px) center / 34% 34% no-repeat;
   filter: drop-shadow(0 4px 0 var(--vermelho-fundo));
 }
+.direcional > * { display: grid; place-items: center; padding: 0; background: var(--tinta); border: 0; cursor: pointer; transition: background-color 0.15s; }
+.direcional > *::before { content: ""; border: 6px solid transparent; border-top: 0; border-bottom: 8px solid #8C93A3; transition: border-color 0.15s; }
+.direcional > *:is(:hover, :focus-visible) { background: #3A3F4B; }
+.direcional > *:is(:hover, :focus-visible)::before { border-bottom-color: var(--amarelo); }
+.direcional > *:active { background: #000; }
+.direcional-cima { grid-area: 1 / 2; border-radius: 6px 6px 0 0; }
+.direcional-esquerda { grid-area: 2 / 1; border-radius: 6px 0 0 6px; }
+.direcional-esquerda::before { rotate: -90deg; }
+.direcional-direita { grid-area: 2 / 3; border-radius: 0 6px 6px 0; }
+.direcional-direita::before { rotate: 90deg; }
+.direcional-baixo { grid-area: 3 / 2; border-radius: 0 0 6px 6px; }
+.direcional-baixo::before { rotate: 180deg; }
 .rodape::after {
   content: ""; position: absolute; right: calc(var(--corpo) + var(--margem) + 12px); top: 48px; width: 132px; height: 62px;
   background: repeating-linear-gradient(to bottom, var(--vermelho-fundo) 0 7px, transparent 7px 18px);
@@ -388,7 +416,7 @@ html:not(.js) :is(.topo-busca, .topo-som, .especie-grito) { display: none; }
 .rodape-avisos { display: grid; gap: var(--e2); align-content: start; line-height: 1.55; max-width: 70ch; font-size: var(--t-menor); }
 @media (max-width: 820px) {
   .rodape { padding-top: 126px; }
-  .rodape::before { width: 64px; top: 32px; }
+  .direcional { width: 78px; top: 26px; }
   .rodape::after { width: 96px; height: 46px; top: 40px; }
   .rodape-grade { grid-template-columns: 1fr; gap: var(--e4); }
 }
@@ -943,7 +971,8 @@ td.frase { font-weight: 500; line-height: 1.45; }
 .bussola-pergunta.saindo { opacity: 0; transform: translateY(-10px); transition: opacity 0.2s, transform 0.2s; }
 .bussola-pergunta.entrando { animation: entrar 0.45s var(--suave); }
 @keyframes entrar { from { opacity: 0; transform: translateY(14px); } }
-.bussola-acoes { margin-top: var(--e3); min-height: 2rem; }
+.bussola-acoes { margin-top: var(--e3); min-height: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--e3); }
+.bussola[data-estado="resultado"] .bussola-atalho { display: none; }
 .bussola-hex figcaption { margin-top: var(--e4); padding-top: 10px; border-top: 2px dashed var(--tela-linha); font-size: 1.02rem; font-weight: 700; text-align: center; min-height: 3.4em; }
 
 .resultado { padding: var(--e5) var(--margem) var(--e7); }
@@ -1436,6 +1465,88 @@ html:not(.js) .forma-prancha .prancha-cor { opacity: 1; transform: none; }
   .vaga-sofre div { grid-template-columns: 6.2rem minmax(0, 1fr); }
 }
 
+/* ---------- roda de tipos ---------- */
+
+.roda { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: var(--e4) var(--e5); align-items: start; padding: var(--e3) var(--margem) var(--e7); }
+.roda [hidden] { display: none; }
+/* Os 18 tipos em círculo. O escolhido fica aceso; quem não tem relação forte com ele apaga. */
+.roda-disco { position: relative; justify-self: center; width: min(100%, 78svh, 640px); aspect-ratio: 1; }
+.roda-linhas { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.roda-linha { fill: none; stroke-width: 0.9; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: riscar 0.45s var(--suave) forwards; animation-delay: calc(var(--i) * 45ms); }
+@keyframes riscar { to { stroke-dashoffset: 0; } }
+.roda-linha-atinge { stroke: var(--tinta); marker-end: url(#roda-seta); }
+/* a tracejada é a que chega: vermelha, pontilhada depois de riscada */
+.roda-linha-apanha { stroke: var(--vermelho); stroke-dasharray: 0.035 0.03; stroke-dashoffset: 0; marker-end: url(#roda-seta); opacity: 0; animation-name: surgir-linha; }
+@keyframes surgir-linha { to { opacity: 1; } }
+#roda-seta path { fill: context-stroke; }
+.roda-tipos li { position: absolute; translate: -50% -50%; }
+.roda-tipo { padding: 4px 11px 5px; font-size: var(--t-menor); cursor: pointer; transition: transform 0.25s var(--suave), opacity 0.25s, box-shadow 0.2s; }
+.roda-tipo:hover { transform: scale(1.08); }
+.roda-tipo[aria-pressed="true"] { transform: scale(1.22); box-shadow: 0 0 0 3px var(--amarelo), 0 0 0 5.5px var(--tinta); z-index: 2; }
+.roda-tipo.fora { opacity: 0.32; }
+.roda-tipo.atacante { box-shadow: 0 0 0 3px var(--vermelho); }
+.roda-sigla { display: none; }
+.roda-centro { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid; justify-items: center; gap: 2px; margin: 0; padding: 12px 20px 14px; text-align: center; background: var(--branco); border: var(--traco) solid var(--tinta); border-radius: 18px; box-shadow: 4px 4px 0 var(--tinta); pointer-events: none; }
+.roda-centro strong { font-size: clamp(1.3rem, 2.6vw, 2rem); line-height: 1.1; }
+.roda-centro span { font-family: var(--ponto); font-size: 1rem; line-height: 1.25; }
+.roda-leitura { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e2); }
+.roda-grupo { display: grid; align-content: start; gap: 8px; padding: var(--e2) 18px 18px; }
+.roda-grupo h2 { font-size: var(--t-texto); letter-spacing: 0; }
+.roda-selos { display: flex; flex-wrap: wrap; gap: 5px; }
+.roda-chave { grid-column: 1 / -1; }
+.roda-traco { display: inline-block; width: 26px; height: 0; margin: 0 7px 0 0; vertical-align: middle; border-top: 3px solid var(--tinta); }
+.roda-traco-tracejado { margin-left: var(--e3); border-top: 3px dashed var(--vermelho); }
+@media (max-width: 980px) { .roda { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 620px) {
+  /* na tela estreita os nomes não cabem em volta: cada tipo vira uma ficha redonda com as três primeiras letras */
+  .roda-nome { display: none; }
+  .roda-sigla { display: block; }
+  .roda-tipo { width: 42px; height: 42px; padding: 0; justify-content: center; font-size: 0.7rem; border-radius: 50%; }
+  .roda-tipo[aria-pressed="true"] { transform: scale(1.15); }
+  .roda-centro { padding: 8px 12px 10px; border-radius: 14px; }
+  .roda-centro span { font-size: 0.9rem; }
+  .roda-leitura { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- desenhe o seu perfil ---------- */
+
+.desenhar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--e4) var(--e5); align-items: start; padding: var(--e3) var(--margem) var(--e7); }
+.desenhar-hex { justify-self: center; width: min(100%, 600px); padding: 38px clamp(50px, 6vw, 78px) var(--e3); border-radius: 22px; box-shadow: 6px 6px 0 var(--tinta); }
+.desenhar-hex figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: 10px var(--e3); margin-top: clamp(30px, 4vw, 44px); padding-top: var(--e2); border-top: 2px dashed var(--tela-linha); }
+/* A alça de cada vértice: uma tecla redonda que se arrasta ao longo do seu eixo. */
+.hex-pega {
+  position: absolute; z-index: 2; width: 34px; height: 34px; margin: -17px 0 0 -17px; padding: 0;
+  background: var(--amarelo); border: 3px solid var(--tinta); border-radius: 50%; box-shadow: 0 3px 0 var(--tinta);
+  cursor: grab; touch-action: none; transition: scale 0.2s var(--suave), background-color 0.2s;
+}
+.hex-pega::after { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--tinta); }
+.hex-pega:hover, .hex-pega:focus-visible { scale: 1.15; background: #FFE066; }
+.hex-pega.arrastando { cursor: grabbing; scale: 1.25; background: var(--branco); }
+.desenhar-lista h2 { font-size: var(--t-subtitulo); margin-bottom: 4px; }
+.desenhar-lista ol { counter-reset: lugar; margin: var(--e2) 0 var(--e2); border-top: var(--traco) solid currentColor; }
+.desenhar-lista li { counter-increment: lugar; display: grid; grid-template-columns: 2.2rem minmax(0, 1fr) clamp(6.5rem, 22%, 10rem); align-items: center; gap: 12px; padding: 8px 0; border-bottom: 2px dashed var(--tela-linha); background: var(--tela); }
+.desenhar-lista li::before { content: counter(lugar); justify-self: center; font-family: var(--ponto); font-size: 1.3rem; line-height: 1; }
+/* a lista mostra os oito primeiros; o botão abre os trinta */
+.desenhar-lista ol:not(.inteira) li:nth-child(n + 9) { display: none; }
+.desenhar-lista li:first-child { background: #FFF6CC; }
+.desenhar-lista a { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 12px; text-decoration: none; }
+.desenhar-lista a:hover .hex-nome { text-decoration: underline; text-decoration-color: var(--vermelho); text-decoration-thickness: 3px; }
+.desenhar-jogo { display: grid; gap: 1px; min-width: 0; }
+.desenhar-jogo .hex-meta { font-weight: 500; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.desenhar-afinidade { display: grid; grid-template-columns: minmax(0, 1fr) 3.2rem; align-items: center; gap: 8px; }
+.desenhar-afinidade b { text-align: right; font-family: var(--ponto); font-weight: 400; font-size: 1.15rem; line-height: 1; }
+.desenhar-trilho { height: 15px; padding: 2px; background: var(--tela-funda); border: 2px solid var(--tinta); border-radius: 999px; }
+.desenhar-trilho span { display: block; height: 100%; min-width: 6px; background: var(--nivel-5); border-radius: 999px; transition: width 0.3s var(--suave); }
+@media (max-width: 980px) { .desenhar { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 620px) {
+  .desenhar-hex { padding: 34px 56px var(--e2); }
+  .hex-pega { width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+  .hex-pega::after { inset: 6px; }
+  .desenhar-lista li { grid-template-columns: 1.8rem minmax(0, 1fr); row-gap: 4px; }
+  .desenhar-afinidade { grid-column: 2; }
+  .desenhar-lista a { grid-template-columns: 44px minmax(0, 1fr); }
+}
+
 /* ---------- diário de desafio ---------- */
 
 .diario { padding: var(--e3) var(--margem) var(--e7); max-width: 76rem; }
@@ -1509,6 +1620,7 @@ html:not(.js) .forma-prancha .prancha-cor { opacity: 1; transform: none; }
   @view-transition { navigation: none; }
   .js .abertura::before, .js .abertura::after { display: none; }
   .entrada::after { animation: none; }
+  .roda-linha { animation: none; stroke-dashoffset: 0; opacity: 1; }
   .folha { height: auto; }
   .trilho { padding-block: var(--e5); row-gap: var(--e4); padding-right: var(--margem); }
   .trilho::after { display: none; }

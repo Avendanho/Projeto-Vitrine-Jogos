@@ -21,6 +21,7 @@ export const TEXTOS = {
     pesa: (eixo, frase) => `${eixo} pesa mais aqui do que você pediu. ${frase}`,
     puxou: (eixo, baixo) => `Você puxou para ${eixo}, e aqui ${baixo}.`,
     ficha: (jogo) => `Abrir a ficha de ${jogo}`, comparar: (jogo) => `Comparar com ${jogo}`,
+    ajustar: "Ajustar este perfil à mão",
     copiado: "Link copiado.", copiadoBotao: "Link copiado", naoCopiou: "Não foi possível copiar. O link está na barra de endereço."
   },
   en: {
@@ -43,6 +44,7 @@ export const TEXTOS = {
     pesa: (eixo, frase) => `${eixo} weighs more here than you asked for. ${frase}`,
     puxou: (eixo, baixo) => `You pulled toward ${eixo}, and here ${baixo}.`,
     ficha: (jogo) => `Open the page of ${jogo}`, comparar: (jogo) => `Compare with ${jogo}`,
+    ajustar: "Adjust this profile by hand (in Portuguese)",
     copiado: "Link copied.", copiadoBotao: "Link copied", naoCopiou: "Could not copy. The link is in the address bar."
   }
 };

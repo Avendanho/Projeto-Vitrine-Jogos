@@ -55,7 +55,7 @@ export function indiceDaBusca() {
   const P = "pokemon", C = "cobblemon", ancora = (id) => id.split(":").pop().replace(/\//g, "-");
   return [
     ...[["Abrir a bússola", "/bussola/"], ["Pokédex", "/pokedex/"], ["Regiões", "/regioes/"], ["Linha do tempo", "/linha-do-tempo/"], ["Comparar jogos", "/comparar/"], ["Comparar Pokémon", "/comparar/pokemon/"],
-      ["Desafios", "/desafios/"], ["Montar um time", "/time/"], ["Diário de desafio", "/diario/"]].map(([nome, url]) => ["Ferramenta", nome, url, P]),
+      ["Desafios", "/desafios/"], ["Montar um time", "/time/"], ["Diário de desafio", "/diario/"], ["Roda de tipos", "/tipos/"], ["Desenhar o perfil", "/desenhar/"]].map(([nome, url]) => ["Ferramenta", nome, url, P]),
     ...[["Pokémon do Cobblemon", "/cobblemon/pokemon/"], ["Itens do Cobblemon", "/cobblemon/itens/"], ["Estruturas do Cobblemon", "/cobblemon/estruturas/"], ["Biomas do Cobblemon", "/cobblemon/biomas/"],
       ["Plano de caçada", "/cobblemon/cacada/"], ["Desafios de Cobblemon", "/cobblemon/desafios/"]].map(([nome, url]) => ["Ferramenta", nome, url, C]),
     ...JOGOS.map((j) => ["Jogo", j.titulo ?? j.curto, `/jogos/${j.slug}/`, P]),
@@ -68,4 +68,8 @@ export function indiceDaBusca() {
     ...COBBLEMON.itens.map((i) => ["Item", i.nome, `/cobblemon/itens/#item-${i.id}`, C])
   ];
 }
+/* Cada espécie pelo número: [endereço, nome, endereço no Cobblemon ou nada]. É o que o aparelho consulta quando
+ * alguém digita um número ou pede um Pokémon ao acaso. */
+export const moduloNumeros = () => `${cabecalho}export const NUMEROS = ${JSON.stringify(Object.keys(FICHAS).map(Number).sort((a, b) => a - b).map((id) => [enderecoEspecie(id), FICHAS[id].nome, COBBLEMON.especies[id]?.impl ? enderecoCobblemon(id) : 0]))};\n`;
+
 export const moduloBusca = () => `${cabecalho}export const INDICE = ${JSON.stringify(indiceDaBusca())};\n`;

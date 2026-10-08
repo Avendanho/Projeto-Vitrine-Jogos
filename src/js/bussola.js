@@ -144,6 +144,16 @@ function concluir(rolar) {
     alvo.querySelector(".hex").style.opacity = "1";
   }
 
+  // o perfil que saiu das respostas pode ser ajustado à mão, vértice por vértice
+  let ajuste = resultado.querySelector("[data-ajustar]");
+  if (!ajuste) {
+    ajuste = Object.assign(document.createElement("a"), { className: "ligacao", textContent: T.ajustar });
+    ajuste.dataset.ajustar = "";
+    if (emPortugues) ajuste.hreflang = "pt-BR";
+    resultado.querySelector(".resultado-acoes").insertBefore(ajuste, resultado.querySelector("[data-copiar]"));
+  }
+  ajuste.href = `/desenhar/#p=${u.map((v) => Math.round(v * 10)).join(",")}`;
+
   resultado.hidden = false;
   if (rolar) {
     history.replaceState(null, "", `#r=${respostas.join("")}`);
